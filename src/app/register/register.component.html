@@ -1,0 +1,59 @@
+<body>
+  <!-- register.component.html -->
+<div class="register-container">
+  <h2>Registrarse</h2>
+  <form (ngSubmit)="register()">
+    <div>
+      <label for="username">Nombre de usuario</label>
+      <input id="username" [(ngModel)]="user.username" name="username" type="text" required />
+    </div>
+    <div>
+      <label for="surname">Apellido</label>
+      <input id="surname" [(ngModel)]="user.surname" name="surname" type="text" required />
+    </div>
+    <div>
+      <label for="email">Correo electrónico</label>
+      <input id="email" [(ngModel)]="user.email" name="email" type="email" required />
+    </div>
+    <div>
+      <label for="password">Contraseña</label>
+      <input id="password" [(ngModel)]="user.password" name="password" type="password" required />
+    </div>
+    <div>
+      <label for="address">Dirección</label>
+      <input id="address" [(ngModel)]="user.address" name="address" type="text" required />
+    </div>
+    <div>
+      <label for="dni">DNI</label>
+      <input id="dni" [(ngModel)]="user.dni" name="dni" type="text" required />
+    </div>
+    <div>
+      <label for="telf">Teléfono</label>
+      <input id="telf" [(ngModel)]="user.telf" name="telf" type="text" required />
+    </div>
+    <div>
+      <label for="cp">Código Postal</label>
+      <input id="cp" [(ngModel)]="user.cp" name="cp" type="text" required />
+    </div>
+    <div>
+      <label for="pob">Población</label>
+      <input id="pob" [(ngModel)]="user.pob" name="pob" type="text" required />
+    </div>
+    <div>
+      <label for="prov">Provincia</label>
+      <input id="prov" [(ngModel)]="user.prov" name="prov" type="text" required />
+    </div>
+    <div>
+      <label for="pais">País</label>
+      <input id="pais" [(ngModel)]="user.pais" name="pais" type="text" required />
+    </div>
+    <div>
+      <label for="tdc">Tipo de Documento de Crédito</label>
+      <input id="tdc" [(ngModel)]="user.tdc" name="tdc" type="text" required />
+    </div>
+    <button type="submit">Registrarse</button>
+  </form>
+  <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+</div>
+
+</body>

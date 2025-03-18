@@ -1,0 +1,10 @@
+<div class="home-container">
+  <h1>Explora Nuestras Secciones</h1>
+  <section class="categories">
+    <div class="category-card" *ngFor="let section of sections">
+      <img [src]="section.image" alt="{{ section.name }}">
+      <h3>{{ section.name }}</h3>
+      <button (click)="goToCategory(section)">Ver Familias</button>
+    </div>
+  </section>
+</div>

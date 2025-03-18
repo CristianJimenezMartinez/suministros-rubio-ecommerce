@@ -1,0 +1,79 @@
+@import '../../_variables' // Importamos las variables globales
+
+.categoria-container
+  text-align: center
+  padding: 2rem
+
+  // Títulos de las páginas
+  h1, h2
+    margin-bottom: 2rem
+
+  .categories
+    display: grid
+    grid-template-columns: repeat(4, 1fr) // 4 elementos por fila
+    gap: 1.5rem
+    justify-content: center
+
+  .category-card
+    background-color: $dropdown-bg // Usamos variable en lugar de #fff
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    align-items: center
+    border: 1px solid $border-color
+    border-radius: 8px
+    padding: 1rem
+    text-align: center
+    height: 300px // Tamaño fijo para garantizar uniformidad
+
+    img
+      max-width: 100%
+      max-height: 150px
+      object-fit: cover
+      border-radius: 4px
+      margin-bottom: 0.5rem
+
+    h3
+      margin: 0.5rem 0
+      font-size: 1rem
+      text-align: center
+
+    button
+      background-color: $yellow-color
+      color: black
+      padding: 0.5rem 1rem
+      border: none
+      border-radius: 4px
+      cursor: pointer
+      margin-top: auto // Empuja el botón hacia la parte inferior
+      transition: background-color 0.3s
+
+      &:hover
+        background-color: darken($yellow-color, 10%)
+
+.pagination
+  display: flex
+  justify-content: center
+  align-items: center
+  margin-top: 2rem
+
+  button
+    background-color: $yellow-color
+    color: black
+    padding: 0.5rem 1rem
+    border: none
+    border-radius: 4px
+    cursor: pointer
+    margin: 0 0.5rem
+    transition: background-color 0.3s
+
+    &:disabled
+      background-color: lighten($yellow-color, 20%)
+      cursor: not-allowed
+
+    &:hover:not(:disabled)
+      background-color: darken($yellow-color, 10%)
+
+  span
+    font-size: 1rem
+    margin: 0 0.5rem

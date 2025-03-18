@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "http://suministrosrubio.com",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

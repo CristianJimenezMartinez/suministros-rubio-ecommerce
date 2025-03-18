@@ -1,0 +1,96 @@
+@import '../../styles'
+@import '../../_variables' // Importamos las variables globales
+
+.cart-popup
+  position: fixed
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+  width: 75vw
+  max-height: 80vh
+  background-color: $dropdown-bg
+  padding: 16px
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3)
+  overflow-y: auto
+  z-index: 1000
+
+  .close-button
+    position: absolute
+    top: 8px
+    right: 8px
+    background: transparent
+    border: none
+    font-size: 1.5rem
+    cursor: pointer
+
+.cart
+  width: 100%
+
+  h2
+    margin-bottom: 16px
+
+  table
+    width: 100%
+    border-collapse: collapse
+    margin-bottom: 16px
+
+    th, td
+      padding: 8px
+      border: 1px solid $border-color
+      text-align: left
+
+  .total
+    text-align: right
+    font-weight: bold
+
+.checkout
+  h2
+    margin-bottom: 16px
+
+  form
+    .form-group
+      margin-bottom: 12px
+
+      label
+        display: block
+        margin-bottom: 4px
+
+      input
+        width: 100%
+        padding: 8px
+        font-size: 1rem
+        border: 1px solid $border-color
+        border-radius: 4px
+
+    .actions
+      display: flex
+      justify-content: space-between
+
+      button
+        padding: 8px 16px
+        font-size: 1rem
+        cursor: pointer
+        background-color: $primary-color
+        color: white
+        border: none
+        border-radius: 4px
+        transition: background-color 0.3s
+
+        &:hover
+          background-color: $primary-hover-color
+
+.continue
+  text-align: right
+
+  button
+    padding: 8px 16px
+    font-size: 1rem
+    cursor: pointer
+    background-color: $yellow-color
+    color: black
+    border: none
+    border-radius: 4px
+    transition: background-color 0.3s
+
+    &:hover
+      background-color: darken($yellow-color, 10%)

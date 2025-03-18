@@ -1,0 +1,24 @@
+<div class="home-container">
+  <h1>Artículos de la Familia</h1>
+  <div *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div *ngIf="!groupedArticles || (groupedArticles | keyvalue).length === 0">
+    <p>No se encontraron artículos para esta familia.</p>
+  </div>
+  <section class="categories" *ngIf="groupedArticles && (groupedArticles | keyvalue).length > 0">
+    <div class="category-card" *ngFor="let group of groupedArticles | keyvalue">
+      <h3>{{ group.key }}</h3>
+      <select (change)="onVariantChange(group.key, $event)">
+        <option *ngFor="let article of group.value; let i = index" [value]="i">
+          {{ article.measure }} - Precio: {{ article.pcoart | currency:'EUR':'symbol':'1.2-2' }}
+        </option>
+      </select>
+      <div *ngIf="selectedVariants[group.key]">
+        <img *ngIf="selectedVariants[group.key].imgart" [src]="selectedVariants[group.key].imgart" alt="{{ group.key }}">
+        <p>Código: {{ selectedVariants[group.key].codart }}</p>
+        <p>Precio: {{ selectedVariants[group.key].pcoart | currency:'EUR':'symbol':'1.2-2' }}</p>
+        <!-- Botón para añadir la variante seleccionada al carrito -->
+        <button (click)="addToCart(selectedVariants[group.key])">Añadir al carrito</button>
+      </div>
+    </div>
+  </section>
+</div>

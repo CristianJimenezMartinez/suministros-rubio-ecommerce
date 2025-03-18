@@ -1,0 +1,172 @@
+@import '../../_variables' // Importamos las variables globales
+
+.selected
+  background-color: $primary-color
+  color: white
+  border-radius: 5px
+  svg
+    fill: white
+
+header
+  background-color: $dropdown-bg // Usamos la variable en lugar de #ffffff
+
+  .container-fluid
+    display: flex
+    justify-content: space-between
+    align-items: center
+    padding-right: 1rem
+
+  .dropdown
+    position: relative
+
+    a
+      cursor: pointer
+      display: flex
+      align-items: center
+      text-decoration: none
+      color: $primary-color
+
+      &:hover
+        color: $primary-hover-color
+
+    .dropdown-menu
+      display: none
+      position: absolute
+      top: 100%
+      left: 0
+      z-index: 1000
+      min-width: 160px
+      padding: 0.5rem 0
+      margin: 0
+      font-size: 1rem
+      color: #212529
+      background-color: $dropdown-bg
+      border: 1px solid $dropdown-border
+      border-radius: 0.25rem
+      box-shadow: 0 0.5rem 1rem $dropdown-shadow
+      transition: opacity 0.3s ease-in-out
+
+      &.show
+        display: block
+
+      a.dropdown-item
+        padding: 0.5rem 1rem
+        text-decoration: none
+        color: #212529
+        border-radius: 0.25rem
+
+        &:hover
+          background-color: $primary-color
+          color: white
+
+  .right-section
+    display: flex
+    align-items: center
+    gap: 1rem
+    margin-right: 1rem
+
+    .cart-container, .user-section
+      display: flex
+      align-items: center
+      justify-content: center
+      height: 40px
+      width: 40px
+
+  .user-section
+    margin-left: auto
+    display: flex
+    gap: 10px
+    background-color: $yellow-color
+    border-radius: 4px
+    border: 1px solid $yellow-color
+
+    a
+      background-color: white
+      color: black
+      font-size: 1rem
+      text-decoration: none
+      padding: 8px 16px
+      border-radius: 4px
+      border: 1px solid $yellow-color
+      cursor: pointer
+      transition: background-color 0.3s, color 0.3s
+
+      &:hover
+        background-color: $primary-hover-color-button
+        color: white
+
+// Dropdown menu
+.dropdown-menu
+  background-color: $dropdown-bg
+  border: 1px solid $dropdown-border
+  border-radius: 0.25rem
+  box-shadow: 0 0.5rem 1rem $dropdown-shadow
+
+  a.dropdown-item
+    padding: 0.5rem 1rem
+    text-decoration: none
+    color: #212529
+    border-radius: 0.25rem
+    border: none
+
+  a.dropdown-item:hover
+    background-color: $primary-color
+    color: white
+
+// Estilos para el botón del carrito
+.cart-container
+  position: relative
+
+.cart-button
+  background-color: $yellow-color
+  color: white
+  border: none
+  padding: 0.5rem
+  border-radius: 4px
+  cursor: pointer
+  position: relative
+  height: 100%
+  width: 100%
+  display: flex
+  align-items: center
+  justify-content: center
+
+  svg
+    display: block
+    width: 24px
+    height: 24px
+
+  .badge
+    position: absolute
+    top: -5px
+    right: -5px
+    background-color: red
+    color: white
+    border-radius: 50%
+    padding: 2px 6px
+    font-size: 0.75rem
+
+// Estilos para el popup/modal del carrito
+.cart-modal
+  position: fixed
+  top: 10%
+  right: 10%
+  width: 300px
+  max-height: 80vh
+  background-color: white
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2)
+  z-index: 1000
+  overflow-y: auto
+
+  .modal-content
+    position: relative
+    padding: 1rem
+
+  .close-button
+    position: absolute
+    top: 5px
+    right: 5px
+    background: transparent
+    border: none
+    font-size: 1.25rem
+    cursor: pointer
