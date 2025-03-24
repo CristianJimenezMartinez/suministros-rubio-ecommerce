@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://suministrosrubio.com",
+    "target": "http://185.134.42.120",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

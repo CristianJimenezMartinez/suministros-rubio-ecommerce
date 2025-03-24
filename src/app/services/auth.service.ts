@@ -10,8 +10,8 @@ export class AuthService {
   isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   // Endpoint de login en el backend
-  private loginUrl = 'http://localhost:3000/api/login';
-  private registerUrl = 'http://localhost:3000/api/createUser';
+  private loginUrl = 'https://185.134.42.120:3000/api/login';
+  private registerUrl = 'https://185.134.42.120:3000/api/createUser';
 
   constructor(private http: HttpClient) {}
 

@@ -16,7 +16,7 @@ export interface Article {
   providedIn: 'root'
 })
 export class DataService {
-  private baseUrl = 'http://localhost:3000/api'; // Ajusta la URL según tu backend
+  private baseUrl = 'https://185.134.42.120:3000/api'; // Ajusta la URL según tu backend
   private readonly _http = inject(HttpClient);
 
   constructor(private http: HttpClient) { }

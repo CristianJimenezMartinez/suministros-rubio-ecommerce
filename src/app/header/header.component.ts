@@ -1,4 +1,5 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd, Event } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -9,7 +10,7 @@ import { CartComponent } from '../cart/cart.component';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, ProfileComponent, CartComponent],
+  imports: [CommonModule, ProfileComponent, CartComponent, FormsModule],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.sass']
 })
@@ -24,6 +25,8 @@ export class HeaderComponent implements OnInit {
   // Propiedades para el carrito
   isCartOpen: boolean = false;
   cartItemCount: number = 0;
+
+  searchText: string = '';
 
   constructor(
     private router: Router, 
@@ -104,6 +107,12 @@ export class HeaderComponent implements OnInit {
 
   closeCart(): void {
     this.isCartOpen = false;
+  }
+  onSearch() {
+    if (this.searchText.trim()) {
+      console.log("Buscando:", this.searchText);
+      // Aquí puedes hacer una redirección o filtrar la lista de productos
+    }
   }
 
   // Detecta clics fuera del componente para cerrar dropdowns y popup del carrito

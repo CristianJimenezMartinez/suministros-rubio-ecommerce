@@ -20,6 +20,12 @@
       </ul>
     </div>
 
+    <!-- Buscador en el centro -->
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="searchText" placeholder="Buscar productos..."
+             (keyup.enter)="onSearch()" />
+    </div>
+
     <!-- Sección derecha: Carrito y Perfil -->
     <div class="right-section">
       <!-- Botón del carrito -->

@@ -13,7 +13,7 @@ export interface Section {
   providedIn: 'root'
 })
 export class SectionService {
-  private baseUrl = 'http://localhost:3000/api'; // Ajusta según corresponda
+  private baseUrl = 'https://185.134.42.120:3000/api'; // Ajusta según corresponda
 
   constructor(private http: HttpClient) {}
 

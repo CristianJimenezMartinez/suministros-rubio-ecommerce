@@ -1,87 +1,85 @@
 @import '../../_variables' // Importamos las variables globales
 
-.selected
-  background-color: $primary-color
-  color: white
-  border-radius: 5px
-  svg
-    fill: white
-
 header
-  background-color: $dropdown-bg // Usamos la variable en lugar de #ffffff
+  position: fixed // Fijamos el header en la parte superior
+  top: 0
+  left: 0
+  width: 100% // Ocupará todo el ancho de la pantalla
+  z-index: 1000 // Asegura que esté por encima de otros elementos
+  background-color: $dropdown-bg // Asegura que mantenga el fondo blanco
+  padding: 0.5rem 1rem
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) // Efecto de sombra para distinguirlo
 
   .container-fluid
     display: flex
     justify-content: space-between
     align-items: center
-    padding-right: 1rem
-
-  .dropdown
     position: relative
 
-    a
-      cursor: pointer
-      display: flex
-      align-items: center
-      text-decoration: none
-      color: $primary-color
+.search-bar
+  position: absolute // Lo posicionamos de manera absoluta dentro del header
+  left: 50%
+  transform: translateX(-50%) // Lo centramos horizontalmente
+  display: flex
+  align-items: center
+  width: 100%
+  max-width: 400px
 
-      &:hover
-        color: $primary-hover-color
+  input
+    width: 100%
+    padding: 10px 15px
+    font-size: 1rem
+    border: 1px solid $border-color
+    border-radius: 25px
+    outline: none
+    transition: all 0.3s ease
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1)
 
-    .dropdown-menu
-      display: none
-      position: absolute
-      top: 100%
-      left: 0
-      z-index: 1000
-      min-width: 160px
-      padding: 0.5rem 0
-      margin: 0
-      font-size: 1rem
-      color: #212529
-      background-color: $dropdown-bg
-      border: 1px solid $dropdown-border
-      border-radius: 0.25rem
-      box-shadow: 0 0.5rem 1rem $dropdown-shadow
-      transition: opacity 0.3s ease-in-out
+    &:focus
+      border-color: $primary-color
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2)
 
-      &.show
-        display: block
+.right-section
+  display: flex
+  align-items: center
+  gap: 1.5rem
+  margin-right: 1rem
+  flex-wrap: nowrap
 
-      a.dropdown-item
-        padding: 0.5rem 1rem
-        text-decoration: none
-        color: #212529
-        border-radius: 0.25rem
-
-        &:hover
-          background-color: $primary-color
-          color: white
-
-  .right-section
+  .cart-container
     display: flex
     align-items: center
-    gap: 1rem
-    margin-right: 1rem
+    justify-content: center
+    padding: 8px
+    background-color: transparent
 
-    .cart-container, .user-section
-      display: flex
-      align-items: center
-      justify-content: center
-      height: 40px
-      width: 40px
+  .cart-button
+    background-color: $yellow-color
+    color: white
+    border: none
+    padding: 0.5rem 1rem
+    border-radius: 4px
+    cursor: pointer
+    display: flex
+    align-items: center
+    justify-content: center
+    gap: 0.5rem
+    min-width: 50px
+    min-height: 40px
+
+    svg
+      width: 24px
+      height: 24px
 
   .user-section
-    margin-left: auto
     display: flex
+    align-items: center
     gap: 10px
-    background-color: $yellow-color
-    border-radius: 4px
-    border: 1px solid $yellow-color
+    background-color: transparent
+    padding: 0
 
     a
-      background-color: white
+      background-color: $yellow-color
       color: black
       font-size: 1rem
       text-decoration: none
@@ -95,78 +93,6 @@ header
         background-color: $primary-hover-color-button
         color: white
 
-// Dropdown menu
-.dropdown-menu
-  background-color: $dropdown-bg
-  border: 1px solid $dropdown-border
-  border-radius: 0.25rem
-  box-shadow: 0 0.5rem 1rem $dropdown-shadow
-
-  a.dropdown-item
-    padding: 0.5rem 1rem
-    text-decoration: none
-    color: #212529
-    border-radius: 0.25rem
-    border: none
-
-  a.dropdown-item:hover
-    background-color: $primary-color
-    color: white
-
-// Estilos para el botón del carrito
-.cart-container
-  position: relative
-
-.cart-button
-  background-color: $yellow-color
-  color: white
-  border: none
-  padding: 0.5rem
-  border-radius: 4px
-  cursor: pointer
-  position: relative
-  height: 100%
-  width: 100%
-  display: flex
-  align-items: center
-  justify-content: center
-
-  svg
-    display: block
-    width: 24px
-    height: 24px
-
-  .badge
-    position: absolute
-    top: -5px
-    right: -5px
-    background-color: red
-    color: white
-    border-radius: 50%
-    padding: 2px 6px
-    font-size: 0.75rem
-
-// Estilos para el popup/modal del carrito
-.cart-modal
-  position: fixed
-  top: 10%
-  right: 10%
-  width: 300px
-  max-height: 80vh
-  background-color: white
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2)
-  z-index: 1000
-  overflow-y: auto
-
-  .modal-content
-    position: relative
-    padding: 1rem
-
-  .close-button
-    position: absolute
-    top: 5px
-    right: 5px
-    background: transparent
-    border: none
-    font-size: 1.25rem
-    cursor: pointer
+// Ajustar el margen superior del contenido para que no quede oculto detrás del header
+main, .content
+  margin-top: 80px // Ajusta esto según la altura del header
