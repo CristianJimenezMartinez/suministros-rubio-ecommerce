@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://185.134.42.120",
+    "target": "https://desktop-p1l2603.duckdns.org",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

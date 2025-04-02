@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
+import { environment } from '../../enviroments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
-  private apiUrl = 'https://185.134.42.120:3000/api/orders'  // Ajusta la URL según tu configuración
+  private apiUrl = environment.apiUrl;  // Ajusta la URL según tu configuración
 
   constructor(private http: HttpClient) {}
 

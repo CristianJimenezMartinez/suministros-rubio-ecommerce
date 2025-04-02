@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-profile',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.sass']
+    selector: 'app-profile',
+    imports: [CommonModule],
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.sass'],
+    standalone: true
 })
 export class ProfileComponent {
 

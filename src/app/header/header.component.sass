@@ -1,34 +1,33 @@
 @import '../../_variables' // Importamos las variables globales
 
 header
-  position: fixed // Fijamos el header en la parte superior
+  position: fixed
   top: 0
   left: 0
-  width: 100% // Ocupará todo el ancho de la pantalla
-  z-index: 1000 // Asegura que esté por encima de otros elementos
-  background-color: $dropdown-bg // Asegura que mantenga el fondo blanco
+  width: 100%
+  height: 80px
+  z-index: 1000
+  background-color: $dropdown-bg
   padding: 0.5rem 1rem
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) // Efecto de sombra para distinguirlo
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)
 
   .container-fluid
     display: flex
-    justify-content: space-between
     align-items: center
     position: relative
+    gap: 1rem
 
+// Barra de búsqueda
 .search-bar
-  position: absolute // Lo posicionamos de manera absoluta dentro del header
-  left: 50%
-  transform: translateX(-50%) // Lo centramos horizontalmente
   display: flex
   align-items: center
-  width: 100%
-  max-width: 400px
+  flex: 1
+  justify-content: center
 
   input
-    width: 100%
-    padding: 10px 15px
-    font-size: 1rem
+    width: clamp(150px, 50%, 600px)
+    padding: clamp(6px, 2vw, 10px) clamp(10px, 3vw, 15px)
+    font-size: clamp(0.85rem, 2vw, 1rem)
     border: 1px solid $border-color
     border-radius: 25px
     outline: none
@@ -39,11 +38,12 @@ header
       border-color: $primary-color
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2)
 
+// Sección derecha: carrito y usuario
 .right-section
   display: flex
   align-items: center
   gap: 1.5rem
-  margin-right: 1rem
+  margin-left: 1rem
   flex-wrap: nowrap
 
   .cart-container
@@ -51,7 +51,6 @@ header
     align-items: center
     justify-content: center
     padding: 8px
-    background-color: transparent
 
   .cart-button
     background-color: $yellow-color
@@ -75,24 +74,113 @@ header
     display: flex
     align-items: center
     gap: 10px
-    background-color: transparent
-    padding: 0
+
+    // Vista Desktop (botones login/registro)
+    .desktop-user
+      display: flex
+      gap: 0.5rem
+
+      a
+        background-color: $yellow-color
+        color: black
+        font-size: 1rem
+        text-decoration: none
+        padding: 8px 16px
+        border-radius: 4px
+        border: 1px solid $yellow-color
+        cursor: pointer
+        transition: background-color 0.3s, color 0.3s
+
+        &:hover
+          background-color: $primary-hover-color-button
+          color: white
+
+    // Vista Móvil: mostramos la imagen con fondo del mismo color que el header
+    .mobile-user
+      display: none
+      a
+        display: inline-block
+        img
+          width: 32px
+          height: 32px
+          border-radius: 50%
+          background-color: $dropdown-bg // mismo color de fondo que el header
+
+// Ajuste del margen superior para el contenido
+main, .content
+  margin-top: 80px
+
+//
+// MEDIA QUERIES
+//
+
+// Dispositivos medianos (tablets)
+@media (max-width: 992px)
+  .search-bar input
+    max-width: 300px
+    font-size: 0.9rem
+    padding: 8px 12px
+
+  .cart-button
+    padding: 0.4rem 0.8rem
+    //min-width: 45px
+    //min-height: 35px
+
+    svg
+      //width: 20px
+      //height: 20px
+
+  .user-section .desktop-user
+    gap: 0.4rem
 
     a
-      background-color: $yellow-color
-      color: black
-      font-size: 1rem
-      text-decoration: none
-      padding: 8px 16px
-      border-radius: 4px
-      border: 1px solid $yellow-color
-      cursor: pointer
-      transition: background-color 0.3s, color 0.3s
+      font-size: 0.9rem
+      padding: 6px 12px
 
-      &:hover
-        background-color: $primary-hover-color-button
-        color: white
+// Dispositivos pequeños (móviles)
+@media (max-width: 620px)
+  header
+    padding: 0.3rem 0.5rem
 
-// Ajustar el margen superior del contenido para que no quede oculto detrás del header
-main, .content
-  margin-top: 80px // Ajusta esto según la altura del header
+    .container-fluid
+      flex-wrap: nowrap
+      gap: 0.5rem
+
+  .search-bar
+    margin: 0
+    input
+      width: clamp(80px, 40vw, 180px)
+      font-size: 0.85rem
+      padding: 6px 10px
+
+  .right-section
+    gap: 0.3rem
+    margin-top: 0
+    justify-content: flex-end
+    width: auto
+
+    .cart-button
+      padding: 0.3rem 0.6rem
+      //min-width: 40px
+      //min-height: 30px
+
+      svg
+        //width: 25px
+        //height: 20px
+    
+    .user-section
+      // Si quieres ocultar la vista desktop, descomenta:
+      //.desktop-user
+      //  display: none
+
+      .mobile-user
+        display: inline-block
+        a
+          img
+            width: 32px
+            height: 32px
+            border-radius: 50%
+            background-color: $dropdown-bg
+
+  main, .content
+    margin-top: 70px

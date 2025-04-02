@@ -1,14 +1,25 @@
 <div class="home-container">
   <h1>Familias</h1>
-  <section class="categories" *ngIf="families && families.length > 0">
+  
+  <!-- Muestra el spinner mientras isLoading es true -->
+  <app-loading *ngIf="isLoading"></app-loading>
+
+  <!-- Si no se están cargando y hay familias, se muestran -->
+  <section class="categories" *ngIf="!isLoading && families && families.length > 0">
     <div class="category-card" 
          *ngFor="let fam of families | slice:(currentPage - 1) * pageSize : currentPage * pageSize">
       <h3>{{ fam.desfam }}</h3>
-
       <button (click)="goToArticles(fam.codfam)">Ver Artículos</button>
     </div>
   </section>
-  <div class="pagination">
+
+  <!-- Si ya cargó pero no hay familias, se muestra un mensaje -->
+  <div *ngIf="!isLoading && (!families || families.length === 0)">
+    <p>No se encontraron familias.</p>
+  </div>
+
+  <!-- Paginación solo si hay familias -->
+  <div class="pagination" *ngIf="!isLoading && families && families.length > 0">
     <button *ngIf="currentPage > 1" (click)="previousPage()">Anterior</button>
     <span>Página {{ currentPage }} de {{ totalPages }}</span>
     <button *ngIf="currentPage < totalPages" (click)="nextPage()">Siguiente</button>

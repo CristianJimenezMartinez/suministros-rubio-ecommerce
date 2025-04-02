@@ -12,14 +12,13 @@ interface Section
 }
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.sass'],
-  imports: [
-    CommonModule,
-    RouterModule
-  ],
-  standalone: true
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.sass'],
+    imports: [
+        CommonModule,
+        RouterModule
+    ]
 })
 export class HomeComponent {
   

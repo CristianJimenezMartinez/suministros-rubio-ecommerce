@@ -1,18 +1,19 @@
-import { Component, ElementRef, HostListener, OnInit, NgModule } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, NavigationEnd, Event } from '@angular/router';
+import { Router, NavigationEnd, Event as RouterEvent } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { ProfileComponent } from '../profile/profile.component';
-import { CartService } from '../services/cart.service'; // Importa el servicio del carrito
+import { CartService } from '../services/cart.service';
 import { CartComponent } from '../cart/cart.component';
+import { DataService, Article } from '../services/data.service';
 
 @Component({
   selector: 'app-header',
-  standalone: true,
   imports: [CommonModule, ProfileComponent, CartComponent, FormsModule],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.sass']
+  styleUrls: ['./header.component.sass'],
+  standalone: true
 })
 export class HeaderComponent implements OnInit {
   isNavDropdownOpen: boolean = false;
@@ -22,19 +23,27 @@ export class HeaderComponent implements OnInit {
   showLoginButton: boolean = true;
   showRegisterButton: boolean = true;
 
+  // Propiedad para determinar si estamos en móvil
+  isMobile: boolean = false;
+
   // Propiedades para el carrito
   isCartOpen: boolean = false;
   cartItemCount: number = 0;
 
   searchText: string = '';
 
+  // Propiedad para almacenar artículos filtrados
+  filteredArticles: Article[] = [];
+
   constructor(
     private router: Router, 
     private elementRef: ElementRef,
-    private cartService: CartService  // Inyecta el servicio del carrito
+    private cartService: CartService,
+    private dataService: DataService  // Inyección de DataService
   ) {}
 
   ngOnInit(): void {
+    this.updateIsMobile(window.innerWidth);
     const user = localStorage.getItem('user');
     this.isLoggedIn = !!user;
     if (this.isLoggedIn) {
@@ -42,17 +51,26 @@ export class HeaderComponent implements OnInit {
       this.showRegisterButton = false;
     }
     this.router.events
-      .pipe(filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd))
+      .pipe(filter((event: RouterEvent): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
-        console.log('NavigationEnd event:', event);
         if (!this.isLoggedIn) {
           this.showLoginButton = !event.urlAfterRedirects.includes('/login');
           this.showRegisterButton = !event.urlAfterRedirects.includes('/register');
         }
       });
-      this.cartService.getItemsObservable().subscribe(items => {
-        this.cartItemCount = items.reduce((acc, item) => acc + item.quantity, 0)
-      })
+    this.cartService.getItemsObservable().subscribe(items => {
+      this.cartItemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+    });
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event): void {
+    const target = event.target as Window;
+    this.updateIsMobile(target.innerWidth);
+  }
+
+  private updateIsMobile(width: number): void {
+    this.isMobile = width <= 576;
   }
 
   toggleNavDropdown(): void {
@@ -71,6 +89,11 @@ export class HeaderComponent implements OnInit {
   onRegisterClick(): void {
     this.showRegisterButton = false;
     this.router.navigate(['/register']);
+  }
+
+  // Método para móviles: redirige o abre modal para login/registro
+  onMobileLoginClick(): void {
+    this.router.navigate(['/login']); 
   }
 
   navigateTo(route: string): void {
@@ -97,31 +120,30 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
-  // Métodos para el carrito
-
-
   toggleCart(): void {
     this.isCartOpen = !this.isCartOpen;
-    // Actualizamos la cuenta cada vez que se abre el popup
   }
 
   closeCart(): void {
     this.isCartOpen = false;
   }
-  onSearch() {
-    if (this.searchText.trim()) {
-      console.log("Buscando:", this.searchText);
-      // Aquí puedes hacer una redirección o filtrar la lista de productos
+
+  onSearch(): void {
+    const query = this.searchText.trim();
+    if (query) {
+      // Navega a la ruta '/articulos' con el query parameter 'query'
+      console.log("funciona")
+      this.router.navigate(['/articulos'], { queryParams: { query } });
     }
   }
-
-  // Detecta clics fuera del componente para cerrar dropdowns y popup del carrito
+  
+  
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
+    const target = event.target as HTMLElement;
+    if (!this.elementRef.nativeElement.contains(target)) {
       this.isNavDropdownOpen = false;
       this.isProfileDropdownOpen = false;
-      // Opcional: si se hace clic fuera del popup, se cierra
       this.isCartOpen = false;
     }
   }

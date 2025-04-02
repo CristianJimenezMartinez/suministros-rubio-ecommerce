@@ -1,51 +1,63 @@
-@import '../../_variables' // Importamos las variables globales
+@import '../../_variables'; // Importamos variables globales
 
 .home-container, .categoria-container
   text-align: center
   padding: 2rem
 
-  h1 
+  h1
     margin-bottom: 2rem
 
-  .categories 
+  .categories
     display: grid
-    grid-template-columns: repeat(4, 1fr) // Fuerza 4 categorías por fila
+    grid-template-columns: repeat(2, 1fr) // 2 columnas en móvil
     gap: 1.5rem
     justify-content: center
 
-  .category-card 
-    background-color: $dropdown-bg // Usamos variable en lugar de #fff
+    // 3 columnas en pantallas intermedias
+    @media (max-width: 992px) and (min-width: 769px)
+      grid-template-columns: repeat(3, 1fr)
+
+    // 4 columnas en pantallas grandes
+    @media (min-width: 993px)
+      grid-template-columns: repeat(4, 1fr)
+
+  .category-card
+    background-color: $dropdown-bg
     display: flex
     flex-direction: column
-    justify-content: space-between
     align-items: center
     border: 1px solid $border-color
     border-radius: 8px
     padding: 1rem
     text-align: center
-    height: 300px // Tamaño fijo para garantizar uniformidad
 
-    img 
+    // Usamos min-height para que la tarjeta crezca si el contenido lo requiere
+    min-height: 300px // Para pantallas grandes
+
+    // Ajustamos a 250px en pantallas más pequeñas
+    @media (max-width: 768px)
+      min-height: 250px
+
+    img
       max-width: 100%
       max-height: 150px
       object-fit: cover
       border-radius: 4px
       margin-bottom: 0.5rem
 
-    h3 
+    h3
       margin: 0.5rem 0
       font-size: 1rem
-      text-align: center
 
-    button 
+    button
       background-color: $yellow-color
       color: black
       padding: 0.5rem 1rem
       border: none
       border-radius: 4px
       cursor: pointer
-      margin-top: auto
+      margin-top: auto // Empuja el botón al fondo de la tarjeta
       transition: background-color 0.3s
 
-      &:hover 
+      &:hover
         background-color: darken($yellow-color, 10%)

@@ -1,19 +1,15 @@
 @import '../../_variables' // Importamos las variables globales
 
-/* Aseguramos que html/body ocupen toda la pantalla */
+/* Asegúrate de que html/body no tengan margen/padding extra
+   y si tu header es fijo, deja espacio arriba */
 html, body
-  margin-top: 0
+  margin: 0
   padding: 0
-  height: 100%
 
-/* Cada contenedor se posiciona en el centro de la pantalla */
 .login-container, .register-container, .profile-container
-  position: absolute
-  top: 50%
-  left: 50%
-  transform: translate(-50%, -50%)  // Centrado vertical y horizontal
+  /* Ajuste la parte superior según la altura de tu header fijo */
+  margin: 80px auto 0 auto
   max-width: 400px
-  width: 90%                // Ajusta para que no se desborde en pantallas pequeñas
   padding: 20px
   border: 1px solid $border-color
   border-radius: 8px
@@ -72,7 +68,7 @@ a
 .user-section
   margin-left: auto
   display: flex
-  gap: 0
+  gap: 0px
   align-items: center
 
   a

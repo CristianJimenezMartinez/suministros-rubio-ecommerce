@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../enviroments/environment';
 
 // Ajusta estas interfaces o importa las que ya tengas
 export interface Article {
@@ -16,7 +17,7 @@ export interface Article {
   providedIn: 'root'
 })
 export class DataService {
-  private baseUrl = 'https://185.134.42.120:3000/api'; // Ajusta la URL según tu backend
+  private baseUrl = environment.apiUrl; // Ajusta la URL según tu backend
   private readonly _http = inject(HttpClient);
 
   constructor(private http: HttpClient) { }
@@ -43,4 +44,9 @@ export class DataService {
     // Ajusta la ruta si en tu backend la definiste diferente, por ejemplo /api/measures
     return this.http.get<{ measures: string[] }>(`${this.baseUrl}/measures`, { headers });
   }
+  searchArticles(query: string): Observable<Article[]> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.get<Article[]>(`${this.baseUrl}/articles/search?query=${query}`, { headers });
+  }
+  
 }

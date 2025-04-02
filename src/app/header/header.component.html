@@ -57,8 +57,21 @@
           </div>
         </ng-container>
         <ng-template #notLoggedIn>
-          <a *ngIf="showLoginButton" (click)="onLoginClick()">Iniciar sesión</a>
-          <a *ngIf="showRegisterButton" (click)="onRegisterClick()">Registrarse</a>
+          <!-- Para desktop: mostrar ambos enlaces -->
+          <div class="desktop-user" *ngIf="!isMobile">
+            <a *ngIf="showLoginButton" (click)="onLoginClick()">Iniciar sesión</a>
+            <a *ngIf="showRegisterButton" (click)="onRegisterClick()">Registrarse</a>
+          </div>
+          <!-- Para móvil: mostrar un icono único -->
+          <div class="mobile-user" *ngIf="isMobile">
+            <!-- Aquí usamos la imagen en lugar del ícono SVG -->
+            <a (click)="onMobileLoginClick()">
+              <img 
+                src="../../assets/img/user.png" 
+                alt="Profile" 
+                style="width:32px; height:32px; border-radius:50%;" />
+            </a>
+          </div>
         </ng-template>
       </div>
     </div>

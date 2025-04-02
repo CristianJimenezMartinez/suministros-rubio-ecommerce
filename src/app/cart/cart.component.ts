@@ -6,11 +6,11 @@ import { FormsModule } from '@angular/forms'
 import { PaymentComponent } from '../payment/payment.component'
 
 @Component({
-  selector: 'app-cart',
-  standalone: true,
-  imports: [CommonModule, FormsModule, PaymentComponent],
-  templateUrl: './cart.component.html',
-  styleUrls: ['./cart.component.sass']
+    selector: 'app-cart',
+    imports: [CommonModule, FormsModule, PaymentComponent],
+    templateUrl: './cart.component.html',
+    styleUrls: ['./cart.component.sass'],
+    standalone: true
 })
 export class CartComponent implements OnInit {
   items: any[] = []

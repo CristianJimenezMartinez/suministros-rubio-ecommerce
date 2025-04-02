@@ -6,11 +6,11 @@ import { FormsModule } from '@angular/forms'
 
 
 @Component({
-  selector: 'app-checkout',
-  templateUrl: './checkout.component.html',
-  imports: [CommonModule, FormsModule],
-  styleUrls: ['./checkout.component.sass'],
-  standalone: true
+    selector: 'app-checkout',
+    templateUrl: './checkout.component.html',
+    imports: [CommonModule, FormsModule],
+    styleUrls: ['./checkout.component.sass'],
+    standalone: true
 })
 export class CheckoutComponent implements OnInit {
   shippingData = {

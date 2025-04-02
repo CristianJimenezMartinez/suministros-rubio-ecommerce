@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../enviroments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +11,8 @@ export class AuthService {
   isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   // Endpoint de login en el backend
-  private loginUrl = 'https://185.134.42.120:3000/api/login';
-  private registerUrl = 'https://185.134.42.120:3000/api/createUser';
+  private loginUrl = environment.apiUrl;
+  private registerUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

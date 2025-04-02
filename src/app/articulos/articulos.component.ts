@@ -4,6 +4,7 @@ import { DataService } from '../services/data.service'
 import { HttpClientModule } from '@angular/common/http'
 import { ActivatedRoute } from '@angular/router'
 import { CartService } from '../services/cart.service'
+import { LoadingComponent } from '../loading/loading.component'  // Asegúrate de tener este componente
 
 export interface Article {
   codart: string
@@ -18,10 +19,10 @@ export interface Article {
 
 @Component({
   selector: 'app-articulos',
-  standalone: true,
-  imports: [HttpClientModule, CommonModule],
+  imports: [HttpClientModule, CommonModule, LoadingComponent],
   templateUrl: './articulos.component.html',
-  styleUrls: ['./articulos.component.sass']
+  styleUrls: ['./articulos.component.sass'],
+  standalone: true
 })
 export class ArticulosComponent implements OnInit {
   apiService = inject(DataService)
@@ -29,7 +30,7 @@ export class ArticulosComponent implements OnInit {
   articles: Article[] = []
   measures: string[] = []
   errorMessage: string = ''
-
+  
   // Artículos agrupados por nombre (dewart)
   groupedArticles: { [key: string]: Article[] } = {}
   // Para cada grupo se guarda la variante seleccionada
@@ -40,65 +41,98 @@ export class ArticulosComponent implements OnInit {
   currentPage: number = 1
   totalPages: number = 1
 
+  // Indicador de carga
+  isLoading: boolean = true
+
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    const famParam = this.route.snapshot.paramMap.get('fam')
-    if (!famParam) {
-      this.errorMessage = 'No se proporcionó la familia'
-      return
-    }
-
-    // Llamada 1: Obtener las medidas (campo "desume")
-    this.apiService.getMeasures().subscribe({
-      next: (res) => {
-        this.measures = (res.measures || [])
-          .map((m: any) => m.desume)
-          .filter((s: string) => s && s.trim() !== '')
-        console.log('Medidas obtenidas:', this.measures)
-
-        // Llamada 2: Obtener los artículos de la familia
-        this.apiService.getArticlesByFamily(famParam).subscribe({
+    // Primero, revisamos si hay un parámetro de búsqueda en la URL
+    this.route.queryParams.subscribe(params => {
+      const query = params['query'];
+      if (query) {
+        // Si hay query, llamamos al endpoint de búsqueda
+        this.apiService.searchArticles(query).subscribe({
           next: (data: Article[]) => {
-            console.log('Artículos recibidos del back:', data)
-            data.forEach(article => {
-              if (article.imgart) {
-                article.imgart = article.imgart.replace(/\\/g, '/')
-              }
-              if (article.dewart) {
-                article.desart = article.dewart
-              }
-              article.desart = article.desart.replace(/\\/g, '').replace(/\n/g, ' ').trim()
-              const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures)
-              article.desart = truncatedName
-              if (foundMeasure) {
-                article.measure = foundMeasure
-              }
-              console.log(`Artículo ${article.codart}: medida: ${article.measure}`)
-            })
-            this.articles = data
-            this.groupedArticles = this.groupArticles(this.articles)
+            console.log('Artículos encontrados por búsqueda:', data);
+            this.articles = data;
+            this.groupedArticles = this.groupArticles(this.articles);
+            // Seleccionamos la primera variante de cada grupo
             for (const key in this.groupedArticles) {
               if (this.groupedArticles.hasOwnProperty(key)) {
-                this.selectedVariants[key] = this.groupedArticles[key][0]
+                this.selectedVariants[key] = this.groupedArticles[key][0];
               }
             }
-            console.log('Artículos agrupados:', this.groupedArticles)
-            this.totalPages = Math.ceil(this.articles.length / this.pageSize)
-            console.log('Artículos procesados:', this.articles)
+            this.totalPages = Math.ceil(this.articles.length / this.pageSize);
+            this.isLoading = false;
           },
           error: (err) => {
-            console.error('Error al obtener artículos:', err)
-            this.errorMessage = 'Error al cargar los artículos'
+            console.error('Error en la búsqueda de artículos:', err);
+            this.errorMessage = 'Error al realizar la búsqueda';
+            this.isLoading = false;
           }
-        })
-      },
-      error: (err) => {
-        console.error('Error al obtener medidas:', err)
-        this.errorMessage = 'Error al cargar las medidas'
+        });
+      } else {
+        // Si no hay query, usamos el parámetro de familia como antes
+        const famParam = this.route.snapshot.paramMap.get('fam');
+        if (!famParam) {
+          this.errorMessage = 'No se proporcionó la familia';
+          this.isLoading = false;
+          return;
+        }
+        this.apiService.getMeasures().subscribe({
+          next: (res) => {
+            this.measures = (res.measures || [])
+              .map((m: any) => m.desume)
+              .filter((s: string) => s && s.trim() !== '');
+            console.log('Medidas obtenidas:', this.measures);
+            this.apiService.getArticlesByFamily(famParam).subscribe({
+              next: (data: Article[]) => {
+                console.log('Artículos recibidos del back:', data);
+                data.forEach(article => {
+                  if (article.imgart) {
+                    article.imgart = article.imgart.replace(/\\/g, '/');
+                  }
+                  if (article.dewart) {
+                    article.desart = article.dewart;
+                  }
+                  article.desart = article.desart.replace(/\\/g, '').replace(/\n/g, ' ').trim();
+                  const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
+                  article.desart = truncatedName;
+                  if (foundMeasure) {
+                    article.measure = foundMeasure;
+                  }
+                  console.log(`Artículo ${article.codart}: medida: ${article.measure}`);
+                });
+                this.articles = data;
+                this.groupedArticles = this.groupArticles(this.articles);
+                for (const key in this.groupedArticles) {
+                  if (this.groupedArticles.hasOwnProperty(key)) {
+                    this.selectedVariants[key] = this.groupedArticles[key][0];
+                  }
+                }
+                console.log('Artículos agrupados:', this.groupedArticles);
+                this.totalPages = Math.ceil(this.articles.length / this.pageSize);
+                console.log('Artículos procesados:', this.articles);
+                this.isLoading = false;
+              },
+              error: (err) => {
+                console.error('Error al obtener artículos:', err);
+                this.errorMessage = 'Error al cargar los artículos';
+                this.isLoading = false;
+              }
+            });
+          },
+          error: (err) => {
+            console.error('Error al obtener medidas:', err);
+            this.errorMessage = 'Error al cargar las medidas';
+            this.isLoading = false;
+          }
+        });
       }
-    })
+    });
   }
+  
 
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
@@ -123,18 +157,16 @@ export class ArticulosComponent implements OnInit {
 
   // Método para agregar la variante seleccionada al carrito
   addToCart(article: Article): void {
-    // Transformamos el objeto para tener las propiedades necesarias en el carrito
     const cartItem = {
-      id: article.codart, // Utilizamos el código de artículo como id
-      name: article.dewart || article.desart, // El nombre a mostrar (puedes ajustar según tu lógica)
-      price: parseFloat(article.pcoart), // Asegúrate de convertir a número si es string
-      quantity: 1, // Se inicia con 1, o puedes usar otra lógica si ya existe una cantidad
+      id: article.codart,
+      name: article.dewart || article.desart,
+      price: parseFloat(article.pcoart),
+      quantity: 1,
       img: article.imgart
-    };
-    this.cartService.addItem(cartItem);
-    console.log(`Artículo ${article.codart} añadido al carrito`);
+    }
+    this.cartService.addItem(cartItem)
+    console.log(`Artículo ${article.codart} añadido al carrito`)
   }
-  
 
   // Agrupa los artículos por el valor de "dewart" (o "desart" como fallback)
   private groupArticles(articles: Article[]): { [key: string]: Article[] } {
@@ -151,7 +183,6 @@ export class ArticulosComponent implements OnInit {
 }
 
 // Función para extraer la medida (completa) de "desart" usando la lista de medidas del back.
-// Se ordena el array de medidas de mayor a menor longitud para capturar primero la coincidencia más completa.
 function extractMeasureFromDesart(
   desart: string,
   measures: string[]

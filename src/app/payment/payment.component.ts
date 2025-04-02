@@ -5,11 +5,11 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 
 @Component({
-  selector: 'app-payment',
-  standalone: true,
-  imports: [CommonModule, FormsModule, NgxStripeModule],
-  templateUrl: './payment.component.html',
-  styleUrls: ['./payment.component.sass']
+    selector: 'app-payment',
+    imports: [CommonModule, FormsModule, NgxStripeModule],
+    templateUrl: './payment.component.html',
+    styleUrls: ['./payment.component.sass'],
+    standalone: true
 })
 export class PaymentComponent implements OnInit {
   @ViewChild(StripeCardComponent) card!: StripeCardComponent

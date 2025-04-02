@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../enviroments/environment';
 
 export interface Section {
   codsec: string;
@@ -13,7 +14,7 @@ export interface Section {
   providedIn: 'root'
 })
 export class SectionService {
-  private baseUrl = 'https://185.134.42.120:3000/api'; // Ajusta según corresponda
+  private baseUrl = environment.apiUrl; // Ajusta según corresponda
 
   constructor(private http: HttpClient) {}
 

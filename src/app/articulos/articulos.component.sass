@@ -11,12 +11,24 @@
 
   .categories
     display: grid
-    grid-template-columns: repeat(4, 1fr) // 4 elementos por fila
+    grid-template-columns: repeat(4, 1fr) // 4 columnas en pantallas grandes
     gap: 1.5rem
     justify-content: center
 
+    // Pantallas entre 768px y 992px => 3 columnas
+    @media (max-width: 992px)
+      grid-template-columns: repeat(3, 1fr)
+
+    // Pantallas entre 576px y 768px => 2 columnas
+    @media (max-width: 768px)
+      grid-template-columns: repeat(2, 1fr)
+
+    // Pantallas menores a 576px => 1 columna
+    @media (max-width: 576px)
+      grid-template-columns: 1fr
+
   .category-card
-    background-color: $dropdown-bg // Usamos variable en lugar de #fff
+    background-color: white
     display: flex
     flex-direction: column
     justify-content: space-between
@@ -25,7 +37,16 @@
     border-radius: 8px
     padding: 1rem
     text-align: center
-    height: 300px // Tamaño fijo para garantizar uniformidad
+    // Usamos min-height en lugar de height para que la tarjeta crezca si hay más contenido
+    min-height: 300px
+
+    // Reducimos la altura mínima en tablets
+    @media (max-width: 768px)
+      min-height: 250px
+
+    // En móviles podemos dejarla en auto para que crezca según el contenido
+    @media (max-width: 576px)
+      min-height: auto
 
     img
       max-width: 100%

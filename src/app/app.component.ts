@@ -10,26 +10,26 @@ import { TokenInterceptor } from './interceptor/token.interceptor';
 
 import { Category } from './models/articles';
 import { CartComponent } from './cart/cart.component';
+import { FooterComponent } from "./footer/footer.component";
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
+    selector: 'app-root',
+    imports: [
     CommonModule,
     HeaderComponent,
     ArticulosComponent,
     CartComponent,
     HttpClientModule,
-    HomeComponent,
     CategoriaComponent,
     RouterModule,
-    
-  ],
-  providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
-  ],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.sass']
+    FooterComponent
+],
+    providers: [
+        { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+    ],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.sass'],
+    standalone: true
 })
 export class AppComponent {
   

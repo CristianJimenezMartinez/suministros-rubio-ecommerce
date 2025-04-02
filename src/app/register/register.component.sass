@@ -3,8 +3,8 @@
 // Estilos del contenedor de registro
 .register-container
   max-width: 900px
-  margin: 0 auto
-  padding: 20px
+  margin: 65px auto 0 auto  // Se añade un margen superior para evitar que el header lo cubra
+  padding: 10px
   border: 1px solid $border-color
   border-radius: 8px
   background-color: #f9f9f9
@@ -18,20 +18,20 @@ h2
 form
   display: grid
   grid-template-columns: repeat(2, 1fr)
-  gap: 1.5rem
+  gap: 0.5rem
   grid-template-rows: auto
 
   @media (max-width: 768px)
-    grid-template-columns: 1fr // Se ajusta a una columna en pantallas pequeñas
+    grid-template-columns: 1fr  // Se ajusta a una columna en pantallas pequeñas
 
-/* Asignación de columnas para cada input */
+/* Asignación de columnas para cada input en escritorio */
 #username, #email, #dni, #cp, #prov, #tdc
   grid-column: 1 / 2
 
 #surname, #address, #telf, #pob, #pais, #password
   grid-column: 2 / 3
 
-/* Botón de registro */
+/* Botón de registro (ocupa ambas columnas en escritorio) */
 button
   grid-column: 1 / 3
   padding: 12px
@@ -81,3 +81,11 @@ input
   &:focus
     outline: none
     border-color: $primary-color
+
+// En móviles, forzamos que todos los inputs y el botón ocupen toda la fila
+@media (max-width: 768px)
+  form
+    #username, #email, #dni, #cp, #prov, #tdc,
+    #surname, #address, #telf, #pob, #pais, #password,
+    button
+      grid-column: 1 / -1

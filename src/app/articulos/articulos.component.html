@@ -1,10 +1,19 @@
 <div class="home-container">
   <h1>Artículos de la Familia</h1>
+
+  <!-- Mensaje de error (si lo hay) -->
   <div *ngIf="errorMessage">{{ errorMessage }}</div>
-  <div *ngIf="!groupedArticles || (groupedArticles | keyvalue).length === 0">
+
+  <!-- Spinner de carga mientras se obtienen los datos -->
+  <app-loading *ngIf="isLoading"></app-loading>
+
+  <!-- Mensaje si ya cargó pero no hay datos -->
+  <div *ngIf="!isLoading && (!groupedArticles || (groupedArticles | keyvalue).length === 0)">
     <p>No se encontraron artículos para esta familia.</p>
   </div>
-  <section class="categories" *ngIf="groupedArticles && (groupedArticles | keyvalue).length > 0">
+
+  <!-- Se muestra el contenido cuando ya se han cargado los datos -->
+  <section class="categories" *ngIf="!isLoading && groupedArticles && (groupedArticles | keyvalue).length > 0">
     <div class="category-card" *ngFor="let group of groupedArticles | keyvalue">
       <h3>{{ group.key }}</h3>
       <select (change)="onVariantChange(group.key, $event)">
@@ -16,7 +25,6 @@
         <img *ngIf="selectedVariants[group.key].imgart" [src]="selectedVariants[group.key].imgart" alt="{{ group.key }}">
         <p>Código: {{ selectedVariants[group.key].codart }}</p>
         <p>Precio: {{ selectedVariants[group.key].pcoart | currency:'EUR':'symbol':'1.2-2' }}</p>
-        <!-- Botón para añadir la variante seleccionada al carrito -->
         <button (click)="addToCart(selectedVariants[group.key])">Añadir al carrito</button>
       </div>
     </div>

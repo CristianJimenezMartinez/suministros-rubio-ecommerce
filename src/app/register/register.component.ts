@@ -4,13 +4,13 @@ import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import * as bcrypt from 'bcryptjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-register',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.sass']
+    selector: 'app-register',
+    imports: [FormsModule, CommonModule],
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.sass']
 })
 export class RegisterComponent {
   user = {

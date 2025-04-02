@@ -4,11 +4,10 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.sass']
+    selector: 'app-login',
+    imports: [FormsModule],
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.sass']
 })
 export class LoginComponent {
   username: string = '';
