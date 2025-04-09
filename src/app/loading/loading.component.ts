@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'app-loading',
@@ -9,6 +9,7 @@ import { Component } from '@angular/core';
     </div>
   `,
   styleUrls: ['./loading.component.sass'],
+  encapsulation: ViewEncapsulation.None, // Agrega esto para testear
   standalone: true
 })
 export class LoadingComponent {}

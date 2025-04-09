@@ -9,6 +9,8 @@ import { RegisterComponent } from './register/register.component';
 import { ProfileComponent } from './profile/profile.component';
 import { CheckoutComponent } from './checkout/checkout.component'; // Importa el componente de checkout
 import { AuthGuard } from './guards/auth.guard';
+import { ContactoComponent } from './info/contacto/contacto.component';
+import { SobreNosotrosComponent } from './info/sobre-nosotros/sobre-nosotros.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Ruta raíz
@@ -20,7 +22,11 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'checkout', component: CheckoutComponent }, // Ruta de checkout
+  { path: 'contacto', component: ContactoComponent },
+  { path: 'sobre-nosotros', component: SobreNosotrosComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' }
+
+  
 ];
 
 @NgModule({

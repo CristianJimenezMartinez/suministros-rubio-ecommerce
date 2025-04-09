@@ -2,25 +2,23 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { HeaderComponent } from './header/header.component';
-import { ArticulosComponent } from './articulos/articulos.component';
+
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { HomeComponent } from "./home/home.component";
-import { CategoriaComponent } from './categoria/categoria.component';
+
 import { TokenInterceptor } from './interceptor/token.interceptor'; 
 
 import { Category } from './models/articles';
-import { CartComponent } from './cart/cart.component';
+
 import { FooterComponent } from "./footer/footer.component";
+
+
 
 @Component({
     selector: 'app-root',
     imports: [
     CommonModule,
     HeaderComponent,
-    ArticulosComponent,
-    CartComponent,
     HttpClientModule,
-    CategoriaComponent,
     RouterModule,
     FooterComponent
 ],

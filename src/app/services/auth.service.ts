@@ -17,7 +17,7 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<any> {
-    return this.http.post(this.loginUrl, { username, password });
+    return this.http.post(this.loginUrl + "/login" , { username, password });
   }
 
   logout(): void {
@@ -44,6 +44,6 @@ export class AuthService {
       TDC: user.tdc,
       WEBPASS: user.password  // Se espera que la contraseña ya esté hasheada o se hashée en el backend
     };
-    return this.http.post(this.registerUrl, payload);
+    return this.http.post(this.registerUrl + "/createUser", payload);
   }
 }

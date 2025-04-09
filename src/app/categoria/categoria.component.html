@@ -7,7 +7,7 @@
   <!-- Si no se están cargando y hay familias, se muestran -->
   <section class="categories" *ngIf="!isLoading && families && families.length > 0">
     <div class="category-card" 
-         *ngFor="let fam of families | slice:(currentPage - 1) * pageSize : currentPage * pageSize">
+         *ngFor="let fam of families | slice:0:displayedCount">
       <h3>{{ fam.desfam }}</h3>
       <button (click)="goToArticles(fam.codfam)">Ver Artículos</button>
     </div>
@@ -18,10 +18,8 @@
     <p>No se encontraron familias.</p>
   </div>
 
-  <!-- Paginación solo si hay familias -->
-  <div class="pagination" *ngIf="!isLoading && families && families.length > 0">
-    <button *ngIf="currentPage > 1" (click)="previousPage()">Anterior</button>
-    <span>Página {{ currentPage }} de {{ totalPages }}</span>
-    <button *ngIf="currentPage < totalPages" (click)="nextPage()">Siguiente</button>
+  <!-- Botón "Ver más" solo si quedan más familias por mostrar -->
+  <div class="load-more" *ngIf="!isLoading && families && families.length > displayedCount">
+    <button (click)="loadMore()">Ver más</button>
   </div>
 </div>

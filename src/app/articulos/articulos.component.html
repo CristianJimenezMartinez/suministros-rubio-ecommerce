@@ -1,32 +1,56 @@
-<div class="home-container">
-  <h1>Artículos de la Familia</h1>
-
-  <!-- Mensaje de error (si lo hay) -->
-  <div *ngIf="errorMessage">{{ errorMessage }}</div>
-
-  <!-- Spinner de carga mientras se obtienen los datos -->
-  <app-loading *ngIf="isLoading"></app-loading>
-
-  <!-- Mensaje si ya cargó pero no hay datos -->
-  <div *ngIf="!isLoading && (!groupedArticles || (groupedArticles | keyvalue).length === 0)">
-    <p>No se encontraron artículos para esta familia.</p>
-  </div>
-
-  <!-- Se muestra el contenido cuando ya se han cargado los datos -->
-  <section class="categories" *ngIf="!isLoading && groupedArticles && (groupedArticles | keyvalue).length > 0">
-    <div class="category-card" *ngFor="let group of groupedArticles | keyvalue">
-      <h3>{{ group.key }}</h3>
-      <select (change)="onVariantChange(group.key, $event)">
-        <option *ngFor="let article of group.value; let i = index" [value]="i">
-          {{ article.measure }} - Precio: {{ article.pcoart | currency:'EUR':'symbol':'1.2-2' }}
-        </option>
-      </select>
-      <div *ngIf="selectedVariants[group.key]">
-        <img *ngIf="selectedVariants[group.key].imgart" [src]="selectedVariants[group.key].imgart" alt="{{ group.key }}">
-        <p>Código: {{ selectedVariants[group.key].codart }}</p>
-        <p>Precio: {{ selectedVariants[group.key].pcoart | currency:'EUR':'symbol':'1.2-2' }}</p>
-        <button (click)="addToCart(selectedVariants[group.key])">Añadir al carrito</button>
-      </div>
+<div class="articulos-container">
+  <!-- Sidebar con el filtro integrado -->
+  <div class="filter-panel">
+    <h3 class="toggle-filter" (click)="toggleFilter()">
+      Filtros 
+      <span *ngIf="isFilterOpen">&#9650;</span>
+      <span *ngIf="!isFilterOpen">&#9660;</span>
+    </h3>
+    <div class="filter-group" *ngIf="isFilterOpen">
+      <fieldset>
+        <legend>Tipo de artículo:</legend>
+        <ul>
+          <li *ngFor="let type of availableTypes">
+            <label>
+              <input type="checkbox" [value]="type" (change)="onCheckboxChange($event)" id="{{ type }}" />
+              <span>{{ type }}</span>
+            </label>
+          </li>
+        </ul>
+      </fieldset>
     </div>
-  </section>
+  </div>
+  
+  <!-- Contenido principal a la derecha -->
+  <div class="content">
+    <h1>Artículos de la Familia</h1>
+
+    <div *ngIf="errorMessage">{{ errorMessage }}</div>
+    <app-loading *ngIf="isLoading"></app-loading>
+    <div *ngIf="!isLoading && (!groupedArticles || (groupedArticles | keyvalue).length === 0)">
+      <p>No se encontraron artículos para esta familia.</p>
+    </div>
+
+    <section class="categories" *ngIf="!isLoading && groupedArticles && (groupedArticles | keyvalue).length > 0">
+      <div class="category-card" *ngFor="let group of filteredGroupedArticles | keyvalue">
+        <h3>{{ group.key }}</h3>
+        
+        <div *ngIf="selectedVariants[group.key]">
+          <img *ngIf="selectedVariants[group.key].imgart" [src]="selectedVariants[group.key].imgart" alt="{{ group.key }}">
+          <p>Código: {{ selectedVariants[group.key].codart }}</p>
+          
+          <!-- Sólo se muestra el desplegable si la variante seleccionada tiene definida la medida -->
+          <select *ngIf="selectedVariants[group.key].measure" (change)="onVariantChange(group.key, $event)">
+            <option *ngFor="let article of group.value; let i = index" [value]="i">
+              {{ article.measure }}
+            </option>
+          </select>
+          
+          <p>Precio {{ selectedVariants[group.key].pcoart }} € Iva incluido</p>
+          
+          <button (click)="addToCart(selectedVariants[group.key])">Añadir al carrito</button>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>

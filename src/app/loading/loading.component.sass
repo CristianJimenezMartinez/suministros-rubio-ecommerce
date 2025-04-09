@@ -7,7 +7,6 @@ html, body
   padding: 0
 
 .login-container, .register-container, .profile-container
-  /* Ajuste la parte superior según la altura de tu header fijo */
   margin: 80px auto 0 auto
   max-width: 400px
   padding: 20px
@@ -25,19 +24,18 @@ form
   flex-direction: column
   gap: 1.5rem
 
-/* Input styles */
+/* Estilos de input */
 input
   padding: 10px
   font-size: 1rem
   border: 1px solid #ccc
   border-radius: 4px
   width: 100%
-
   &:focus
     outline: none
     border-color: $primary-color
 
-/* Button styles */
+/* Estilos de botones */
 button
   padding: 10px
   font-size: 1rem
@@ -47,7 +45,6 @@ button
   border-radius: 4px
   cursor: pointer
   width: 100%
-
   &:hover
     background-color: $primary-hover-color
 
@@ -59,18 +56,16 @@ a
   text-decoration: none
   font-size: 1rem
   transition: color 0.3s
-
   &:hover
     text-decoration: underline
     color: $primary-hover-color
 
-/* Estilos para los botones de login y register */
+/* Botones de login y register */
 .user-section
   margin-left: auto
   display: flex
   gap: 0px
   align-items: center
-
   a
     background-color: $yellow-color
     color: black
@@ -81,7 +76,48 @@ a
     border: 1px solid $yellow-color
     transition: background-color 0.3s, color 0.3s
     margin-right: 0
-
     &:hover
       background-color: $primary-hover-color-button
       color: white
+
+/* Contenedor de loading: cubre toda la pantalla y queda encima */
+.loading-container
+  position: fixed
+  top: 0
+  left: 0
+  width: 100vw
+  height: 100vh
+  background-color: white
+  z-index: 9999
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  @media (max-width: 576px)
+    padding: 20px
+  p
+    margin-top: 10px
+    font-size: 1rem
+    color: #333
+
+/* Spinner */
+.spinner
+  border: 8px solid #f3f3f3  // Fondo del spinner
+  border-top: 8px solid $primary-color  // Usa el mismo color que los botones
+  border-radius: 50%
+  width: 60px
+  height: 60px
+  animation: spin 1s linear infinite
+
+@keyframes spin
+  0%
+    transform: rotate(0deg)
+  100%
+    transform: rotate(360deg)
+
+/* Responsive: Ajustes para móviles en contenedores de formularios */
+@media (max-width: 576px)
+  .login-container, .register-container, .profile-container
+    margin: 60px auto 0 auto
+    max-width: 90%
+    padding: 15px

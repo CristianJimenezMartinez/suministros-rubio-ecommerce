@@ -1,96 +1,86 @@
-<div class="cart-popup">
-  <button class="close-button" (click)="closeCart()">X</button>
-  
-  <!-- Vista del Carrito -->
-  <div *ngIf="currentStep === 'cart'" class="cart">
-    <h2>Carrito de Compras</h2>
-    <div *ngIf="items.length === 0">
-      <p>Tu carrito está vacío.</p>
-    </div>
-    <div *ngIf="items.length > 0">
-      <table>
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Subtotal</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of items">
-            <td>{{ item.name }}</td>
-            <td>{{ item.price | currency:'EUR':'symbol':'1.2-2' }}</td>
-            <td>
-              <input #qtyInput type="number" [value]="item.quantity" (change)="updateQuantity(item, +qtyInput.value)" min="1">
-            </td>
-            <td>{{ item.price * item.quantity | currency:'EUR':'symbol':'1.2-2' }}</td>
-            <td>
-              <button (click)="removeItem(item)">Eliminar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="total">
-        <p>Total: {{ total | currency:'EUR':'symbol':'1.2-2' }}</p>
+<div class="cart-container">
+  <div class="cart-popup">
+    <button class="close-button" (click)="closeCart()">X</button>
+    
+    <!-- Vista del Carrito -->
+    <div *ngIf="currentStep === 'cart'" class="cart">
+      <h2>Tus Productos</h2>
+      <div *ngIf="items.length === 0">
+        <p>Tu carrito está vacío.</p>
       </div>
-      <div class="continue">
-        <button (click)="continueCheckout(); $event.stopPropagation()">Continuar</button>
+      <div *ngIf="items.length > 0">
+        <section class="categories">
+          <div class="category-card" *ngFor="let item of items">
+            <img *ngIf="item.img" [src]="item.img" alt="Imagen de {{ item.name }}">
+            <h3>{{ item.name }}</h3>
+            <p>Precio: {{ item.price  + "€" }}</p>
+            <div class="quantity-control">
+              <label>Cantidad:</label>
+              <input #qtyInput type="number" min="1" [value]="item.quantity" (change)="updateQuantity(item, qtyInput.valueAsNumber)">
+            </div>
+            <p>Subtotal: {{ item.price * item.quantity  + "€" }}</p>
+            <button (click)="removeItem(item)">Eliminar</button>
+          </div>
+        </section>
+        <div class="total">
+          <p>Total: {{ total  + "€" }}</p>
+        </div>
+        <div class="continue">
+          <button (click)="continueCheckout(); $event.stopPropagation()">Continuar</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Vista del Checkout -->
-  <div *ngIf="currentStep === 'checkout'" class="checkout">
-    <h2>Datos de Envío</h2>
-    <form (ngSubmit)="submitOrder()" #checkoutForm="ngForm">
-      <div class="form-group">
-        <label>Nombre completo:</label>
-        <input type="text" name="fullName" [(ngModel)]="shippingData.fullName" required>
-      </div>
-      <div class="form-group">
-        <label>Dirección:</label>
-        <input type="text" name="address" [(ngModel)]="shippingData.address" required>
-      </div>
-      <div class="form-group">
-        <label>Ciudad:</label>
-        <input type="text" name="city" [(ngModel)]="shippingData.city" required>
-      </div>
-      <div class="form-group">
-        <label>Código postal:</label>
-        <input type="text" name="postalCode" [(ngModel)]="shippingData.postalCode" required>
-      </div>
-      <div class="form-group">
-        <label>País:</label>
-        <input type="text" name="country" [(ngModel)]="shippingData.country" required>
-      </div>
-      <div class="form-group">
-        <label>Teléfono:</label>
-        <input type="tel" name="phone" [(ngModel)]="shippingData.phone" required>
-      </div>
+    <!-- Vista del Checkout -->
+    <div *ngIf="currentStep === 'checkout'" class="checkout">
+      <h2>Datos de Envío</h2>
+      <form (ngSubmit)="submitOrder()" #checkoutForm="ngForm">
+        <div class="form-group">
+          <label>Nombre completo:</label>
+          <input type="text" name="fullName" [(ngModel)]="shippingData.fullName" required>
+        </div>
+        <div class="form-group">
+          <label>Dirección:</label>
+          <input type="text" name="address" [(ngModel)]="shippingData.address" required>
+        </div>
+        <div class="form-group">
+          <label>Ciudad:</label>
+          <input type="text" name="city" [(ngModel)]="shippingData.city" required>
+        </div>
+        <div class="form-group">
+          <label>Código postal:</label>
+          <input type="text" name="postalCode" [(ngModel)]="shippingData.postalCode" required>
+        </div>
+        <div class="form-group">
+          <label>País:</label>
+          <input type="text" name="country" [(ngModel)]="shippingData.country" required>
+        </div>
+        <div class="form-group">
+          <label>Teléfono:</label>
+          <input type="tel" name="phone" [(ngModel)]="shippingData.phone" required>
+        </div>
+        <div class="actions">
+          <button type="button" (click)="onStepChange('cart'); $event.stopPropagation()">Volver al Carrito</button>
+          <button type="button" (click)="onStepChange('payment'); $event.stopPropagation()">Continuar a Pago</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Vista de Pago -->
+    <div *ngIf="currentStep === 'payment'" class="payment">
+      <app-payment 
+        (paymentConfirmed)="onStepChange('confirmation')"
+        (cancel)="onStepChange('checkout')">
+      </app-payment>
+    </div>
+    
+    <!-- Vista de Confirmación -->
+    <div *ngIf="currentStep === 'confirmation'" class="confirmation">
+      <h2>Confirmación</h2>
+      <p>¡Tu pedido ha sido realizado exitosamente!</p>
       <div class="actions">
-        <button type="button" (click)="onStepChange('cart'); $event.stopPropagation()">Volver al Carrito</button>
-        <button type="button" (click)="onStepChange('payment'); $event.stopPropagation()">Continuar a Pago</button>
+        <button type="button" (click)="closeCart(); $event.stopPropagation()">Cerrar</button>
       </div>
-    </form>
-  </div>
-
-  <!-- Vista de Pago -->
-  <div *ngIf="currentStep === 'payment'" class="payment">
-    <app-payment 
-      (paymentConfirmed)="onStepChange('confirmation')"
-      (cancel)="onStepChange('checkout')">
-    </app-payment>
-  </div>
-  
-
-  <!-- Vista de Confirmación -->
-  <div *ngIf="currentStep === 'confirmation'" class="confirmation">
-    <h2>Confirmación</h2>
-    <p>¡Tu pedido ha sido realizado exitosamente!</p>
-    <div class="actions">
-      <button type="button" (click)="closeCart(); $event.stopPropagation()">Cerrar</button>
     </div>
   </div>
 </div>

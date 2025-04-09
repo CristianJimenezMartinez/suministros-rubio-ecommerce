@@ -3,14 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd, Event as RouterEvent } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { ProfileComponent } from '../profile/profile.component';
 import { CartService } from '../services/cart.service';
 import { CartComponent } from '../cart/cart.component';
 import { DataService, Article } from '../services/data.service';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, ProfileComponent, CartComponent, FormsModule],
+  imports: [CommonModule, CartComponent, FormsModule],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.sass'],
   standalone: true
