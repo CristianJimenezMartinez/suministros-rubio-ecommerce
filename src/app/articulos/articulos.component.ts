@@ -5,19 +5,36 @@ import { HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../services/cart.service';
 import { LoadingComponent } from '../loading/loading.component';
-import { RatesService, Rate } from '../services/rates.service';
+import { RatesService } from '../services/rates.service';
 
 export interface Article {
   codart: string;
   desart: string;
   dewart?: string;
-  pcoart: string; // Precio base, que se sobrescribe con el precio calculado
+  /**
+   * Precio bruto (con IVA) como cadena, p.ej. "12.34"
+   */
+  pcoart: string;
   imgart: string;
   famart: string;
   eanart: string;
   measure?: string;
-  tivart?: string; // "0" para IVA del 21% o "1" para IVA del 10%
+  /**
+   * "0" ⇒ 21% IVA, "1" ⇒ 10% IVA
+   */
+  tivart?: string;
+
+  /**
+   * Precio neto (sin IVA), calculado en ArticulosComponent
+   */
+  netPrice?: string;
+
+  /**
+   * Importe de IVA, calculado en ArticulosComponent
+   */
+  vatAmount?: string;
 }
+
 
 @Component({
   selector: 'app-articulos',
@@ -46,10 +63,9 @@ export class ArticulosComponent implements OnInit {
   // Tipos disponibles para filtrar (primeras palabras sin duplicados)
   availableTypes: string[] = [];
 
-  // Paginación
+  // Paginación (al estilo de categorías)
   pageSize: number = 12;
-  currentPage: number = 1;
-  totalPages: number = 1;
+  displayedCount: number = 12;
 
   // Indicadores de carga y modo búsqueda
   isLoading: boolean = true;
@@ -67,37 +83,29 @@ export class ArticulosComponent implements OnInit {
       if (query) {
         // Modo búsqueda
         this.isSearchMode = true;
-        // Primero obtenemos las medidas
         this.apiService.getMeasures().subscribe({
           next: (res) => {
             this.measures = (res.measures || [])
               .map((m: any) => m.desume)
               .filter((s: string) => s && s.trim() !== '');
-            // Luego realizamos la búsqueda
             this.apiService.searchArticles(query).subscribe({
               next: (data: Article[]) => {
                 data.forEach(article => {
-                  // Transformación de la ruta de la imagen con logs de depuración
                   if (article.imgart) {
                     let fixedPath = article.imgart.replace(/\\/g, '/');
                     const index = fixedPath.indexOf('/FOTOS/');
                     if (index !== -1) {
                       const relativePath = fixedPath.substr(index);
                       article.imgart = 'assets/img/factusolImg' + relativePath;
-                    } else {
                     }
                   }
-                  
-                  // Si existe 'dewart', lo usamos para sobreescribir 'desart'
                   if (article.dewart) {
                     article.desart = article.dewart;
                   }
-                  // Limpiamos 'desart'
                   article.desart = article.desart
                     .replace(/\\/g, '')
                     .replace(/\n/g, ' ')
                     .trim();
-                  // Extraemos la medida y ajustamos el nombre
                   const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
                   article.desart = truncatedName;
                   if (foundMeasure) {
@@ -105,18 +113,30 @@ export class ArticulosComponent implements OnInit {
                   }
                 });
                 this.articles = data;
-                // Se obtiene la tarifa "INTERNET" y se calcula el precio final aplicando también el IVA
                 this.ratesService.getInternetRate().subscribe({
                   next: (internetRate) => {
                     this.articles.forEach(article => {
-                      const basePrice = parseFloat(article.pcoart);
+                      const basePrice     = parseFloat(article.pcoart);
                       const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-                      let vatPercentage = 21;
-                      if (article.tivart === '1') {
-                        vatPercentage = 10;
+                      console.log(computedPrice)
+                      let vatPercentage: number;
+                      switch (article.tivart) {
+                        case '0': vatPercentage = 21; break;
+                        case '1': vatPercentage = 10; break;
+                        case '2': vatPercentage = 4;  break;
+                        case '4': vatPercentage = 0;  break;
+                        default:  vatPercentage = 21;
                       }
-                      const finalPrice = computedPrice * (1 + vatPercentage / 100);
-                      article.pcoart = finalPrice.toFixed(2);
+                    
+                      const netPrice   = computedPrice;
+                      const vatAmount  = netPrice * (vatPercentage / 100);
+                      const grossPrice = netPrice + vatAmount;
+                      console.log(netPrice)
+                      console.log(vatAmount)
+                      console.log(grossPrice)
+                      article.pcoart     = grossPrice.toFixed(2);
+                      article.netPrice   = netPrice.toFixed(2);
+                      article.vatAmount  = vatAmount.toFixed(2);
                     });
                     this.groupArticlesAndSetup();
                   },
@@ -138,88 +158,157 @@ export class ArticulosComponent implements OnInit {
           }
         });
       } else {
-        // Modo por familia
         const famParam = this.route.snapshot.paramMap.get('fam');
-        if (!famParam) {
-          this.errorMessage = 'No se proporcionó la familia';
-          this.isLoading = false;
-          return;
-        }
-        this.apiService.getMeasures().subscribe({
-          next: (res) => {
-            this.measures = (res.measures || [])
-              .map((m: any) => m.desume)
-              .filter((s: string) => s && s.trim() !== '');
-            
-            this.apiService.getArticlesByFamily(famParam).subscribe({
-              next: (data: Article[]) => {
-                data.forEach(article => {
-                  if (article.imgart) {
-                    // Igual que en el modo búsqueda, aplicamos la transformación de la ruta
-
-                    let fixedPath = article.imgart.replace(/\\/g, '/');
-
-                    const index = fixedPath.indexOf('/FOTOS/');
-                    if (index !== -1) {
-                      const relativePath = fixedPath.substr(index);
-
-                      article.imgart = 'assets/img/factusolImg' + relativePath;
-                    } else {
-
-                    }
-
-                  }
-                  if (article.dewart) {
-                    article.desart = article.dewart;
-                  }
-                  article.desart = article.desart
-                    .replace(/\\/g, '')
-                    .replace(/\n/g, ' ')
-                    .trim();
-                  const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
-                  article.desart = truncatedName;
-                  if (foundMeasure) {
-                    article.measure = foundMeasure;
-                  }
-                });
-                this.articles = data;
-                // Se obtiene la tarifa "INTERNET" y se calcula el precio final aplicando también el IVA
-                this.ratesService.getInternetRate().subscribe({
-                  next: (internetRate) => {
-                    this.articles.forEach(article => {
-                      const basePrice = parseFloat(article.pcoart);
-                      const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-                      let vatPercentage = 21;
-                      if (article.tivart === '1') {
-                        vatPercentage = 10;
+        if (famParam) {
+          // Modo por familia
+          this.apiService.getMeasures().subscribe({
+            next: (res) => {
+              this.measures = (res.measures || [])
+                .map((m: any) => m.desume)
+                .filter((s: string) => s && s.trim() !== '');
+              this.apiService.getArticlesByFamily(famParam).subscribe({
+                next: (data: Article[]) => {
+                  data.forEach(article => {
+                    if (article.imgart) {
+                      let fixedPath = article.imgart.replace(/\\/g, '/');
+                      const index = fixedPath.indexOf('/FOTOS/');
+                      if (index !== -1) {
+                        const relativePath = fixedPath.substr(index);
+                        article.imgart = 'assets/img/factusolImg' + relativePath;
                       }
-                      const finalPrice = computedPrice * (1 + vatPercentage / 100);
-                      article.pcoart = finalPrice.toFixed(2);
-                    });
-                    this.groupArticlesAndSetup();
-                  },
-                  error: (err) => {
-                    this.errorMessage = 'Error al obtener la tarifa de INTERNET';
-                    this.isLoading = false;
+                    }
+                    if (article.dewart) {
+                      article.desart = article.dewart;
+                    }
+                    article.desart = article.desart
+                      .replace(/\\/g, '')
+                      .replace(/\n/g, ' ')
+                      .trim();
+                    const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
+                    article.desart = truncatedName;
+                    if (foundMeasure) {
+                      article.measure = foundMeasure;
+                    }
+                  });
+                  this.articles = data;
+                  this.ratesService.getInternetRate().subscribe({
+                    next: (internetRate) => {
+                      this.articles.forEach(article => {
+                        const basePrice     = parseFloat(article.pcoart);
+                        const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
+                        console.log(computedPrice)
+                        let vatPercentage: number;
+                        switch (article.tivart) {
+                          case '0': vatPercentage = 21; break;
+                          case '1': vatPercentage = 10; break;
+                          case '2': vatPercentage = 4;  break;
+                          case '4': vatPercentage = 0;  break;
+                          default:  vatPercentage = 21;
+                        }
+                      
+                        const netPrice   = computedPrice;
+                        const vatAmount  = netPrice * (vatPercentage / 100);
+                        const grossPrice = netPrice + vatAmount;
+                        /* console.log(netPrice) */
+                        console.log(vatAmount)
+                        /* console.log(grossPrice) */
+                        article.pcoart     = grossPrice.toFixed(2);
+                        article.netPrice   = netPrice.toFixed(2);
+                        article.vatAmount  = vatAmount.toFixed(2);
+                      });
+                      this.groupArticlesAndSetup();
+                    },
+                    error: (err) => {
+                      this.errorMessage = 'Error al obtener la tarifa de INTERNET';
+                      this.isLoading = false;
+                    }
+                  });
+                },
+                error: (err) => {
+                  this.errorMessage = 'Error al cargar los artículos por familia';
+                  this.isLoading = false;
+                }
+              });
+            },
+            error: (err) => {
+              this.errorMessage = 'Error al cargar las medidas';
+              this.isLoading = false;
+            }
+          });
+        } else {
+          // Cargar TODOS los artículos
+          this.apiService.getArticles().subscribe({
+            next: (result) => {
+              this.measures = (result.measures || [])
+                .map((m: any) => m.desume)
+                .filter((s: string) => s && s.trim() !== '');
+              result.articles.forEach(article => {
+                if (article.imgart) {
+                  let fixedPath = article.imgart.replace(/\\/g, '/');
+                  const index = fixedPath.indexOf('/FOTOS/');
+                  if (index !== -1) {
+                    const relativePath = fixedPath.substr(index);
+                    article.imgart = 'assets/img/factusolImg' + relativePath;
                   }
-                });
-              },
-              error: (err) => {
-                this.errorMessage = 'Error al cargar los artículos';
-                this.isLoading = false;
-              }
-            });
-          },
-          error: (err) => {
-            this.errorMessage = 'Error al cargar las medidas';
-            this.isLoading = false;
-          }
-        });
+                }
+                if (article.dewart) {
+                  article.desart = article.dewart;
+                }
+                article.desart = article.desart
+                  .replace(/\\/g, '')
+                  .replace(/\n/g, ' ')
+                  .trim();
+                const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
+                article.desart = truncatedName;
+                if (foundMeasure) {
+                  article.measure = foundMeasure;
+                }
+              });
+              this.articles = result.articles;
+              this.ratesService.getInternetRate().subscribe({
+                next: (internetRate) => {
+                  this.articles.forEach(article => {
+                    const basePrice     = parseFloat(article.pcoart);
+                    const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
+                    console.log(computedPrice)
+                    let vatPercentage: number;
+                    switch (article.tivart) {
+                      case '0': vatPercentage = 21; break;
+                      case '1': vatPercentage = 10; break;
+                      case '2': vatPercentage = 4;  break;
+                      case '4': vatPercentage = 0;  break;
+                      default:  vatPercentage = 21;
+                    }
+                  
+                    const netPrice   = computedPrice;
+                    const vatAmount  = netPrice * (vatPercentage / 100);
+                    const grossPrice = netPrice + vatAmount;
+                    /* console.log(netPrice)
+                    console.log(vatAmount)
+                    console.log(grossPrice) */
+                    article.pcoart     = grossPrice.toFixed(2);
+                    article.netPrice   = netPrice.toFixed(2);
+                    article.vatAmount  = vatAmount.toFixed(2);
+                  });
+                  this.groupArticlesAndSetup();
+                },
+                error: (err) => {
+                  this.errorMessage = 'Error al obtener la tarifa de INTERNET';
+                  this.isLoading = false;
+                }
+              });
+            },
+            error: (err) => {
+              this.errorMessage = 'Error al cargar todos los artículos';
+              this.isLoading = false;
+            }
+          });
+        }
       }
     });
   }
 
-  // Método común para agrupar artículos y configurar variantes, paginación y filtros
+  // Método para agrupar artículos y configurar variantes, paginación y filtros
   private groupArticlesAndSetup(): void {
     this.groupedArticles = this.groupArticles(this.articles);
     for (const key in this.groupedArticles) {
@@ -229,7 +318,7 @@ export class ArticulosComponent implements OnInit {
     }
     this.filteredGroupedArticles = { ...this.groupedArticles };
     this.availableTypes = this.extractArticleTypes(this.articles);
-    this.totalPages = Math.ceil(this.articles.length / this.pageSize);
+    // Paginación al estilo "Ver más": los artículos se mostrarán según displayedCount
     this.isLoading = false;
   }
 
@@ -248,6 +337,8 @@ export class ArticulosComponent implements OnInit {
       }
       this.filteredGroupedArticles = filtered;
     }
+    // Reiniciar el contador de artículos mostrados al filtrar
+    this.displayedCount = this.pageSize;
   }
 
   toggleFilter(): void {
@@ -287,16 +378,16 @@ export class ArticulosComponent implements OnInit {
     return Array.from(new Set(types));
   }
 
+  loadMore(): void {
+    this.displayedCount += this.pageSize;
+  }
+
   nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-    }
+    // Se eliminan o dejan en desuso si se usa loadMore
   }
 
   previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
+    // Se eliminan o dejan en desuso si se usa loadMore
   }
 
   onVariantChange(groupKey: string, event: Event): void {
@@ -309,11 +400,14 @@ export class ArticulosComponent implements OnInit {
 
   addToCart(article: Article): void {
     const cartItem = {
-      id: article.codart,
-      name: article.dewart || article.desart,
-      price: parseFloat(article.pcoart),
-      quantity: 1,
-      img: article.imgart
+      id:        article.codart,
+      name:      article.dewart || article.desart,
+      price:     parseFloat(article.pcoart),       // bruto (precio final con IVA)
+      netPrice:  parseFloat(article.netPrice!),   // neto (precio sin IVA)
+      vatAmount: parseFloat(article.vatAmount!),  // importe de IVA por unidad
+      vatType:   parseInt(article.tivart || '0', 10), // 0,1,2,4 según tivart
+      quantity:  1,
+      img:       article.imgart
     };
     this.cartService.addItem(cartItem);
   }
