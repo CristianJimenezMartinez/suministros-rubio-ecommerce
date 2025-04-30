@@ -95,6 +95,54 @@ header
           background-color: $primary-hover-color-button
           color: white
 
+    // Botón de usuario para cuando está logueado
+    .user-button
+      background-color: $yellow-color
+      border: none
+      padding: 0.5rem 1rem
+      border-radius: 4px
+      cursor: pointer
+      display: flex
+      align-items: center
+      justify-content: center
+      gap: 0.5rem
+      min-width: 50px
+      min-height: 40px
+
+      svg
+        width: 24px
+        height: 24px
+        fill: white
+        stroke: white
+
+      &:hover
+        background-color: $primary-hover-color-button
+
+    // Dropdown de perfil integrado (la parte "profile")
+    .profile-dropdown
+      list-style: none
+      margin: 0
+      padding: 0.5rem 0
+      background-color: white
+      border: 1px solid $border-color
+      border-radius: 4px
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)
+      width: 150px
+
+      li
+        a.dropdown-item
+          display: block
+          padding: 0.5rem 1rem
+          color: black
+          text-decoration: none
+          transition: background-color 0.3s, color 0.3s
+          // Aseguramos que también cambie el cursor para estos enlaces
+          cursor: pointer
+
+          &:hover
+            background-color: $primary-hover-color-button
+            color: white
+
     // Vista Móvil: mostramos la imagen con fondo del mismo color que el header
     .mobile-user
       display: none
@@ -123,12 +171,9 @@ main, .content
 
   .cart-button
     padding: 0.4rem 0.8rem
-    //min-width: 45px
-    //min-height: 35px
 
     svg
-      //width: 20px
-      //height: 20px
+      // Ajustes opcionales para tamaños de ícono en tablets
 
   .user-section .desktop-user
     gap: 0.4rem
@@ -161,18 +206,11 @@ main, .content
 
     .cart-button
       padding: 0.3rem 0.6rem
-      //min-width: 40px
-      //min-height: 30px
 
       svg
-        //width: 25px
-        //height: 20px
-    
-    .user-section
-      // Si quieres ocultar la vista desktop, descomenta:
-      //.desktop-user
-      //  display: none
+        // Ajustes opcionales para íconos en móviles
 
+    .user-section
       .mobile-user
         display: inline-block
         a
@@ -184,3 +222,8 @@ main, .content
 
   main, .content
     margin-top: 70px
+
+// Regla para que TODOS los enlaces dentro del header muestren el cursor de puntero
+header a 
+  cursor: pointer;
+

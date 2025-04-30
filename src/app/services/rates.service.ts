@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../enviroments/environment'; // Ajusta la ruta según la ubicación
 
 export interface Rate {
   codtar: string;
@@ -15,7 +16,8 @@ export interface Rate {
   providedIn: 'root'
 })
 export class RatesService {
-  private ratesUrl = 'https://desktop-p1l2603.duckdns.org/api/rates';
+  // Se construye la URL usando el environment.apiUrl definido
+  private ratesUrl = `${environment.apiUrl}/rates`;
 
   constructor(private http: HttpClient) {}
 

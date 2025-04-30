@@ -40,6 +40,6 @@ export class HomeComponent {
     // Convertimos el array de familias en una cadena separada por comas
     const secParam = section.sec.join(',');
     // Navegamos a /categoria/1,3,5 (por ejemplo)
-    this.router.navigate(['/categoria', secParam]);
+    this.router.navigate(['/categorias', secParam]);
   }
 }

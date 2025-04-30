@@ -15,8 +15,8 @@
           [ngClass]="{'show': isNavDropdownOpen}"
           style="position: absolute; transform: translateY(40px);">
         <li><a class="dropdown-item" (click)="navigateTo('/')">Inicio</a></li>
-        <li><a class="dropdown-item" (click)="navigateTo('/categoria')">Categorías</a></li>
-        <li><a class="dropdown-item" (click)="navigateTo('/articulos')">Artículos</a></li>
+        <li><a class="dropdown-item" (click)="navigateTo('/categorias')">Categorías</a></li>
+        <li><a class="dropdown-item" (click)="navigateTo('/articulos')">Productos</a></li>
       </ul>
     </div>
 
@@ -26,7 +26,7 @@
              (keyup.enter)="onSearch()" />
     </div>
 
-    <!-- Sección derecha: Carrito y Perfil -->
+    <!-- Sección derecha: Carrito y Usuario -->
     <div class="right-section">
       <!-- Botón del carrito -->
       <div class="cart-container">
@@ -40,14 +40,23 @@
         </button>
       </div>
 
-      <!-- Menú de usuario (perfil) -->
+
+      <!-- Sección del usuario -->
       <div class="user-section">
         <ng-container *ngIf="isLoggedIn; else notLoggedIn">
           <div class="dropdown">
-            <a class="d-flex align-items-center" (click)="toggleProfileDropdown()">
-              <img src="../../assets/img/user.png" alt="Profile" style="width:32px; height:32px; border-radius:50%;">
-            </a>
-            <ul class="dropdown-menu text-small shadow" 
+            <!-- Botón de usuario con un SVG o imagen, por ejemplo con la clase user-button -->
+            <button class="user-button" (click)="toggleProfileDropdown()">
+              <!-- Puedes usar un SVG para que sea fácilmente estilable -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                  fill="white" stroke="white" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" class="icon icon-user">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M6 20c0-2.2 3.6-4 6-4s6 1.8 6 4"></path>
+              </svg>
+            </button>
+            <!-- Dropdown del perfil integrado (contenido del profile.component.html) -->
+            <ul class="dropdown-menu text-small shadow profile-dropdown"
                 [ngClass]="{'show': isProfileDropdownOpen}"
                 style="position: absolute; right: 0; left: auto; transform: translateY(40px);">
               <li><a class="dropdown-item" (click)="navigateToProfile()">Perfil</a></li>
@@ -57,23 +66,19 @@
           </div>
         </ng-container>
         <ng-template #notLoggedIn>
-          <!-- Para desktop: mostrar ambos enlaces -->
           <div class="desktop-user" *ngIf="!isMobile">
             <a *ngIf="showLoginButton" (click)="onLoginClick()">Iniciar sesión</a>
             <a *ngIf="showRegisterButton" (click)="onRegisterClick()">Registrarse</a>
           </div>
-          <!-- Para móvil: mostrar un icono único -->
           <div class="mobile-user" *ngIf="isMobile">
-            <!-- Aquí usamos la imagen en lugar del ícono SVG -->
             <a (click)="onMobileLoginClick()">
-              <img 
-                src="../../assets/img/user.png" 
-                alt="Profile" 
-                style="width:32px; height:32px; border-radius:50%;" />
+              <img src="../../assets/img/user.png" alt="Profile" style="width:32px; height:32px; border-radius:50%;" />
             </a>
           </div>
         </ng-template>
       </div>
+
+
     </div>
   </div>
 

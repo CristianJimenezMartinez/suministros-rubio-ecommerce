@@ -6,49 +6,62 @@ import { CommonModule } from '@angular/common';
 import { CartService } from '../services/cart.service';
 import { CartComponent } from '../cart/cart.component';
 import { DataService, Article } from '../services/data.service';
+import { AuthService } from '../services/auth.service';
+import { PopupComponent } from '../popup/popup.component';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, CartComponent, FormsModule],
+  imports: [CommonModule, CartComponent, FormsModule, PopupComponent],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.sass'],
   standalone: true
 })
 export class HeaderComponent implements OnInit {
+  // Dropdown de navegación y perfil
   isNavDropdownOpen: boolean = false;
   isProfileDropdownOpen: boolean = false;
-  
+
+  // Variables de autenticación
   isLoggedIn: boolean = false;
   showLoginButton: boolean = true;
   showRegisterButton: boolean = true;
 
-  // Propiedad para determinar si estamos en móvil
+  // Determina si estamos en móvil (ancho <= 576px)
   isMobile: boolean = false;
 
   // Propiedades para el carrito
   isCartOpen: boolean = false;
   cartItemCount: number = 0;
 
+  // Buscador
   searchText: string = '';
-
-  // Propiedad para almacenar artículos filtrados
   filteredArticles: Article[] = [];
 
   constructor(
     private router: Router, 
     private elementRef: ElementRef,
     private cartService: CartService,
-    private dataService: DataService  // Inyección de DataService
+    private dataService: DataService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.updateIsMobile(window.innerWidth);
-    const user = localStorage.getItem('user');
-    this.isLoggedIn = !!user;
-    if (this.isLoggedIn) {
-      this.showLoginButton = false;
-      this.showRegisterButton = false;
-    }
+
+    // Suscribirse al estado de autenticación
+    this.authService.isAuthenticated$.subscribe(auth => {
+      this.isLoggedIn = auth;
+      if (auth) {
+        // Si está autenticado, ocultamos los botones de login/registro
+        this.showLoginButton = false;
+        this.showRegisterButton = false;
+      } else {
+        this.showLoginButton = true;
+        this.showRegisterButton = true;
+      }
+    });
+
+    // Ajustar los botones según la ruta (si el usuario NO está autenticado)
     this.router.events
       .pipe(filter((event: RouterEvent): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
@@ -57,6 +70,8 @@ export class HeaderComponent implements OnInit {
           this.showRegisterButton = !event.urlAfterRedirects.includes('/register');
         }
       });
+
+    // Actualizar el contador del carrito
     this.cartService.getItemsObservable().subscribe(items => {
       this.cartItemCount = items.reduce((acc, item) => acc + item.quantity, 0);
     });
@@ -81,16 +96,14 @@ export class HeaderComponent implements OnInit {
   }
 
   onLoginClick(): void {
-    this.showLoginButton = false;
     this.router.navigate(['/login']);
   }
 
   onRegisterClick(): void {
-    this.showRegisterButton = false;
     this.router.navigate(['/register']);
   }
 
-  // Método para móviles: redirige o abre modal para login/registro
+  // Para móviles: redirige al login
   onMobileLoginClick(): void {
     this.router.navigate(['/login']); 
   }
@@ -100,6 +113,7 @@ export class HeaderComponent implements OnInit {
     this.router.navigate([route]);
   }
 
+  // Lógica que venía del componente profile:
   navigateToProfile(): void {
     this.isProfileDropdownOpen = false;
     this.router.navigate(['/profile']);
@@ -112,6 +126,7 @@ export class HeaderComponent implements OnInit {
 
   logout(): void {
     localStorage.removeItem('user');
+    this.authService.logout(); // Actualiza el observable de autenticación
     this.isLoggedIn = false;
     this.showLoginButton = true;
     this.showRegisterButton = true;
@@ -130,13 +145,10 @@ export class HeaderComponent implements OnInit {
   onSearch(): void {
     const query = this.searchText.trim();
     if (query) {
-      // Navega a la ruta '/articulos' con el query parameter 'query'
-      console.log("funciona")
       this.router.navigate(['/articulos'], { queryParams: { query } });
     }
   }
-  
-  
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;

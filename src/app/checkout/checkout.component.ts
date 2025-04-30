@@ -1,77 +1,92 @@
-import { Component, OnInit } from '@angular/core'
-import { CartService } from '../services/cart.service'
-import { OrderService } from '../services/order.service'
-import { CommonModule } from '@angular/common'
-import { FormsModule } from '@angular/forms'
-
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-    selector: 'app-checkout',
-    templateUrl: './checkout.component.html',
-    imports: [CommonModule, FormsModule],
-    styleUrls: ['./checkout.component.sass'],
-    standalone: true
+  selector: 'app-checkout',
+  templateUrl: './checkout.component.html',
+  styleUrls: ['./checkout.component.sass'],
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 export class CheckoutComponent implements OnInit {
+  // Recibe los artículos del carrito desde el componente padre
+  @Input() cartItems: any[] = [];
+
+  // Emite la información completa del checkout para pasar al siguiente paso (payment)
+  @Output() checkoutCompleted = new EventEmitter<any>();
+  // Emite para cancelar y volver al carrito
+  @Output() cancelCheckout = new EventEmitter<void>();
+
+  // Datos de envío (ahora incluye email)
   shippingData = {
     fullName: '',
     address: '',
     city: '',
+    province: '',
     postalCode: '',
     country: '',
-    phone: ''
-  }
-  cartItems: any[] = []
-  total: number = 0
+    phone: '',
+    email: ''
+  };
 
-  constructor(private cartService: CartService, private orderService: OrderService) {}
+  // Método de envío seleccionado
+  shippingMethod: string = 'standard';
+  // Totales
+  subtotal: number = 0;
+  shippingCost: number = 0;
+  total: number = 0;
 
   ngOnInit(): void {
-    // Recoge los artículos del carrito
-    this.cartItems = this.cartService.getItems()
-    this.total = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    this.calculateSubtotal();
+    this.onShippingMethodChange();
   }
 
-  submitOrder(): void {
-    // Construir la cabecera de la orden (datos de envío, etc.)
-    const cabecera = {
-      tippcl: 'V',  // Ejemplo: tipo de pedido (puedes ajustar según tu lógica)
-      codpcl: null, // Se asignará en el back
-      refpcl: 'REF-1234',  // Referencia, si es necesario
-      fecpcl: new Date().toISOString(),
-      agepcl: this.shippingData.fullName,
-      clipcl: '',  // Podrías añadir ID del cliente si lo tienes
-      dirpcl: this.shippingData.address,
-      tivpcl: '',  // Tipo de IVA, etc.
-      reqpcl: '',  // Requerimientos especiales
-      almpcl: '',  // Almacén, si corresponde
-      net1pcl: this.total
+  // Calcula el subtotal sumando precio x cantidad de cada producto
+  calculateSubtotal(): void {
+    this.subtotal = this.cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  }
+
+  // Calcula el coste de envío según el método seleccionado
+  calculateShippingCost(): void {
+    switch (this.shippingMethod) {
+      case 'standard':
+        this.shippingCost = 10;
+        break;
+      case 'pickup':
+        this.shippingCost = 0;
+        break;
+      default:
+        this.shippingCost = 0;
     }
+  }
 
-    // Construir las líneas de pedido a partir del carrito
-    const lineas = this.cartItems.map((item, index) => ({
-      tiplpc: 'V', // Tipo de línea, ejemplo
-      poslpc: index + 1,
-      artlpc: item.id,
-      deslpc: item.name,
-      canlpc: item.quantity,
-      dt1lpc: 0,  // Descuento si existe
-      prelpc: item.price,
-      totlpc: item.price * item.quantity
-    }))
+  // Actualiza el total sumando subtotal y coste de envío
+  updateTotal(): void {
+    this.total = this.subtotal + this.shippingCost;
+  }
 
-    const order = { cabecera, lineas }
-    console.log('Enviando orden:', order)
+  // Se llama cuando se cambia el método de envío
+  onShippingMethodChange(): void {
+    this.calculateShippingCost();
+    this.updateTotal();
+  }
 
-    // Enviar la orden al backend
-    this.orderService.placeOrder(order).subscribe(
-      response => {
-        console.log('Orden realizada correctamente:', response)
-        // Aquí podrías limpiar el carrito o redirigir a una página de confirmación
-      },
-      error => {
-        console.error('Error al realizar la orden:', error)
-      }
-    )
+  // Al enviar el formulario, se emite el evento checkoutCompleted con toda la información necesaria
+  submitCheckout(): void {
+    const checkoutInfo = {
+      shippingData: this.shippingData,
+      shippingMethod: this.shippingMethod,
+      subtotal: this.subtotal,
+      shippingCost: this.shippingCost,
+      total: this.total,
+      cartItems: this.cartItems
+    };
+    this.checkoutCompleted.emit(checkoutInfo);
+  }
+
+  // Permite cancelar el checkout y volver al carrito
+  cancel(): void {
+    this.cancelCheckout.emit();
   }
 }

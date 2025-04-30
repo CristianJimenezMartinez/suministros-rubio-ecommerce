@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../enviroments/environment';
 
 @Injectable({
@@ -17,7 +18,15 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<any> {
-    return this.http.post(this.loginUrl + "/login" , { username, password });
+    return this.http.post<any>(this.loginUrl + "/login", { username, password }).pipe(
+      tap(response => {
+        // Suponiendo que la respuesta contiene un token y un objeto "user"
+        if (response && response.token && response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user));
+          this.isAuthenticatedSubject.next(true);
+        }
+      })
+    );
   }
 
   logout(): void {

@@ -7,10 +7,13 @@ import { environment } from '../../enviroments/environment';
 export interface Article {
   codart: string;
   desart: string;
-  pcoart: string;
+  dewart?: string;
+  pcoart: string; // Precio base, que se sobrescribe con el precio calculado
   imgart: string;
   famart: string;
   eanart: string;
+  measure?: string;
+  tivart?: string;
 }
 
 @Injectable({
