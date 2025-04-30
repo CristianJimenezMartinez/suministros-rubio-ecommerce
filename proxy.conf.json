@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://desktop-p1l2603.duckdns.org",
+    "target": "https://suministrosrubio.duckdns.org",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

@@ -11,11 +11,13 @@ import { CheckoutComponent } from './checkout/checkout.component'; // Importa el
 import { AuthGuard } from './guards/auth.guard';
 import { ContactoComponent } from './info/contacto/contacto.component';
 import { SobreNosotrosComponent } from './info/sobre-nosotros/sobre-nosotros.component';
+import { PoliticaPrivacidadComponent } from './info/politica-privacidad/politica-privacidad.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Ruta raíz
   { path: 'home', component: HomeComponent },
-  { path: 'categoria/:sec', component: CategoriaComponent },
+  { path: 'categorias/:sec', component: CategoriaComponent },
+  { path: 'categorias', component: CategoriaComponent },
   { path: 'articulos/:fam', component: ArticulosComponent },
   { path: 'articulos', component: ArticulosComponent },
   { path: 'login', component: LoginComponent },
@@ -24,6 +26,7 @@ export const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent }, // Ruta de checkout
   { path: 'contacto', component: ContactoComponent },
   { path: 'sobre-nosotros', component: SobreNosotrosComponent },
+  { path: 'politica-privacidad', component: PoliticaPrivacidadComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 
   

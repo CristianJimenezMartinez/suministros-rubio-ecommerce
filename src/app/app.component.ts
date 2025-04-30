@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { HeaderComponent } from './header/header.component';
-
+import { environment } from '../enviroments/environment';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { TokenInterceptor } from './interceptor/token.interceptor'; 
@@ -20,7 +20,7 @@ import { FooterComponent } from "./footer/footer.component";
     HeaderComponent,
     HttpClientModule,
     RouterModule,
-    FooterComponent
+    FooterComponent,
 ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
