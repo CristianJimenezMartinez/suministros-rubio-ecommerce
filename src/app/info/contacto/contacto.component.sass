@@ -1,19 +1,23 @@
-@import '../../../_variables' // Importar tus variables globales si procede
+@import '../../../_variables'; // Importar tus variables globales si procede
 
 .card-container
-  max-width: 500px
-  margin: 40px auto 20px auto
+  max-width: 1000px
+  margin: 150px auto 20px auto
   padding: 20px
   border: 1px solid #ddd
   border-radius: 8px
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1)
   background: #fff
   font-family: Arial, sans-serif
+  display: flex
+  flex-direction: column
+  align-items: center  // Centrar los elementos dentro de la tarjeta
+  justify-content: center  // Centrar los elementos verticalmente
 
   // Icono de la empresa, centrado y con un tamaño razonable
   .company-icon
     display: block
-    margin: 0 auto 1.5rem
+    margin: 0 auto 1.5rem  // Centrar la imagen horizontalmente
     width: 80px
     height: auto
 

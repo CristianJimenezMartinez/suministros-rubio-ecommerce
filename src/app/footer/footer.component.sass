@@ -12,7 +12,7 @@
     margin: 0 auto
     padding: 0 1rem
 
-    // Sección superior (info + redes) en una fila
+    // Sección superior (info + redes) en una fila (si la usas)
     .footer-top
       display: flex
       flex-direction: row
@@ -60,3 +60,29 @@
       font-size: 0.8rem
       color: #888
       margin: 0
+
+      a
+        color: inherit
+        text-decoration: none
+        transition: color 0.3s
+
+        &:hover
+          color: $primary-color
+
+// Ajustes responsivos para móviles
+@media (max-width: 576px)
+  .footer
+    // Disminuye el font-size general del footer
+    font-size: 0.8rem
+
+    // Ajusta márgenes si es necesario
+    padding: 0.5rem 0
+
+    .footer-info
+      margin-top: 1.5rem
+      p
+        margin: 0.1rem 0   // reduce aún más los márgenes
+
+    .footer-credit
+      p
+        font-size: 0.6rem  // reduce el tamaño de “Made By CJ”

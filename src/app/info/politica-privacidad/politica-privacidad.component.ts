@@ -4,7 +4,8 @@ import { Component } from '@angular/core';
   selector: 'app-politica-privacidad',
   imports: [],
   templateUrl: './politica-privacidad.component.html',
-  styleUrl: './politica-privacidad.component.sass'
+  styleUrl: './politica-privacidad.component.sass',
+  standalone: true
 })
 export class PoliticaPrivacidadComponent {
 
