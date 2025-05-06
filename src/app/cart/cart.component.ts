@@ -3,6 +3,7 @@ import { CartService } from '../services/cart.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ProcessOrderPayload } from '../services/payment.service'; // importa la interfaz
 
 import { PaymentComponent } from '../payment/payment.component';
 import { CheckoutComponent } from '../checkout/checkout.component';
@@ -165,33 +166,37 @@ export class CartComponent implements OnInit {
   
 
   // 3) Cuando el pago se confirma (desde PaymentComponent)
-  handlePaymentConfirmed(paymentData: any): void {
+  handlePaymentConfirmed(paymentData: {
+    paymentMethodId: string;
+    raw?: any;
+    paymentMethodType: 'stripe' | 'paypal';
+  }): void {
     console.log('Pago confirmado:', paymentData);
 
-    const payload = {
-      order: this.orderToPay,
-      lineas: this.cartItemsForPayment,       // opcional, si tu backend lo necesita
-      shippingData: this.checkoutData.shippingData,
-      shippingMethod: this.checkoutData.shippingMethod,
-      shippingCost: this.checkoutData.shippingCost,
-      paymentMethodId: paymentData.paymentMethod.id
+    const payload: ProcessOrderPayload = {
+      order:               this.orderToPay,
+      paymentMethodId:     paymentData.paymentMethodId,
+      shippingData:        this.checkoutData.shippingData,
+      shippingMethod:      this.checkoutData.shippingMethod,
+      shippingCost:        this.checkoutData.shippingCost,
+      paymentMethodType:   paymentData.paymentMethodType
     };
 
     this.paymentService.processOrder(payload).subscribe({
-      next:(response: any) => {
+      next: (response) => {
         console.log('processOrder response:', response);
-        // 1) Únete a la sala para recibir feedback del webhook
-        if (response.pedidoId) {
-          this.feedbackService.joinRoom(response.pedidoId);
+        // 1) únete a la sala para recibir feedback del webhook
+        if (response.pedidoId != null) {
+          this.feedbackService.joinRoom(response.pedidoId.toString());
         }
-        // 2) Limpia carrito y vuelve al estado inicial
+        // 2) limpia carrito y vuelve al estado inicial
         this.cartService.clearCart();
         this.currentStep = 'none';
-        // 3) Muestra el popup de “gracias”
+        // 3) muestra el popup de “gracias”
         this.popupMessage = '¡Tu compra se ha realizado con éxito!';
         this.showPopup = true;
       },
-      error: err => {
+      error: (err) => {
         console.error('Error en processOrder:', err);
         this.popupMessage = 'Error al procesar la orden. Revisa la consola.';
         this.showPopup = true;
