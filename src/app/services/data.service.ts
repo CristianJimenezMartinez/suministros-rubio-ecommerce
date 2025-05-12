@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../enviroments/environment';
+import { environment, environmentProd } from '../../enviroments/environment';
 
 // Ajusta estas interfaces o importa las que ya tengas
 export interface Article {
@@ -20,7 +20,7 @@ export interface Article {
   providedIn: 'root'
 })
 export class DataService {
-  private baseUrl = environment.apiUrl; // Ajusta la URL según tu backend
+  private baseUrl = environmentProd.apiUrl; // Ajusta la URL según tu backend
   private readonly _http = inject(HttpClient);
 
   constructor(private http: HttpClient) { }

@@ -1,29 +1,28 @@
-import { HttpClient } from '@angular/common/http';
+// src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
-import { environment } from '../../enviroments/environment';
+import { environmentProd } from '../../enviroments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  // 1) Mantenemos un BehaviorSubject interno
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
+  // 2) Exponemos un observable para el header (y cualquier otro suscriptor)
+  isAuthenticated$: Observable<boolean> = this.isAuthenticatedSubject.asObservable();
 
-  // Endpoint de login en el backend
-  private loginUrl = environment.apiUrl;
-  private registerUrl = environment.apiUrl;
+  private loginUrl = environmentProd.apiUrl + '/login';
+  private registerUrl = environmentProd.apiUrl + '/createUser';
 
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<any> {
-    return this.http.post<any>(this.loginUrl + "/login", { username, password }).pipe(
+    return this.http.post<any>(this.loginUrl, { username, password }).pipe(
       tap(response => {
-        // Suponiendo que la respuesta contiene un token y un objeto "user"
-        if (response && response.token && response.user) {
+        if (response?.token && response?.user) {
           localStorage.setItem('user', JSON.stringify(response.user));
-          this.isAuthenticatedSubject.next(true);
+          this.isAuthenticatedSubject.next(true);  // emitimos el nuevo estado
         }
       })
     );
@@ -34,8 +33,9 @@ export class AuthService {
     this.isAuthenticatedSubject.next(false);
   }
 
+  // Método síncrono por si en algún sitio quieres chequear rápido
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('user');
+    return this.isAuthenticatedSubject.value;
   }
 
   register(user: any): Observable<any> {
@@ -51,8 +51,13 @@ export class AuthService {
       PROV: user.prov,
       PAIS: user.pais,
       TDC: user.tdc,
-      WEBPASS: user.password  // Se espera que la contraseña ya esté hasheada o se hashée en el backend
+      WEBPASS: user.password
     };
-    return this.http.post(this.registerUrl + "/createUser", payload);
+    return this.http.post(this.registerUrl, payload);
+  }
+
+  private hasToken(): boolean {
+    // inicializamos el BehaviorSubject a true si ya había token en localStorage
+    return !!localStorage.getItem('user');
   }
 }

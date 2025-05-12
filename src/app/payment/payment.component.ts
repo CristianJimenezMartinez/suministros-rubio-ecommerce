@@ -33,17 +33,23 @@ export class PaymentComponent implements OnInit {
   @Input() shippingMethod!: string;
   @Input() shippingCost!: number;
 
-  @Output() paymentConfirmed = new EventEmitter<{ paymentMethodId: string; raw?: any; paymentMethodType: 'stripe' | 'paypal' }>();
-  @Output() paymentError     = new EventEmitter<string>();
-  @Output() cancel           = new EventEmitter<void>();
+  @Output() paymentConfirmed = new EventEmitter<{
+    paymentMethodId: string;
+    raw?: any;
+    paymentMethodType: 'stripe' | 'paypal';
+  }>();
+  @Output() paymentError = new EventEmitter<string>();
+  @Output() cancel = new EventEmitter<void>();
 
-  // 1) Selección interna de método
+  /** 1) Control de método seleccionado */
   selectedMethod: 'stripe' | 'paypal' | null = null;
 
   processing = false;
   errorMessage = '';
 
-  cardOptions: StripeCardElementOptions = { style: { base: { color: '#000' } } };
+  cardOptions: StripeCardElementOptions = {
+    style: { base: { color: '#000' } }
+  };
   elementsOptions: StripeElementsOptions = { locale: 'es' };
 
   constructor(
@@ -52,10 +58,10 @@ export class PaymentComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Carga PayPal solo cuando se seleccione
+    // No cargamos nada aquí, esperaremos a que el usuario seleccione PayPal
   }
 
-  // 2) Método para elegir
+  /** 2) Cuando el usuario elige método */
   selectMethod(method: 'stripe' | 'paypal') {
     this.selectedMethod = method;
     if (method === 'paypal') {
@@ -69,12 +75,12 @@ export class PaymentComponent implements OnInit {
     this.processing = true;
     this.errorMessage = '';
 
-    // 1) crea PM
+    // 1) Crear PaymentMethod
     const pmData = {
       type: 'card',
       card: this.card.element,
       billing_details: {
-        name:  this.shippingData.fullName,
+        name: this.shippingData.fullName,
         email: this.shippingData.email,
         phone: this.shippingData.phone
       }
@@ -87,7 +93,7 @@ export class PaymentComponent implements OnInit {
     }
     const pm = pmResult.paymentMethod!.id;
 
-    // 2) llama al back
+    // 2) Llamada al backend
     const payload: ProcessOrderPayload = {
       order: this.order,
       paymentMethodId: pm,
@@ -127,7 +133,9 @@ export class PaymentComponent implements OnInit {
 
   // —————— PayPal flow ——————
   private loadPayPalSdk() {
-    if ((<any>window).paypal) return this.renderPayPalButtons();
+    if ((<any>window).paypal) {
+      return this.renderPayPalButtons();
+    }
     const scr = document.createElement('script');
     scr.src = `https://www.paypal.com/sdk/js?client-id=${environment.paypalClientId}&currency=EUR`;
     scr.onload = () => this.renderPayPalButtons();
@@ -150,7 +158,7 @@ export class PaymentComponent implements OnInit {
         this.processing = true;
         try {
           const capture = await actions.order.capture();
-          // Envía al back orderID como paymentMethodId
+          // payload para backend
           const payload: ProcessOrderPayload = {
             order: this.order,
             paymentMethodId: capture.id,
@@ -180,8 +188,12 @@ export class PaymentComponent implements OnInit {
     }).render('#paypal-button-container');
   }
 
-  // 4) Emite éxito indicando método
-  private emitSuccess(paymentMethodId: string, raw: any, method: 'stripe' | 'paypal') {
+  /** 4) Emitir éxito con tipo de método */
+  private emitSuccess(
+    paymentMethodId: string,
+    raw: any,
+    method: 'stripe' | 'paypal'
+  ) {
     this.processing = false;
     this.paymentConfirmed.emit({ paymentMethodId, raw, paymentMethodType: method });
   }

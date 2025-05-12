@@ -1,51 +1,57 @@
 <!-- src/app/payment/payment.component.html -->
 <div class="payment">
 
-  <!-- Selección de método -->
+  <!-- Selección de método en acordeón -->
   <div class="method-selector">
-    <button
-      type="button"
-      [class.active]="selectedMethod==='stripe'"
-      (click)="selectMethod('stripe')"
-    >
-      Pagar con Tarjeta
-    </button>
-    <button
-      type="button"
-      [class.active]="selectedMethod==='paypal'"
-      (click)="selectMethod('paypal')"
-    >
-      Pagar con PayPal
-    </button>
+
+    <div class="dropdown">
+      <div
+        class="dropdown-header"
+        [class.active]="selectedMethod==='stripe'"
+        (click)="selectMethod('stripe')"
+      >
+        <span>Pagar con Tarjeta</span>
+        <i class="arrow" [class.open]="selectedMethod==='stripe'"></i>
+      </div>
+      <div class="dropdown-body" *ngIf="selectedMethod==='stripe'">
+        <form (submit)="payStripe($event)">
+          <ngx-stripe-card
+            [options]="cardOptions"
+            [elementsOptions]="elementsOptions"
+          ></ngx-stripe-card>
+          <div class="actions">
+            <button type="submit" [disabled]="processing">
+              {{ processing ? 'Procesando...' : 'Confirmar con Tarjeta' }}
+            </button>
+            <button type="button" (click)="onCancel()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <div
+        class="dropdown-header"
+        [class.active]="selectedMethod==='paypal'"
+        (click)="selectMethod('paypal')"
+      >
+        <span>Pagar con PayPal</span>
+        <i class="arrow" [class.open]="selectedMethod==='paypal'"></i>
+      </div>
+      <div class="dropdown-body" *ngIf="selectedMethod==='paypal'">
+        <div id="paypal-button-container"></div>
+        <div class="actions">
+          <button *ngIf="processing" disabled>Procesando...</button>
+          <button *ngIf="!processing" type="button" (click)="onCancel()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <p *ngIf="!selectedMethod" class="choose-method">
     Por favor, selecciona un método de pago.
   </p>
-
   <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
-
-  <!-- Stripe -->
-  <form *ngIf="selectedMethod==='stripe'" (submit)="payStripe($event)">
-    <ngx-stripe-card
-      [options]="cardOptions"
-      [elementsOptions]="elementsOptions"
-    ></ngx-stripe-card>
-    <div class="actions">
-      <button type="submit" [disabled]="processing">
-        {{ processing ? 'Procesando...' : 'Confirmar con Tarjeta' }}
-      </button>
-      <button type="button" (click)="onCancel()">Cancelar</button>
-    </div>
-  </form>
-
-  <!-- PayPal -->
-  <div *ngIf="selectedMethod==='paypal'" class="paypal-section">
-    <div id="paypal-button-container"></div>
-    <div class="actions">
-      <button *ngIf="processing" disabled>Procesando...</button>
-      <button *ngIf="!processing" type="button" (click)="onCancel()">Cancelar</button>
-    </div>
-  </div>
 
 </div>

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import type { PaymentIntent } from '@stripe/stripe-js';
-import { environment } from '../../enviroments/environment';
+import { environment, environmentProd } from '../../enviroments/environment';
 
 export interface ShippingData {
   fullName:  string;

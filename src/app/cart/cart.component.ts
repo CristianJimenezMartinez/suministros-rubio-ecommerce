@@ -113,6 +113,17 @@ export class CartComponent implements OnInit {
     const grossSum = items.reduce((sum, i) =>
       sum + (parseFloat(i.price ?? '0')    || 0) * i.quantity
     , 0);
+
+    let clientId = 0;
+    try {
+      const stored = localStorage.getItem('user');
+      if (stored) {
+        const usr = JSON.parse(stored);
+        clientId = usr.id ?? 0;
+      }
+    } catch {
+      clientId = 0;
+    }
   
     // 2) Tipo de IVA del primer artículo (0,1,2,4, etc.)
     const ivaType = items[0]?.tivart ?? '0';
@@ -120,12 +131,12 @@ export class CartComponent implements OnInit {
     // 3) Construir el pedido, convirtiendo a número con dos decimales
     this.orderToPay = {
       cabecera: {
-        tippcl:   'O',
+        tippcl:   '3',
         codpcl:   0,
         refpcl:   String(Date.now()).substring(0, 12),
         fecpcl:   new Date().toISOString().split('T')[0],
         agepcl:   '',
-        clipcl:   '',
+        clipcl:   clientId.toString(),
   
         cempcl:   checkoutData.shippingData.email,     // <--- nuevo
         cpapcl:   checkoutData.shippingData.country,   // <--- nuevo
@@ -135,11 +146,11 @@ export class CartComponent implements OnInit {
         almpcl:   '',
         cnopcl:   checkoutData.shippingData.fullName,
         cdopcl:   checkoutData.shippingData.address,
-        cpopcl:   checkoutData.shippingData.province,
+        cpopcl:   checkoutData.shippingData.city,
         ccppcl:   checkoutData.shippingData.postalCode,
-        cprpcl:   checkoutData.shippingData.country,
+        cprpcl:   checkoutData.shippingData.province,
         telpcl:   checkoutData.shippingData.phone,
-  
+        
         net1pcl:  parseFloat(netSum.toFixed(2)),
         iiva1pcl: parseFloat(vatSum.toFixed(2)),
         totpcl:   parseFloat(grossSum.toFixed(2))

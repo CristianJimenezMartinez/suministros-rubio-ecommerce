@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../enviroments/environment';
+import { environment, environmentProd } from '../../enviroments/environment';
 
 export interface Family {
   codfam: string;
@@ -21,7 +21,7 @@ export interface Article {
   providedIn: 'root'
 })
 export class FamilyService {
-  private baseUrl = environment.apiUrl; // Ajusta según corresponda
+  private baseUrl = environmentProd.apiUrl; // Ajusta según corresponda
 
   constructor(private http: HttpClient) {
     console.log('FamilyService - baseUrl:', this.baseUrl);

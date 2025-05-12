@@ -50,12 +50,12 @@
       <ul>
         <li *ngFor="let item of cartItems">
           {{ item.name }} – Cantidad: {{ item.quantity }} – Subtotal:
-          {{ (item.price * item.quantity) }} €
+          {{ (item.price * item.quantity).toFixed(2) }} €
         </li>
       </ul>
-      <p>Subtotal: {{ subtotal }} €</p>
-      <p>Envío: {{ shippingCost }} €</p>
-      <p>Total: {{ total }} €</p>
+      <p>Subtotal: {{ subtotal.toFixed(2) }} €</p>
+      <p>Envío: {{ shippingCost.toFixed(2) }} €</p>
+      <p>Total: {{ total.toFixed(2) }} €</p>
     </div>
 
     <div class="actions">

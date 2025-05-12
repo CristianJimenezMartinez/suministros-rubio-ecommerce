@@ -12,6 +12,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { ContactoComponent } from './info/contacto/contacto.component';
 import { SobreNosotrosComponent } from './info/sobre-nosotros/sobre-nosotros.component';
 import { PoliticaPrivacidadComponent } from './info/politica-privacidad/politica-privacidad.component';
+import { CookiePolicyComponent } from './cookie-policy/cookie-policy.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Ruta raíz
@@ -27,6 +28,7 @@ export const routes: Routes = [
   { path: 'contacto', component: ContactoComponent },
   { path: 'sobre-nosotros', component: SobreNosotrosComponent },
   { path: 'politica-privacidad', component: PoliticaPrivacidadComponent },
+  { path: 'politica-cookies', component: CookiePolicyComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 
   

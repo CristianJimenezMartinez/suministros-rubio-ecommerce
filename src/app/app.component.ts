@@ -10,6 +10,8 @@ import { TokenInterceptor } from './interceptor/token.interceptor';
 import { Category } from './models/articles';
 
 import { FooterComponent } from "./footer/footer.component";
+import { CookieBannerComponent } from './cookie-banner/cookie-banner.component';
+import { CookiePolicyComponent } from './cookie-policy/cookie-policy.component';
 
 
 
@@ -21,6 +23,8 @@ import { FooterComponent } from "./footer/footer.component";
     HttpClientModule,
     RouterModule,
     FooterComponent,
+    CookieBannerComponent,
+    CookiePolicyComponent
 ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }

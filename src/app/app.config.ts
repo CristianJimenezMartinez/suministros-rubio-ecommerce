@@ -7,14 +7,14 @@ import { routes } from './app.routes';
 import { environment } from '../enviroments/environment';
 
 const socketConfig: SocketIoConfig = {
-  url: environment.apiUrl,    // ej. 'https://tu-dominio.com'
+  url: environment.apiUrl,    
   options: {}
 };
 
 
 export const appConfig: ApplicationConfig = {
   providers: [provideRouter(routes),provideHttpClient(),
-    provideNgxStripe('pk_test_51R3DczE3oVRVCHqc5ZLTK0WazqUlqf9UdtYYSaqHBO2nql400HIqlydjgdWzFkL1u0QB9wiRqlqDizE8w5HTM9SN00yF3vgCYW'),
+    provideNgxStripe('pk_test_51R538tFf4swcvg5iad5Y2LQM6o8MIwKB0CnCpHTexJ7mKzXZz2FQXwGvQu7HyTgTIerL95m82ZOKL2gsC15473Mg005pdv5BP0'),
     importProvidersFrom(
       SocketIoModule.forRoot(socketConfig)
     )
