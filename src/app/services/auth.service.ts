@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
-import { environmentProd } from '../../enviroments/environment';
+import { environment } from '../../enviroments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -12,8 +12,8 @@ export class AuthService {
   // 2) Exponemos un observable para el header (y cualquier otro suscriptor)
   isAuthenticated$: Observable<boolean> = this.isAuthenticatedSubject.asObservable();
 
-  private loginUrl = environmentProd.apiUrl + '/login';
-  private registerUrl = environmentProd.apiUrl + '/createUser';
+  private loginUrl = environment.apiUrl + '/login';
+  private registerUrl = environment.apiUrl + '/createUser';
 
   constructor(private http: HttpClient) {}
 

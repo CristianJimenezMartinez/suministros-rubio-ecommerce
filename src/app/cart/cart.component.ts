@@ -125,9 +125,6 @@ export class CartComponent implements OnInit {
       clientId = 0;
     }
   
-    // 2) Tipo de IVA del primer artículo (0,1,2,4, etc.)
-    const ivaType = items[0]?.tivart ?? '0';
-  
     // 3) Construir el pedido, convirtiendo a número con dos decimales
     this.orderToPay = {
       cabecera: {
@@ -143,7 +140,7 @@ export class CartComponent implements OnInit {
   
         tivpcl:   items[0]?.vatType ?? '0',
         reqpcl:   '0',
-        almpcl:   '',
+        almpcl:   'GEN',
         cnopcl:   checkoutData.shippingData.fullName,
         cdopcl:   checkoutData.shippingData.address,
         cpopcl:   checkoutData.shippingData.city,
@@ -156,7 +153,7 @@ export class CartComponent implements OnInit {
         totpcl:   parseFloat(grossSum.toFixed(2))
       },
       lineas: items.map((item: any, idx: number) => ({
-        tiplpc: '1',
+        tiplpc: '3',
         poslpc: idx + 1,
         artlpc: item.id,
         deslpc: item.name,
@@ -178,42 +175,63 @@ export class CartComponent implements OnInit {
 
   // 3) Cuando el pago se confirma (desde PaymentComponent)
   handlePaymentConfirmed(paymentData: {
-    paymentMethodId: string;
-    raw?: any;
-    paymentMethodType: 'stripe' | 'paypal';
-  }): void {
-    console.log('Pago confirmado:', paymentData);
+  paymentMethodId: string;
+  raw?: any;
+  paymentMethodType: 'stripe'|'paypal'|'redsys';
+}): void {
+  console.log('Pago confirmado:', paymentData);
 
-    const payload: ProcessOrderPayload = {
-      order:               this.orderToPay,
-      paymentMethodId:     paymentData.paymentMethodId,
-      shippingData:        this.checkoutData.shippingData,
-      shippingMethod:      this.checkoutData.shippingMethod,
-      shippingCost:        this.checkoutData.shippingCost,
-      paymentMethodType:   paymentData.paymentMethodType
-    };
+  const payload: ProcessOrderPayload = {
+    order:             this.orderToPay,
+    paymentMethodId:   paymentData.paymentMethodId,
+    shippingData:      this.checkoutData.shippingData,
+    shippingMethod:    this.checkoutData.shippingMethod,
+    shippingCost:      this.checkoutData.shippingCost,
+    paymentMethodType: paymentData.paymentMethodType
+  };
 
-    this.paymentService.processOrder(payload).subscribe({
-      next: (response) => {
-        console.log('processOrder response:', response);
-        // 1) únete a la sala para recibir feedback del webhook
-        if (response.pedidoId != null) {
-          this.feedbackService.joinRoom(response.pedidoId.toString());
+  if (paymentData.paymentMethodType === 'redsys') {
+    // → Redsys va por /pasarelaGlobal/pay
+    this.paymentService.processGlobal(payload).subscribe({
+      next: resp => {
+        console.log('processGlobal (Redsys) response:', resp);
+        if (resp.pedidoId != null) {
+          this.feedbackService.joinRoom(resp.pedidoId.toString());
         }
-        // 2) limpia carrito y vuelve al estado inicial
         this.cartService.clearCart();
         this.currentStep = 'none';
-        // 3) muestra el popup de “gracias”
-        this.popupMessage = '¡Tu compra se ha realizado con éxito!';
+        this.popupMessage = '¡Tu compra con Redsys se ha realizado con éxito!';
         this.showPopup = true;
       },
-      error: (err) => {
-        console.error('Error en processOrder:', err);
-        this.popupMessage = 'Error al procesar la orden. Revisa la consola.';
+      error: err => {
+        console.error('Error en Redsys:', err);
+        this.popupMessage = `Error al procesar Redsys: ${err.error?.message||err.message}`;
+        this.showPopup = true;
+      }
+    });
+  } else {
+    // → Stripe / PayPal van por /payment/orders
+    this.paymentService.processOrder(payload).subscribe({
+      next: resp => {
+        console.log('processOrder (Stripe/PayPal) response:', resp);
+        if (resp.pedidoId != null) {
+          this.feedbackService.joinRoom(resp.pedidoId.toString());
+        }
+        this.cartService.clearCart();
+        this.currentStep = 'none';
+        this.popupMessage = paymentData.paymentMethodType === 'stripe'
+          ? '¡Tu compra con tarjeta se ha realizado con éxito!'
+          : '¡Tu compra con PayPal se ha realizado con éxito!';
+        this.showPopup = true;
+      },
+      error: err => {
+        console.error('Error en Stripe/PayPal:', err);
+        this.popupMessage = `Error al procesar la orden: ${err.error?.message||err.message}`;
         this.showPopup = true;
       }
     });
   }
+}
 
   handlePaymentError(errorMessage: string): void {
     console.error('Error en el pago:', errorMessage);

@@ -21,7 +21,7 @@ export interface Article {
   providedIn: 'root'
 })
 export class FamilyService {
-  private baseUrl = environmentProd.apiUrl; // Ajusta según corresponda
+  private baseUrl = environment.apiUrl; // Ajusta según corresponda
 
   constructor(private http: HttpClient) {
     console.log('FamilyService - baseUrl:', this.baseUrl);

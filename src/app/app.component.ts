@@ -38,7 +38,6 @@ export class AppComponent {
   title = 'Suministros Rubio';
   showHome: boolean = true;
 
-  // Asegúrate de que selectedCategory nunca sea null
   selectedCategory: Category = { 
     id: 1, 
     name: "Agua", 

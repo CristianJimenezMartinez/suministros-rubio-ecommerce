@@ -20,7 +20,7 @@ export interface Article {
   providedIn: 'root'
 })
 export class DataService {
-  private baseUrl = environmentProd.apiUrl; // Ajusta la URL según tu backend
+  private baseUrl = environment.apiUrl; // Ajusta la URL según tu backend
   private readonly _http = inject(HttpClient);
 
   constructor(private http: HttpClient) { }

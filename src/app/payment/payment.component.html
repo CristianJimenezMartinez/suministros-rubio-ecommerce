@@ -4,6 +4,7 @@
   <!-- Selección de método en acordeón -->
   <div class="method-selector">
 
+    <!-- Stripe -->
     <div class="dropdown">
       <div
         class="dropdown-header"
@@ -29,6 +30,7 @@
       </div>
     </div>
 
+    <!-- PayPal -->
     <div class="dropdown">
       <div
         class="dropdown-header"
@@ -43,6 +45,35 @@
         <div class="actions">
           <button *ngIf="processing" disabled>Procesando...</button>
           <button *ngIf="!processing" type="button" (click)="onCancel()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Redsys -->
+    <div class="dropdown">
+      <div
+        class="dropdown-header"
+        [class.active]="selectedMethod==='redsys'"
+        (click)="selectMethod('redsys')"
+      >
+        <span>Pagar con Tarjeta (Redsys)</span>
+        <i class="arrow" [class.open]="selectedMethod==='redsys'"></i>
+      </div>
+      <div class="dropdown-body" *ngIf="selectedMethod==='redsys'">
+        <div id="redsys-card-form"></div>
+        <input type="hidden" id="redsys-token" />
+        <input type="hidden" id="redsys-error" />
+
+        <div class="actions">
+          <!-- Nuestro botón, para que el usuario confirme -->
+          <button
+            type="button"
+            (click)="onClickConfirmRedsys()"
+            [disabled]="processing"
+          >
+            {{ processing ? 'Procesando...' : 'Confirmar con Redsys' }}
+          </button>
+          <button type="button" (click)="onCancel()">Cancelar</button>
         </div>
       </div>
     </div>
