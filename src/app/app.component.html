@@ -3,6 +3,7 @@
     <app-header></app-header>
     <!-- Contenedor para el contenido principal -->
     <div class="main-content">
+      <app-loading *ngIf="loading$ | async" class="global-spinner"></app-loading>
       <router-outlet></router-outlet>
       <app-cookie-banner></app-cookie-banner>
     </div>

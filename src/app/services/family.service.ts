@@ -6,6 +6,7 @@ import { environment, environmentProd } from '../../enviroments/environment';
 export interface Family {
   codfam: string;
   desfam: string;
+  imageUrl?: string;
 }
 
 export interface Article {

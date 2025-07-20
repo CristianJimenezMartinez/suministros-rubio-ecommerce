@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { FamilyService, Family } from '../services/family.service';
-import { CommonModule } from '@angular/common';
-import { LoadingComponent } from '../loading/loading.component';
+import { FamilyService, Family }             from '../services/family.service';
+import { CommonModule }                       from '@angular/common';
+import { DataService, Article }               from '../services/data.service';
+import { LoadingComponent }                   from '../loading/loading.component';
 
 @Component({
   selector: 'app-categoria',
@@ -12,108 +13,137 @@ import { LoadingComponent } from '../loading/loading.component';
   standalone: true
 })
 export class CategoriaComponent implements OnInit {
-  families: Family[] = [];
+  families: Family[]         = [];
   filteredFamilies: Family[] = [];
-  errorMessage: string = '';
+  errorMessage: string       = '';
   
-  // Cantidad de familias a mostrar inicialmente y en cada "ver más"
-  pageSize: number = 20;
-  displayedCount: number = 20;
+  pageSize = 20;
+  displayedCount = 20;
   
-  isLoading: boolean = true;
-  
-  // Propiedades para el filtro
-  isFilterOpen: boolean = true;
-  availableTypes: string[] = [];       // Se almacenarán las primeras palabras únicas
+  isLoading = true;
+  isFilterOpen = true;
+  availableTypes: string[] = [];
   selectedFilterTypes: string[] = [];
+
+  // Aquí guardamos las URLs normalizadas de imgart
+  allImageUrls: string[] = []; 
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private familyService: FamilyService
+    private familyService: FamilyService,
+    private dataService:   DataService
   ) {}
 
   ngOnInit(): void {
     const secParam = this.route.snapshot.paramMap.get('sec');
-    if (secParam) {
-      // Se proporcionaron IDs de secciones, se cargan familias filtradas por secciones
-      this.familyService.getFamiliesBySections(secParam).subscribe({
-        next: (families: Family[]) => {
-          this.families = families;
-          this.initializeFilter();
-          this.isLoading = false;
-        },
-        error: (err: any) => {
-          console.error('Error al obtener familias por secciones:', err);
-          this.errorMessage = 'Error al cargar las familias';
-          this.isLoading = false;
-        }
-      });
-    } else {
-      // No se proporcionaron IDs de secciones, se cargan TODAS las familias
-      this.familyService.getFamily().subscribe({
-        next: (families: Family[]) => {
-          this.families = families;
-          this.initializeFilter();
-          this.isLoading = false;
-        },
-        error: (err: any) => {
-          console.error('Error al obtener todas las familias:', err);
-          this.errorMessage = 'Error al cargar las familias';
-          this.isLoading = false;
-        }
-      });
-    }
-  }
-  
-  // Extrae la primera palabra de cada desfam y elimina duplicados
-  private initializeFilter(): void {
-    const types = this.families.map(family => {
-      const firstWord = family.desfam.trim().split(' ')[0];
-      return firstWord;
+    const families$ = secParam
+      ? this.familyService.getFamiliesBySections(secParam)
+      : this.familyService.getFamily();
+
+    families$.subscribe({
+      next: families => {
+        this.families = families;
+        this.initializeFilter();
+        this.loadAllImageUrls();
+      },
+      error: err => {
+        console.error('Error al obtener familias:', err);
+        this.errorMessage = 'Error al cargar las familias';
+        this.isLoading = false;
+      }
     });
-    this.availableTypes = Array.from(new Set(types));
-    // Inicialmente sin filtro, se muestran todas las familias
+  }
+
+  /** 1) Trae todos los artículos, normaliza imgart y guarda URLs únicas */
+  private loadAllImageUrls(): void {
+    this.dataService.getArticles().subscribe({
+      next: ({ articles }) => {
+        const urls = articles
+          .map(a => {
+            let fixed = a.imgart.replace(/\\/g, '/');
+            const idx = fixed.indexOf('/FOTOS/');
+            if (idx !== -1) {
+              fixed = 'assets/img/factusolImg' + fixed.substring(idx);
+            }
+            return fixed;
+          });
+        this.allImageUrls = Array.from(new Set(urls));
+        this.assignImagesToFamilies();
+        this.isLoading = false;
+      },
+      error: err => {
+        console.error('Error al cargar artículos:', err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  /** 2) Para cada familia, intenta buscar coincidencia por primera o segunda palabra */
+  private assignImagesToFamilies(): void {
+    const placeholder = 'assets/img/placeholder.png';
+
+    this.families.forEach(fam => {
+      // Obtiene primera y segunda palabra en minúsculas
+      const parts = fam.desfam.trim().split(/\s+/);
+      const keys = parts
+        .slice(0, 2)
+        .map(w => w.toLowerCase());
+
+      // Busca URL cuyo nombre de fichero empiece por cualquiera de las keys
+      const match = this.allImageUrls.find(url => {
+        const filename = url.split('/').pop() || '';
+        const namePart = filename.split('.')[0]
+                                 .split(/[-_\s]+/)[0]
+                                 .toLowerCase();
+        return keys.includes(namePart);
+      });
+
+      fam.imageUrl = match || placeholder;
+    });
+
     this.filteredFamilies = [...this.families];
   }
-  
+
+  private initializeFilter(): void {
+    const types = this.families.map(f => f.desfam.trim().split(' ')[0]);
+    this.availableTypes = Array.from(new Set(types));
+    this.filteredFamilies = [...this.families];
+    this.displayedCount = this.pageSize;
+  }
+
   toggleFilter(): void {
     this.isFilterOpen = !this.isFilterOpen;
   }
-  
-  onCheckboxChange(event: Event): void {
-    const checkbox = event.target as HTMLInputElement;
-    const value = checkbox.value;
-    if (checkbox.checked) {
-      if (!this.selectedFilterTypes.includes(value)) {
-        this.selectedFilterTypes.push(value);
-      }
+
+  onCheckboxChange(evt: Event): void {
+    const cb = evt.target as HTMLInputElement;
+    const v = cb.value;
+    if (cb.checked) {
+      this.selectedFilterTypes.push(v);
     } else {
-      this.selectedFilterTypes = this.selectedFilterTypes.filter(type => type !== value);
+      this.selectedFilterTypes = this.selectedFilterTypes.filter(t => t !== v);
     }
-    this.onFilterChanged(this.selectedFilterTypes);
+    this.applyFilter();
   }
-  
-  onFilterChanged(selectedTypes: string[]): void {
-    if (selectedTypes.length === 0) {
+
+  private applyFilter(): void {
+    if (!this.selectedFilterTypes.length) {
       this.filteredFamilies = [...this.families];
     } else {
-      this.filteredFamilies = this.families.filter(family => {
-        const firstWord = family.desfam.trim().split(' ')[0];
-        return selectedTypes.includes(firstWord);
+      this.filteredFamilies = this.families.filter(f => {
+        const first = f.desfam.trim().split(' ')[0];
+        return this.selectedFilterTypes.includes(first);
       });
     }
-    // Reinicia el contador de familias mostradas al filtrar
     this.displayedCount = this.pageSize;
   }
-  
+
   loadMore(): void {
-    // Incrementa la cantidad de familias mostradas
     this.displayedCount += this.pageSize;
   }
-  
-  goToArticles(familyId: string): void {
-    // Navega al componente de artículos pasando el ID de familia
-    this.router.navigate(['/articulos', familyId]);
+
+  goToArticles(id: string): void {
+    this.router.navigate(['/articulos', id]);
   }
 }

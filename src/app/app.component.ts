@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { HeaderComponent } from './header/header.component';
+import { LoadingService } from './services/loading.service';
 import { environment } from '../enviroments/environment';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
@@ -12,6 +13,9 @@ import { Category } from './models/articles';
 import { FooterComponent } from "./footer/footer.component";
 import { CookieBannerComponent } from './cookie-banner/cookie-banner.component';
 import { CookiePolicyComponent } from './cookie-policy/cookie-policy.component';
+import { Observable } from 'rxjs';
+import { LoadingComponent } from './loading/loading.component';
+import { LoadingInterceptor } from './interceptor/loading.interceptor';
 
 
 
@@ -24,16 +28,20 @@ import { CookiePolicyComponent } from './cookie-policy/cookie-policy.component';
     RouterModule,
     FooterComponent,
     CookieBannerComponent,
-    CookiePolicyComponent
+    CookiePolicyComponent,
+    LoadingComponent
 ],
     providers: [
-        { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+        { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true }
+        
     ],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.sass'],
     standalone: true
 })
 export class AppComponent {
+  loading$: Observable<boolean>;
   
   title = 'Suministros Rubio';
   showHome: boolean = true;
@@ -45,7 +53,9 @@ export class AppComponent {
     fam: ['1', '2', '3']
   };
 
-  constructor(private router: Router) {}
+  constructor(private loadingService: LoadingService) {
+    this.loading$ = this.loadingService.isLoading;
+  }
 
   onViewCategory(category: any): void {
     // Convertir los elementos de fam a string[] si es necesario

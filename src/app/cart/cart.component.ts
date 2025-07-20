@@ -11,6 +11,9 @@ import { PopupComponent } from '../popup/popup.component';
 
 import { FeedbackService } from '../services/feedback.service';
 import { PaymentService } from '../services/payment.service';
+import { LoadingService } from '../services/loading.service';
+import { LoadingComponent } from '../loading/loading.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-cart',
@@ -22,7 +25,9 @@ import { PaymentService } from '../services/payment.service';
     FormsModule,
     PaymentComponent,
     CheckoutComponent,
-    PopupComponent
+    PopupComponent,
+    PaymentComponent,
+    LoadingComponent
   ]
 })
 export class CartComponent implements OnInit {
@@ -39,16 +44,19 @@ export class CartComponent implements OnInit {
 
   cartItemsForPayment: any[] = [];
   orderToPay: any;
-
   @Output() close = new EventEmitter<void>();
-
+  
+  loading$: Observable<boolean>;
   constructor(
     private cartService: CartService,
     private router: Router,
     private feedbackService: FeedbackService,
-    private paymentService: PaymentService
-  ) {}
-
+    private paymentService: PaymentService,
+    private loading: LoadingService 
+  ) {
+    this.loading$ = this.loading.isLoading;
+  }
+  
   ngOnInit(): void {
     this.loadCart();
 
@@ -174,76 +182,69 @@ export class CartComponent implements OnInit {
   
 
   // 3) Cuando el pago se confirma (desde PaymentComponent)
-  handlePaymentConfirmed(paymentData: {
-  paymentMethodId: string;
-  raw?: any;
-  paymentMethodType: 'stripe'|'paypal'|'redsys';
-}): void {
-  console.log('Pago confirmado:', paymentData);
+ handlePaymentConfirmed(paymentData: {
+    paymentMethodId: string;
+    raw?: any;
+    paymentMethodType: 'stripe' | 'paypal' | 'redsys';
+  }): void {
+    console.log('Pago confirmado:', paymentData);
 
-  const payload: ProcessOrderPayload = {
-    order:             this.orderToPay,
-    paymentMethodId:   paymentData.paymentMethodId,
-    shippingData:      this.checkoutData.shippingData,
-    shippingMethod:    this.checkoutData.shippingMethod,
-    shippingCost:      this.checkoutData.shippingCost,
-    paymentMethodType: paymentData.paymentMethodType
-  };
+    const payload: ProcessOrderPayload = {
+      order:             this.orderToPay,
+      paymentMethodId:   paymentData.paymentMethodId,
+      shippingData:      this.checkoutData.shippingData,
+      shippingMethod:    this.checkoutData.shippingMethod,
+      shippingCost:      this.checkoutData.shippingCost,
+      paymentMethodType: paymentData.paymentMethodType
+    };
 
-  if (paymentData.paymentMethodType === 'redsys') {
-    // → Redsys va por /pasarelaGlobal/pay
-    this.paymentService.processGlobal(payload).subscribe({
-      next: resp => {
-        console.log('processGlobal (Redsys) response:', resp);
-        if (resp.pedidoId != null) {
-          this.feedbackService.joinRoom(resp.pedidoId.toString());
-        }
-        this.cartService.clearCart();
-        this.currentStep = 'none';
-        this.popupMessage = '¡Tu compra con Redsys se ha realizado con éxito!';
-        this.showPopup = true;
-      },
-      error: err => {
-        console.error('Error en Redsys:', err);
-        this.popupMessage = `Error al procesar Redsys: ${err.error?.message||err.message}`;
-        this.showPopup = true;
+    const onSuccess = (resp: any) => {
+      console.log(`processOrder (${paymentData.paymentMethodType}) response:`, resp);
+      if (resp.pedidoId != null) {
+        this.feedbackService.joinRoom(resp.pedidoId.toString());
       }
-    });
-  } else {
-    // → Stripe / PayPal van por /payment/orders
-    this.paymentService.processOrder(payload).subscribe({
-      next: resp => {
-        console.log('processOrder (Stripe/PayPal) response:', resp);
-        if (resp.pedidoId != null) {
-          this.feedbackService.joinRoom(resp.pedidoId.toString());
-        }
-        this.cartService.clearCart();
-        this.currentStep = 'none';
-        this.popupMessage = paymentData.paymentMethodType === 'stripe'
+      this.cartService.clearCart();
+      this.currentStep = 'none';
+      // mensaje según método
+      this.popupMessage = paymentData.paymentMethodType === 'redsys'
+        ? '¡Tu compra con Redsys se ha realizado con éxito!'
+        : paymentData.paymentMethodType === 'stripe'
           ? '¡Tu compra con tarjeta se ha realizado con éxito!'
           : '¡Tu compra con PayPal se ha realizado con éxito!';
-        this.showPopup = true;
-      },
-      error: err => {
-        console.error('Error en Stripe/PayPal:', err);
-        this.popupMessage = `Error al procesar la orden: ${err.error?.message||err.message}`;
-        this.showPopup = true;
-      }
-    });
+      this.loading.hide()
+      this.showPopup = true;
+      // NO escondemos el spinner aquí: lo dejamos hasta que el usuario cierre popup
+    };
+
+    const onError = (err: any) => {
+      console.error(`Error en ${paymentData.paymentMethodType}:`, err);
+      this.popupMessage = `Error al procesar la orden: ${err.error?.message || err.message}`;
+      this.showPopup = true;
+      // idem, spinner sigue hasta cerrar popup
+    };
+
+    if (paymentData.paymentMethodType === 'redsys') {
+      this.paymentService.processGlobal(payload).subscribe({ next: onSuccess, error: onError });
+    } else {
+      this.paymentService.processOrder(payload).subscribe({ next: onSuccess, error: onError });
+    }
   }
-}
+
+  /**
+   * 4) Cuando el usuario cierra el popup, ocultamos spinner y volvemos a 'cart'
+   */
+  closePopup(): void {
+    this.showPopup = false;
+    this.loading.hide();      // ← aquí apagamos el spinner global
+    if (this.currentStep === 'none') {
+      this.onStepChange('cart');
+    }
+  }
 
   handlePaymentError(errorMessage: string): void {
     console.error('Error en el pago:', errorMessage);
     this.popupMessage = `Error al procesar el pago: ${errorMessage}`;
     this.showPopup = true;
-  }
-
-  closePopup(): void {
-    this.showPopup = false;
-    if (this.currentStep === 'none') {
-      this.onStepChange('cart');
-    }
   }
 
   closeCart(): void {
