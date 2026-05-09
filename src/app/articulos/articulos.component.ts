@@ -118,7 +118,7 @@ export class ArticulosComponent implements OnInit {
                     this.articles.forEach(article => {
                       const basePrice     = parseFloat(article.pcoart);
                       const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-                      console.log(computedPrice)
+                      /* console.log(computedPrice) */
                       let vatPercentage: number;
                       switch (article.tivart) {
                         case '0': vatPercentage = 21; break;
@@ -131,9 +131,9 @@ export class ArticulosComponent implements OnInit {
                       const netPrice   = computedPrice;
                       const vatAmount  = netPrice * (vatPercentage / 100);
                       const grossPrice = netPrice + vatAmount;
-                      console.log(netPrice)
+                      /* console.log(netPrice)
                       console.log(vatAmount)
-                      console.log(grossPrice)
+                      console.log(grossPrice) */
                       article.pcoart     = grossPrice.toFixed(2);
                       article.netPrice   = netPrice.toFixed(2);
                       article.vatAmount  = vatAmount.toFixed(2);
@@ -196,7 +196,7 @@ export class ArticulosComponent implements OnInit {
                       this.articles.forEach(article => {
                         const basePrice     = parseFloat(article.pcoart);
                         const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-                        console.log(computedPrice)
+                        /* console.log(computedPrice) */
                         let vatPercentage: number;
                         switch (article.tivart) {
                           case '0': vatPercentage = 21; break;
@@ -210,7 +210,7 @@ export class ArticulosComponent implements OnInit {
                         const vatAmount  = netPrice * (vatPercentage / 100);
                         const grossPrice = netPrice + vatAmount;
                         /* console.log(netPrice) */
-                        console.log(vatAmount)
+                        /* console.log(vatAmount) */
                         /* console.log(grossPrice) */
                         article.pcoart     = grossPrice.toFixed(2);
                         article.netPrice   = netPrice.toFixed(2);
@@ -270,7 +270,7 @@ export class ArticulosComponent implements OnInit {
                   this.articles.forEach(article => {
                     const basePrice     = parseFloat(article.pcoart);
                     const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-                    console.log(computedPrice)
+                    /* console.log(computedPrice) */
                     let vatPercentage: number;
                     switch (article.tivart) {
                       case '0': vatPercentage = 21; break;

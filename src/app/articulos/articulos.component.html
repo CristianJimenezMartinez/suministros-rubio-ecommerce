@@ -29,20 +29,23 @@
     
     <!-- Contenido principal -->
     <div class="content">
-      <!-- Tarjeta con el título -->
-      <div class="title-card">
-        <h1>Selecciona tus productos</h1>
+
+      <!-- Título dinámico -->
+      <div class="title-card" *ngIf="!isLoading">
+        <h1 *ngIf="groupedArticles && (groupedArticles | keyvalue).length">
+          Selecciona tus productos
+        </h1>
+        <h1 *ngIf="!groupedArticles || (groupedArticles | keyvalue).length === 0">
+          Algo no ocurrió como se esperaba
+        </h1>
+        <p *ngIf="errorMessage" class="error-detail">
+          {{ errorMessage }}
+        </p>
       </div>
 
-      <!-- Mensajes y loading -->
-      <div *ngIf="errorMessage">{{ errorMessage }}</div>
+      <!-- Spinner de carga -->
       <app-loading *ngIf="isLoading"></app-loading>
 
-      <!-- Mensaje cuando no hay artículos -->
-      <div *ngIf="!isLoading && (!groupedArticles || (groupedArticles | keyvalue).length === 0)">
-        <p>No se encontraron artículos para esta familia.</p>
-      </div>
-      
       <!-- Listado de artículos -->
       <section class="categories"
                *ngIf="!isLoading && groupedArticles && (groupedArticles | keyvalue).length > 0">
@@ -60,12 +63,10 @@
             <!-- Solo muestra el select si se define measure -->
             <select
               *ngIf="selectedVariants[group.key].measure"
-              (change)="onVariantChange(group.key, $event)"
-            >
+              (change)="onVariantChange(group.key, $event)">
               <option
                 *ngFor="let article of group.value; let i = index"
-                [value]="i"
-              >
+                [value]="i">
                 {{ article.measure }}
               </option>
             </select>
@@ -78,7 +79,7 @@
         </div>
       </section>
 
-      <!-- Botón "Ver más": se muestra solo si hay más artículos de los que ya mostramos -->
+      <!-- Botón "Ver más" -->
       <div class="load-more"
            *ngIf="!isLoading && (filteredGroupedArticles | keyvalue).length > displayedCount">
         <button (click)="loadMore()">Ver más</button>

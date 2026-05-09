@@ -42,30 +42,30 @@
 
 
       <!-- Sección del usuario -->
-      <div class="user-section">
+      <!-- <div class="user-section">
         <ng-container *ngIf="isLoggedIn; else notLoggedIn">
-          <div class="dropdown">
+          <div class="dropdown"> -->
             <!-- Botón de usuario con un SVG o imagen, por ejemplo con la clase user-button -->
-            <button class="user-button" (click)="toggleProfileDropdown()">
+            <!-- <button class="user-button" (click)="toggleProfileDropdown()"> -->
               <!-- Puedes usar un SVG para que sea fácilmente estilable -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+              <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
                   fill="white" stroke="white" stroke-width="2" stroke-linecap="round"
                   stroke-linejoin="round" class="icon icon-user">
                 <circle cx="12" cy="8" r="4"></circle>
                 <path d="M6 20c0-2.2 3.6-4 6-4s6 1.8 6 4"></path>
               </svg>
-            </button>
+            </button> -->
             <!-- Dropdown del perfil integrado (contenido del profile.component.html) -->
-            <ul class="dropdown-menu text-small shadow profile-dropdown"
+            <!-- <ul class="dropdown-menu text-small shadow profile-dropdown"
                 [ngClass]="{'show': isProfileDropdownOpen}"
                 style="position: absolute; right: 0; left: auto; transform: translateY(40px);">
               <li><a class="dropdown-item" (click)="navigateToProfile()">Perfil</a></li>
               <li><a class="dropdown-item" (click)="navigateToSettings()">Configuración</a></li>
               <li><a class="dropdown-item" (click)="logout()">Cerrar sesión</a></li>
             </ul>
-          </div>
-        </ng-container>
-        <ng-template #notLoggedIn>
+          </div> -->
+        <!-- </ng-container> -->
+        <!-- <ng-template #notLoggedIn>
           <div class="desktop-user" *ngIf="!isMobile">
             <a *ngIf="showLoginButton" (click)="onLoginClick()">Iniciar sesión</a>
             <a *ngIf="showRegisterButton" (click)="onRegisterClick()">Registrarse</a>
@@ -76,7 +76,7 @@
             </a>
           </div>
         </ng-template>
-      </div>
+      </div> -->
 
 
     </div>

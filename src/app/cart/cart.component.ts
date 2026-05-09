@@ -63,7 +63,7 @@ export class CartComponent implements OnInit {
     // 1) Suscripción para recibir feedback del webhook
     this.feedbackService.onPaymentFeedback()
       .subscribe(data => {
-        console.log('Received payment feedback:', data);
+        /* console.log('Received payment feedback:', data); */
         if (data?.message) {
           this.popupMessage = data.message;
           this.showPopup = true;
@@ -187,7 +187,7 @@ export class CartComponent implements OnInit {
     raw?: any;
     paymentMethodType: 'stripe' | 'paypal' | 'redsys';
   }): void {
-    console.log('Pago confirmado:', paymentData);
+    /* console.log('Pago confirmado:', paymentData); */
 
     const payload: ProcessOrderPayload = {
       order:             this.orderToPay,
@@ -199,8 +199,8 @@ export class CartComponent implements OnInit {
     };
 
     const onSuccess = (resp: any) => {
-      console.log(`processOrder (${paymentData.paymentMethodType}) response:`, resp);
-      if (resp.pedidoId != null) {
+/*       console.log(`processOrder (${paymentData.paymentMethodType}) response:`, resp);
+ */      if (resp.pedidoId != null) {
         this.feedbackService.joinRoom(resp.pedidoId.toString());
       }
       this.cartService.clearCart();
@@ -217,7 +217,7 @@ export class CartComponent implements OnInit {
     };
 
     const onError = (err: any) => {
-      console.error(`Error en ${paymentData.paymentMethodType}:`, err);
+      /* console.error(`Error en ${paymentData.paymentMethodType}:`, err); */
       this.popupMessage = `Error al procesar la orden: ${err.error?.message || err.message}`;
       this.showPopup = true;
       // idem, spinner sigue hasta cerrar popup
@@ -242,7 +242,7 @@ export class CartComponent implements OnInit {
   }
 
   handlePaymentError(errorMessage: string): void {
-    console.error('Error en el pago:', errorMessage);
+    /* console.error('Error en el pago:', errorMessage); */
     this.popupMessage = `Error al procesar el pago: ${errorMessage}`;
     this.showPopup = true;
   }

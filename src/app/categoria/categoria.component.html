@@ -1,6 +1,7 @@
 <div class="categorias-container">
   <div class="main-layout">
 
+    <!-- Panel de filtros -->
     <div class="filter-panel">
       <h3 class="toggle-filter" (click)="toggleFilter()">
         Filtros
@@ -27,39 +28,52 @@
       </div>
     </div>
 
+    <!-- Contenido principal -->
     <div class="content">
-      <div class="title-card">
-        <h1>Explora nuestras categorías</h1>
-      </div>
 
-      <div *ngIf="errorMessage">{{ errorMessage }}</div>
+      <!-- Título dinámico -->
+      <div class="title-card" *ngIf="!isLoading">
+  <!-- Hay categorías: título principal -->
+  <h1 *ngIf="filteredFamilies && filteredFamilies.length">
+    Explora nuestras categorías
+  </h1>
+
+  <!-- No hay categorías: mensaje genérico -->
+  <h1 *ngIf="!filteredFamilies || filteredFamilies.length === 0">
+    Algo no ocurrió como se esperaba
+  </h1>
+
+  <!-- Detalle de error (opcional) -->
+  <p *ngIf="errorMessage" class="error-detail">
+    {{ errorMessage }}
+  </p>
+</div>
+      <!-- Spinner de carga -->
       <app-loading *ngIf="isLoading"></app-loading>
 
-      <div *ngIf="!isLoading && (!filteredFamilies || filteredFamilies.length === 0)">
-        <p>No se encontraron categorías.</p>
-      </div>
+      <!-- Lista de categorías -->
+      <section class="categories" *ngIf="!isLoading && filteredFamilies?.length">
+  <div
+    class="category-card"
+    *ngFor="let fam of filteredFamilies | slice: 0 : displayedCount; trackBy: trackFam"
+  >
+    <h3>{{ fam.desfam }}</h3>
 
-      <section class="categories"
-               *ngIf="!isLoading && filteredFamilies.length">
-        <div class="category-card"
-             *ngFor="let fam of filteredFamilies | slice:0:displayedCount">
-          <h3>{{ fam.desfam }}</h3>
-          <div>
-            <img *ngIf="fam.imageUrl"
-                 [src]="fam.imageUrl"
-                 [alt]="'Imagen de ' + fam.desfam" />
-            <img *ngIf="!fam.imageUrl"
-                 src="assets/img/placeholder.png"
-                 alt="Sin imagen" />
-          </div>
-          <button (click)="goToArticles(fam.codfam)">
-            Ver Artículos
-          </button>
-        </div>
-      </section>
+    <img
+      [src]="fam.imageUrl || 'assets/img/placeholder.png'"
+      [alt]="'Imagen de ' + fam.desfam"
+      loading="lazy"
+    />
 
-      <div class="load-more"
-           *ngIf="!isLoading && filteredFamilies.length > displayedCount">
+    <button (click)="goToArticles(fam.codfam)">Ver Artículos</button>
+  </div>
+</section>
+
+      <!-- Botón “Ver más” -->
+      <div
+        class="load-more"
+        *ngIf="!isLoading && filteredFamilies.length > displayedCount"
+      >
         <button (click)="loadMore()">Ver más</button>
       </div>
     </div>

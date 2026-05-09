@@ -1,3 +1,4 @@
+// checkout.component.ts
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,15 +11,10 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule]
 })
 export class CheckoutComponent implements OnInit {
-  // Recibe los artículos del carrito desde el componente padre
   @Input() cartItems: any[] = [];
-
-  // Emite la información completa del checkout para pasar al siguiente paso (payment)
   @Output() checkoutCompleted = new EventEmitter<any>();
-  // Emite para cancelar y volver al carrito
   @Output() cancelCheckout = new EventEmitter<void>();
 
-  // Datos de envío (ahora incluye email)
   shippingData = {
     fullName: '',
     address: '',
@@ -29,25 +25,23 @@ export class CheckoutComponent implements OnInit {
     phone: '',
     email: ''
   };
-
-  // Método de envío seleccionado
   shippingMethod: string = 'standard';
-  // Totales
   subtotal: number = 0;
   shippingCost: number = 0;
   total: number = 0;
+
+  errorMessage: string = '';
 
   ngOnInit(): void {
     this.calculateSubtotal();
     this.onShippingMethodChange();
   }
 
-  // Calcula el subtotal sumando precio x cantidad de cada producto
   calculateSubtotal(): void {
-    this.subtotal = this.cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    this.subtotal = this.cartItems.reduce((acc, item) =>
+      acc + (item.price * item.quantity), 0);
   }
 
-  // Calcula el coste de envío según el método seleccionado
   calculateShippingCost(): void {
     switch (this.shippingMethod) {
       case 'standard':
@@ -61,19 +55,23 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
-  // Actualiza el total sumando subtotal y coste de envío
   updateTotal(): void {
     this.total = this.subtotal + this.shippingCost;
   }
 
-  // Se llama cuando se cambia el método de envío
   onShippingMethodChange(): void {
     this.calculateShippingCost();
     this.updateTotal();
   }
 
-  // Al enviar el formulario, se emite el evento checkoutCompleted con toda la información necesaria
   submitCheckout(): void {
+    // Validación de país
+    if (this.shippingData.country !== 'España') {
+      this.errorMessage = 'Solo realizamos envíos dentro de España.';
+      return;
+    }
+    this.errorMessage = '';
+
     const checkoutInfo = {
       shippingData: this.shippingData,
       shippingMethod: this.shippingMethod,
@@ -85,7 +83,6 @@ export class CheckoutComponent implements OnInit {
     this.checkoutCompleted.emit(checkoutInfo);
   }
 
-  // Permite cancelar el checkout y volver al carrito
   cancel(): void {
     this.cancelCheckout.emit();
   }

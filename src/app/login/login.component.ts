@@ -23,7 +23,7 @@ export class LoginComponent {
         this.router.navigate(['/home']);
       },
       error: (err) => {
-        console.error('Error en login:', err);
+        /* console.error('Error en login:', err); */
         alert('Error de autenticación');
       }
     });
