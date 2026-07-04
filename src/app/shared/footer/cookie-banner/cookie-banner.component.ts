@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { CookieConsentService } from '../services/cookie-consent.service';
+import { CookieConsentService } from '../../../services/cookie-consent.service';
 
 @Component({
   selector: 'app-cookie-banner',

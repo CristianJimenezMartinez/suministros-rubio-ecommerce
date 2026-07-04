@@ -1,5 +1,4 @@
-@import 'bootstrap/scss/bootstrap';
-@import '../../_variables';
+@use '../../../../_variables' as *
 
 .cookie-banner 
   position: fixed
@@ -21,7 +20,7 @@
       text-decoration: underline;
       color: $yellow-color;
       &:hover 
-        color: darken($yellow-color, 10%)
+        color: $primary-hover-color-button
       
     
   
@@ -36,4 +35,4 @@
     transition: background-color 0.3s
 
     &:hover 
-      background-color: darken($yellow-color, 10%)
+      background-color: $primary-hover-color-button
