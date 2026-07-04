@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { HeaderComponent } from './header/header.component';
+import { HeaderComponent } from './shared/header/header.component';
 import { LoadingService } from './services/loading.service';
 import { environment } from '../enviroments/environment';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
@@ -10,11 +10,10 @@ import { TokenInterceptor } from './interceptor/token.interceptor';
 
 import { Category } from './models/articles';
 
-import { FooterComponent } from "./footer/footer.component";
-import { CookieBannerComponent } from './cookie-banner/cookie-banner.component';
-import { CookiePolicyComponent } from './cookie-policy/cookie-policy.component';
+import { FooterComponent } from "./shared/footer/footer.component";
+import { CookieBannerComponent } from './shared/footer/cookie-banner/cookie-banner.component';
 import { Observable } from 'rxjs';
-import { LoadingComponent } from './loading/loading.component';
+import { LoadingComponent } from './shared/loading/loading.component';
 import { LoadingInterceptor } from './interceptor/loading.interceptor';
 
 
@@ -28,7 +27,6 @@ import { LoadingInterceptor } from './interceptor/loading.interceptor';
     RouterModule,
     FooterComponent,
     CookieBannerComponent,
-    CookiePolicyComponent,
     LoadingComponent
 ],
     providers: [

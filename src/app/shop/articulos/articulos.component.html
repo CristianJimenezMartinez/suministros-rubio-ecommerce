@@ -1,0 +1,124 @@
+<div class="articulos-page">
+
+  <!-- Barra superior de resultados -->
+  <div class="articulos-topbar" *ngIf="!isLoading">
+    <div class="topbar-left">
+      <h1 *ngIf="groupedArticles && (groupedArticles | keyvalue).length">
+        Catálogo de productos
+      </h1>
+      <span class="result-count" *ngIf="!isLoading">
+        {{ (filteredGroupedArticles | keyvalue).length }} productos
+      </span>
+    </div>
+    <!-- Botón filtros en móvil -->
+    <button class="btn-filter-toggle" (click)="toggleFilter()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="11" y1="18" x2="13" y2="18"></line></svg>
+      Filtros
+      <span class="filter-badge" *ngIf="selectedFilterTypes.length > 0">{{ selectedFilterTypes.length }}</span>
+    </button>
+  </div>
+
+  <div class="articulos-body">
+
+    <!-- SIDEBAR DE FILTROS -->
+    <aside class="filter-sidebar" [class.open]="isFilterOpen">
+      <div class="filter-header">
+        <h3>Filtros</h3>
+        <button class="clear-filters" *ngIf="selectedFilterTypes.length > 0" (click)="clearFilters()">
+          Limpiar todo
+        </button>
+      </div>
+
+      <div class="filter-section">
+        <h4 class="filter-section-title">Tipo de artículo</h4>
+        <div class="filter-tags">
+          <label class="filter-tag" *ngFor="let type of availableTypes">
+            <input
+              type="checkbox"
+              [value]="type"
+              [checked]="selectedFilterTypes.includes(type)"
+              (change)="onCheckboxChange($event)"
+            />
+            <span>{{ type }}</span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- OVERLAY móvil para cerrar sidebar -->
+    <div class="filter-overlay" *ngIf="isFilterOpen" (click)="toggleFilter()"></div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="articulos-content">
+      <!-- Spinner -->
+      <app-loading *ngIf="isLoading"></app-loading>
+
+      <!-- Grid de productos -->
+      <section class="products-grid"
+               *ngIf="!isLoading && groupedArticles && (groupedArticles | keyvalue).length > 0">
+
+        <article class="product-card"
+                 *ngFor="let group of (filteredGroupedArticles | keyvalue) | slice:0:displayedCount">
+
+          <!-- Imagen -->
+          <div class="product-img-wrap">
+            <img
+              *ngIf="selectedVariants[group.key].imgart"
+              [src]="selectedVariants[group.key].imgart"
+              [alt]="group.key"
+              loading="lazy"
+            />
+            <div class="product-img-placeholder" *ngIf="!selectedVariants[group.key].imgart">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="product-info">
+            <h3 class="product-name">{{ group.key }}</h3>
+            <p class="product-code">Ref: {{ selectedVariants[group.key].codart }}</p>
+
+            <!-- Variante / medida -->
+            <select class="product-variant"
+              *ngIf="selectedVariants[group.key].measure"
+              (change)="onVariantChange(group.key, $event)">
+              <option *ngFor="let article of group.value; let i = index" [value]="i">
+                {{ article.measure }}
+              </option>
+            </select>
+
+            <!-- Precio -->
+            <div class="product-price">
+              <span class="price-main">{{ selectedVariants[group.key].pcoart }} €</span>
+              <span class="price-tax">IVA incluido</span>
+            </div>
+          </div>
+
+          <!-- Acción -->
+          <button class="btn-add-cart" (click)="addToCart(selectedVariants[group.key])">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            Añadir al carrito
+          </button>
+        </article>
+      </section>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="!isLoading && (filteredGroupedArticles | keyvalue).length === 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <h3>Sin resultados</h3>
+        <p>Prueba con otros filtros</p>
+        <button class="btn-clear" (click)="clearFilters()">Limpiar filtros</button>
+      </div>
+
+      <!-- Botón Ver más y Centinela de Scroll Infinito -->
+      <div class="load-more-wrap"
+           *ngIf="!isLoading && (filteredGroupedArticles | keyvalue).length > displayedCount">
+        <div #infiniteScrollSentinel class="scroll-sentinel" style="height: 1px;"></div>
+        <button class="btn-load-more" (click)="loadMore()">
+          Ver más productos
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+      </div>
+    </main>
+  </div>
+</div>

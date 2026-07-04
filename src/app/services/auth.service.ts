@@ -21,6 +21,7 @@ export class AuthService {
     return this.http.post<any>(this.loginUrl, { username, password }).pipe(
       tap(response => {
         if (response?.token && response?.user) {
+          localStorage.setItem('token', response.token);
           localStorage.setItem('user', JSON.stringify(response.user));
           this.isAuthenticatedSubject.next(true);  // emitimos el nuevo estado
         }
@@ -29,6 +30,7 @@ export class AuthService {
   }
 
   logout(): void {
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.isAuthenticatedSubject.next(false);
   }
@@ -58,6 +60,6 @@ export class AuthService {
 
   private hasToken(): boolean {
     // inicializamos el BehaviorSubject a true si ya había token en localStorage
-    return !!localStorage.getItem('user');
+    return !!localStorage.getItem('token');
   }
 }

@@ -1,0 +1,106 @@
+@use '../../../_variables' as *
+
+// Register reuses auth-card styles from login.component.sass
+// Only register-specific overrides below
+
+.register-page
+  padding: 1.5rem 1rem
+  align-items: flex-start
+
+.register-card
+  max-width: 680px
+
+.register-form
+  display: flex
+  flex-direction: column
+  gap: 0
+
+// ─── SECCIONES ──────────────────────────────────────
+.form-section
+  padding: 1.25rem 0
+  border-bottom: 1px solid #f1f5f9
+
+  &:last-of-type
+    border-bottom: none
+    padding-bottom: 0
+
+.section-title
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  font-size: 0.9rem
+  font-weight: 700
+  color: #374151
+  margin: 0 0 1rem 0
+  text-transform: uppercase
+  letter-spacing: 0.04em
+
+  svg
+    color: var(--primary-color)
+
+// ─── FILAS DE DOS COLUMNAS ─────────────────────────
+.form-row
+  display: grid
+  grid-template-columns: 1fr 1fr
+  gap: 1rem
+  margin-bottom: 1rem
+
+  @media (max-width: 576px)
+    grid-template-columns: 1fr
+
+.form-group
+  display: flex
+  flex-direction: column
+  gap: 0.35rem
+
+  &.full-width
+    grid-column: 1 / -1
+    margin-bottom: 1rem
+
+  label
+    font-size: 0.82rem
+    font-weight: 600
+    color: #374151
+
+  input
+    padding: 0.65rem 0.9rem
+    font-size: 0.9rem
+    border: 1.5px solid #e2e8f0
+    border-radius: 8px
+    outline: none
+    background-color: #f8fafc
+    transition: all 0.2s ease
+    color: #0f172a
+    width: 100%
+
+    &::placeholder
+      color: #94a3b8
+
+    &:focus
+      border-color: var(--primary-color)
+      background-color: #ffffff
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1)
+
+// ─── ERRORES Y AYUDAS ───────────────────────────────
+.field-error
+  font-size: 0.78rem
+  color: #ef4444
+  display: flex
+  align-items: center
+  gap: 0.25rem
+
+.required
+  color: #ef4444
+  font-weight: 700
+
+.optional
+  color: #94a3b8
+  font-weight: 400
+  font-size: 0.75rem
+
+// ─── BOTÓN DESHABILITADO ────────────────────────────
+.btn-primary-auth:disabled
+  opacity: 0.55
+  cursor: not-allowed
+  transform: none !important
+  box-shadow: none !important
