@@ -42,4 +42,15 @@ export class HomeComponent {
     // Navegamos a /categoria/1,3,5 (por ejemplo)
     this.router.navigate(['/categorias', secParam]);
   }
+
+  scrollToCategories(): void {
+    const element = document.getElementById('categories-grid');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
+  }
 }
