@@ -11,13 +11,9 @@
         </svg>
       </button>
 
-      <!-- Logotipo de la marca con sello S.R y tipografía oficial -->
+      <!-- Logotipo de la marca original -->
       <a class="brand-logo d-flex align-items-center text-decoration-none" (click)="navigateTo('/')">
-        <img src="assets/logo/logo-clean.svg" alt="Suministros Rubio Logo" class="header-logo" />
-        <div class="brand-text d-flex flex-column ms-2">
-          <span class="brand-title"><span class="logo-accent">S</span>uministros <span class="logo-accent">R</span>ubio</span>
-          <span class="brand-sub">Profesionales desde 1954</span>
-        </div>
+        <img src="assets/logo/logo.png" alt="Suministros Rubio" class="header-logo" />
       </a>
 
       <!-- Menú horizontal para ordenadores de escritorio -->
@@ -116,10 +112,7 @@
   
   <div class="mobile-sidenav" [class.open]="isNavDropdownOpen" *ngIf="isMobile">
     <div class="sidenav-header d-flex justify-content-between align-items-center px-3 py-3">
-      <div class="d-flex align-items-center gap-2">
-        <img src="assets/logo/logo-clean.svg" alt="Suministros Rubio" class="sidenav-logo" />
-        <span class="text-white fw-bold fs-6">Suministros Rubio</span>
-      </div>
+      <img src="assets/logo/logo.png" alt="Suministros Rubio" class="sidenav-logo" />
       <button class="close-btn btn btn-link p-0 border-0 text-white" (click)="toggleNavDropdown()" aria-label="Cerrar menú">
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>

@@ -1,19 +1,19 @@
 <div class="articulos-page">
 
-  <!-- SIDEBAR DE FILTROS (acoplado directamente debajo del header fijo) -->
+  <!-- SIDEBAR DE FILTROS (pegado directamente al navbar) -->
   <aside class="filter-sidebar" [class.open]="isFilterOpen">
     <div class="filter-header">
       <div class="d-flex align-items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
         <h3>Filtros</h3>
       </div>
       <button class="clear-filters" *ngIf="selectedFamilies.length > 0 || filterMinPrice > minPriceLimit || filterMaxPrice < maxPriceLimit || sortBy !== 'default'" (click)="clearFilters()">
-        Limpiar todo
+        Limpiar
       </button>
     </div>
 
     <!-- SECCIÓN FILTRO: Rango de Precio -->
-    <div class="filter-section" *ngIf="!isLoading && maxPriceLimit > minPriceLimit">
+    <div class="filter-section" *ngIf="maxPriceLimit > minPriceLimit">
       <h4 class="filter-section-title">Precio (€)</h4>
       <div class="price-range-inputs">
         <div class="price-input-box">
@@ -26,13 +26,21 @@
           <input type="number" [(ngModel)]="filterMaxPrice" (change)="onPriceFilterChange()" [min]="filterMinPrice" [max]="maxPriceLimit" />
         </div>
       </div>
+
+      <!-- Quick chips de precio -->
+      <div class="quick-price-chips">
+        <button type="button" class="chip-price" (click)="setQuickPrice(0, 50)" [class.active]="filterMinPrice === 0 && filterMaxPrice === 50">&lt; 50 €</button>
+        <button type="button" class="chip-price" (click)="setQuickPrice(50, 200)" [class.active]="filterMinPrice === 50 && filterMaxPrice === 200">50-200 €</button>
+        <button type="button" class="chip-price" (click)="setQuickPrice(200, 500)" [class.active]="filterMinPrice === 200 && filterMaxPrice === 500">200-500 €</button>
+        <button type="button" class="chip-price" (click)="setQuickPrice(500, 2000)" [class.active]="filterMinPrice === 500 && filterMaxPrice === 2000">&gt; 500 €</button>
+      </div>
     </div>
 
     <!-- SECCIÓN FILTRO: Familias / Categorías -->
-    <div class="filter-section" *ngIf="!isLoading && availableFamilies.length > 0">
+    <div class="filter-section" *ngIf="availableFamilies.length > 0">
       <h4 class="filter-section-title">Familias / Categorías</h4>
       <div class="filter-categories-list">
-        <label class="filter-category-item" *ngFor="let fam of availableFamilies">
+        <label class="filter-category-item" *ngFor="let fam of availableFamilies" [class.checked]="selectedFamilies.includes(fam.code)">
           <input
             type="checkbox"
             [value]="fam.code"
@@ -53,12 +61,12 @@
   <div class="articulos-main">
 
     <!-- Topbar dentro de la columna de productos -->
-    <div class="articulos-topbar" *ngIf="!isLoading">
+    <div class="articulos-topbar">
       <div class="topbar-left">
-        <h1 *ngIf="groupedArticles && (groupedArticles | keyvalue).length">
+        <h1 *ngIf="filteredGroupedArticles">
           Catálogo de Productos
         </h1>
-        <span class="result-count" *ngIf="!isLoading">
+        <span class="result-count">
           {{ (filteredGroupedArticles | keyvalue).length }} productos disponibles
         </span>
       </div>
@@ -78,7 +86,7 @@
 
         <!-- Botón filtros en móvil -->
         <button class="btn-filter-toggle" (click)="toggleFilter()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="11" y1="18" x2="13" y2="18"></line></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="11" y1="18" x2="13" y2="18"></line></svg>
           Filtros
           <span class="filter-badge" *ngIf="selectedFamilies.length > 0">{{ selectedFamilies.length }}</span>
         </button>
@@ -87,26 +95,24 @@
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="articulos-content">
-      <!-- Spinner -->
-      <app-loading *ngIf="isLoading"></app-loading>
-
       <!-- Grid de productos -->
       <section class="products-grid"
-               *ngIf="!isLoading && groupedArticles && (groupedArticles | keyvalue).length > 0">
+               *ngIf="filteredGroupedArticles && (filteredGroupedArticles | keyvalue).length > 0">
 
         <article class="product-card"
                  *ngFor="let group of (filteredGroupedArticles | keyvalue) | slice:0:displayedCount">
 
-          <!-- Imagen -->
+          <!-- Imagen con fallback robusto -->
           <div class="product-img-wrap">
             <img
               *ngIf="selectedVariants[group.key]?.imgart"
               [src]="selectedVariants[group.key].imgart"
               [alt]="group.key"
+              (error)="onImgError($event)"
               loading="lazy"
             />
             <div class="product-img-placeholder" *ngIf="!selectedVariants[group.key]?.imgart">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
             </div>
           </div>
 
@@ -135,15 +141,15 @@
 
           <!-- Acción -->
           <button class="btn-add-cart" (click)="addToCart(selectedVariants[group.key])">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             Añadir al carrito
           </button>
         </article>
       </section>
 
       <!-- Estado vacío -->
-      <div class="empty-state" *ngIf="!isLoading && (filteredGroupedArticles | keyvalue).length === 0">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <div class="empty-state" *ngIf="!filteredGroupedArticles || (filteredGroupedArticles | keyvalue).length === 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <h3>Sin productos con estos filtros</h3>
         <p>Prueba a ampliar el rango de precios o seleccionar otras categorías.</p>
         <button class="btn-clear" (click)="clearFilters()">Restablecer filtros</button>
@@ -151,14 +157,14 @@
 
       <!-- Centinela y Botón Cargar Más -->
       <div class="load-more-wrap"
-           *ngIf="!isLoading && (filteredGroupedArticles | keyvalue).length > displayedCount">
+           *ngIf="(filteredGroupedArticles | keyvalue).length > displayedCount">
         <div #infiniteScrollSentinel class="scroll-sentinel" style="height: 1px;"></div>
         <button class="btn-load-more" (click)="loadMore()">
           <span>Ver más productos</span>
           <span class="remaining-pill">
             +{{ (filteredGroupedArticles | keyvalue).length - displayedCount }} restantes
           </span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
       </div>
     </main>

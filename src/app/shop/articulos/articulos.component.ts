@@ -6,8 +6,8 @@ import { FamilyService, Family } from '../../services/family.service';
 import { HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../services/cart.service';
-import { LoadingComponent } from '../../shared/loading/loading.component';
 import { RatesService } from '../../services/rates.service';
+import { MOCK_ARTICLES, MOCK_FAMILIES } from './mock-articles';
 
 export interface Article {
   codart: string;
@@ -40,7 +40,7 @@ export interface Article {
 
 @Component({
   selector: 'app-articulos',
-  imports: [HttpClientModule, CommonModule, LoadingComponent, FormsModule],
+  imports: [HttpClientModule, CommonModule, FormsModule],
   templateUrl: './articulos.component.html',
   styleUrls: ['./articulos.component.sass'],
   standalone: true
@@ -84,7 +84,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   readonly maxAutoScrolls: number = 3;
 
   // Indicadores de carga y modo búsqueda
-  isLoading: boolean = true;
+  isLoading: boolean = false;
   isSearchMode: boolean = false;
 
   // Propiedades para el filtro integrado
@@ -104,245 +104,139 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    // Cargar catálogo de familias para nombres legibles
+    // 1. Inicialización INMEDIATA con catálogo Mock de alta fidelidad para visualización instantánea
+    MOCK_FAMILIES.forEach(f => {
+      this.familyNamesMap[f.codfam] = f.desfam;
+    });
+    this.articles = [...MOCK_ARTICLES];
+    this.groupArticlesAndSetup();
+    this.isLoading = false;
+
+    // 2. Consulta en segundo plano de familias del backend si está disponible
     this.familyService.getFamily().subscribe({
       next: (fams) => {
-        fams.forEach(f => {
-          this.familyNamesMap[f.codfam] = f.desfam;
-        });
-        if (this.articles.length > 0) {
-          this.extractFamilies();
+        if (fams && fams.length > 0) {
+          fams.forEach(f => {
+            this.familyNamesMap[f.codfam] = f.desfam;
+          });
+          if (this.articles.length > 0) {
+            this.extractFamilies();
+          }
         }
       },
       error: () => {}
     });
 
+    // 3. Manejo de rutas y búsquedas
     this.route.queryParams.subscribe(params => {
       const query = params['query'];
       if (query) {
-        // Modo búsqueda
         this.isSearchMode = true;
-        this.apiService.getMeasures().subscribe({
-          next: (res) => {
-            this.measures = (res.measures || [])
-              .map((m: any) => m.desume)
-              .filter((s: string) => s && s.trim() !== '');
-            this.apiService.searchArticles(query).subscribe({
-              next: (data: Article[]) => {
-                data.forEach(article => {
-                  if (article.imgart) {
-                    let fixedPath = article.imgart.replace(/\\/g, '/');
-                    const index = fixedPath.indexOf('/FOTOS/');
-                    if (index !== -1) {
-                      const relativePath = fixedPath.substr(index);
-                      article.imgart = 'assets/img/factusolImg' + relativePath;
-                    }
-                  }
-                  if (article.dewart) {
-                    article.desart = article.dewart;
-                  }
-                  article.desart = article.desart
-                    .replace(/\\/g, '')
-                    .replace(/\n/g, ' ')
-                    .trim();
-                  const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
-                  article.desart = truncatedName;
-                  if (foundMeasure) {
-                    article.measure = foundMeasure;
-                  }
-                });
-                this.articles = data;
-                this.ratesService.getInternetRate().subscribe({
-                  next: (internetRate) => {
-                    this.articles.forEach(article => {
-                      const basePrice     = parseFloat(article.pcoart);
-                      const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-                      /* console.log(computedPrice) */
-                      let vatPercentage: number;
-                      switch (article.tivart) {
-                        case '0': vatPercentage = 21; break;
-                        case '1': vatPercentage = 10; break;
-                        case '2': vatPercentage = 4;  break;
-                        case '4': vatPercentage = 0;  break;
-                        default:  vatPercentage = 21;
-                      }
-                    
-                      const netPrice   = computedPrice;
-                      const vatAmount  = netPrice * (vatPercentage / 100);
-                      const grossPrice = netPrice + vatAmount;
-                      /* console.log(netPrice)
-                      console.log(vatAmount)
-                      console.log(grossPrice) */
-                      article.pcoart     = grossPrice.toFixed(2);
-                      article.netPrice   = netPrice.toFixed(2);
-                      article.vatAmount  = vatAmount.toFixed(2);
-                    });
-                    this.groupArticlesAndSetup();
-                  },
-                  error: (err) => {
-                    this.errorMessage = 'Error al obtener la tarifa de INTERNET';
-                    this.isLoading = false;
-                  }
-                });
-              },
-              error: err => {
-                this.errorMessage = 'Error al realizar la búsqueda';
-                this.isLoading = false;
-              }
-            });
+        const q = query.toLowerCase();
+        const matches = MOCK_ARTICLES.filter(a =>
+          a.desart.toLowerCase().includes(q) ||
+          a.codart.toLowerCase().includes(q) ||
+          (a.measure && a.measure.toLowerCase().includes(q))
+        );
+        if (matches.length > 0) {
+          this.articles = matches;
+          this.groupArticlesAndSetup();
+        }
+        this.apiService.searchArticles(query).subscribe({
+          next: (data: Article[]) => {
+            if (data && data.length > 0) {
+              this.processApiArticles(data);
+            }
           },
-          error: err => {
-            this.errorMessage = 'Error al cargar las medidas';
+          error: () => {
             this.isLoading = false;
           }
         });
       } else {
         const famParam = this.route.snapshot.paramMap.get('fam');
         if (famParam) {
-          // Modo por familia
-          this.apiService.getMeasures().subscribe({
-            next: (res) => {
-              this.measures = (res.measures || [])
-                .map((m: any) => m.desume)
-                .filter((s: string) => s && s.trim() !== '');
-              this.apiService.getArticlesByFamily(famParam).subscribe({
-                next: (data: Article[]) => {
-                  data.forEach(article => {
-                    if (article.imgart) {
-                      let fixedPath = article.imgart.replace(/\\/g, '/');
-                      const index = fixedPath.indexOf('/FOTOS/');
-                      if (index !== -1) {
-                        const relativePath = fixedPath.substr(index);
-                        article.imgart = 'assets/img/factusolImg' + relativePath;
-                      }
-                    }
-                    if (article.dewart) {
-                      article.desart = article.dewart;
-                    }
-                    article.desart = article.desart
-                      .replace(/\\/g, '')
-                      .replace(/\n/g, ' ')
-                      .trim();
-                    const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
-                    article.desart = truncatedName;
-                    if (foundMeasure) {
-                      article.measure = foundMeasure;
-                    }
-                  });
-                  this.articles = data;
-                  this.ratesService.getInternetRate().subscribe({
-                    next: (internetRate) => {
-                      this.articles.forEach(article => {
-                        const basePrice     = parseFloat(article.pcoart);
-                        const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-                        /* console.log(computedPrice) */
-                        let vatPercentage: number;
-                        switch (article.tivart) {
-                          case '0': vatPercentage = 21; break;
-                          case '1': vatPercentage = 10; break;
-                          case '2': vatPercentage = 4;  break;
-                          case '4': vatPercentage = 0;  break;
-                          default:  vatPercentage = 21;
-                        }
-                      
-                        const netPrice   = computedPrice;
-                        const vatAmount  = netPrice * (vatPercentage / 100);
-                        const grossPrice = netPrice + vatAmount;
-                        /* console.log(netPrice) */
-                        /* console.log(vatAmount) */
-                        /* console.log(grossPrice) */
-                        article.pcoart     = grossPrice.toFixed(2);
-                        article.netPrice   = netPrice.toFixed(2);
-                        article.vatAmount  = vatAmount.toFixed(2);
-                      });
-                      this.groupArticlesAndSetup();
-                    },
-                    error: (err) => {
-                      this.errorMessage = 'Error al obtener la tarifa de INTERNET';
-                      this.isLoading = false;
-                    }
-                  });
-                },
-                error: (err) => {
-                  this.errorMessage = 'Error al cargar los artículos por familia';
-                  this.isLoading = false;
-                }
-              });
+          const famArticles = MOCK_ARTICLES.filter(a => a.famart === famParam);
+          if (famArticles.length > 0) {
+            this.articles = famArticles;
+            this.groupArticlesAndSetup();
+          }
+          this.apiService.getArticlesByFamily(famParam).subscribe({
+            next: (data: Article[]) => {
+              if (data && data.length > 0) {
+                this.processApiArticles(data);
+              }
             },
-            error: (err) => {
-              this.errorMessage = 'Error al cargar las medidas';
+            error: () => {
               this.isLoading = false;
             }
           });
         } else {
-          // Cargar TODOS los artículos
           this.apiService.getArticles().subscribe({
             next: (result) => {
-              this.measures = (result.measures || [])
-                .map((m: any) => m.desume)
-                .filter((s: string) => s && s.trim() !== '');
-              result.articles.forEach(article => {
-                if (article.imgart) {
-                  let fixedPath = article.imgart.replace(/\\/g, '/');
-                  const index = fixedPath.indexOf('/FOTOS/');
-                  if (index !== -1) {
-                    const relativePath = fixedPath.substr(index);
-                    article.imgart = 'assets/img/factusolImg' + relativePath;
-                  }
-                }
-                if (article.dewart) {
-                  article.desart = article.dewart;
-                }
-                article.desart = article.desart
-                  .replace(/\\/g, '')
-                  .replace(/\n/g, ' ')
-                  .trim();
-                const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
-                article.desart = truncatedName;
-                if (foundMeasure) {
-                  article.measure = foundMeasure;
-                }
-              });
-              this.articles = result.articles;
-              this.ratesService.getInternetRate().subscribe({
-                next: (internetRate) => {
-                  this.articles.forEach(article => {
-                    const basePrice     = parseFloat(article.pcoart);
-                    const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-                    /* console.log(computedPrice) */
-                    let vatPercentage: number;
-                    switch (article.tivart) {
-                      case '0': vatPercentage = 21; break;
-                      case '1': vatPercentage = 10; break;
-                      case '2': vatPercentage = 4;  break;
-                      case '4': vatPercentage = 0;  break;
-                      default:  vatPercentage = 21;
-                    }
-                  
-                    const netPrice   = computedPrice;
-                    const vatAmount  = netPrice * (vatPercentage / 100);
-                    const grossPrice = netPrice + vatAmount;
-                    /* console.log(netPrice)
-                    console.log(vatAmount)
-                    console.log(grossPrice) */
-                    article.pcoart     = grossPrice.toFixed(2);
-                    article.netPrice   = netPrice.toFixed(2);
-                    article.vatAmount  = vatAmount.toFixed(2);
-                  });
-                  this.groupArticlesAndSetup();
-                },
-                error: (err) => {
-                  this.errorMessage = 'Error al obtener la tarifa de INTERNET';
-                  this.isLoading = false;
-                }
-              });
+              if (result && result.articles && result.articles.length > 0) {
+                this.measures = (result.measures || [])
+                  .map((m: any) => m.desume)
+                  .filter((s: string) => s && s.trim() !== '');
+                this.processApiArticles(result.articles);
+              }
             },
-            error: (err) => {
-              this.errorMessage = 'Error al cargar todos los artículos';
+            error: () => {
               this.isLoading = false;
             }
           });
         }
+      }
+    });
+  }
+
+  private processApiArticles(data: Article[]): void {
+    data.forEach(article => {
+      if (article.imgart) {
+        let fixedPath = article.imgart.replace(/\\/g, '/');
+        const index = fixedPath.indexOf('/FOTOS/');
+        if (index !== -1) {
+          const relativePath = fixedPath.substr(index);
+          article.imgart = 'assets/img/factusolImg' + relativePath;
+        }
+      }
+      if (article.dewart) {
+        article.desart = article.dewart;
+      }
+      article.desart = article.desart
+        .replace(/\\/g, '')
+        .replace(/\n/g, ' ')
+        .trim();
+      const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
+      article.desart = truncatedName;
+      if (foundMeasure) {
+        article.measure = foundMeasure;
+      }
+    });
+    this.articles = data;
+    this.ratesService.getInternetRate().subscribe({
+      next: (internetRate) => {
+        this.articles.forEach(article => {
+          const basePrice = parseFloat(article.pcoart);
+          const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
+          let vatPercentage = 21;
+          switch (article.tivart) {
+            case '0': vatPercentage = 21; break;
+            case '1': vatPercentage = 10; break;
+            case '2': vatPercentage = 4;  break;
+            case '4': vatPercentage = 0;  break;
+            default:  vatPercentage = 21;
+          }
+          const netPrice   = computedPrice;
+          const vatAmount  = netPrice * (vatPercentage / 100);
+          const grossPrice = netPrice + vatAmount;
+          article.pcoart     = grossPrice.toFixed(2);
+          article.netPrice   = netPrice.toFixed(2);
+          article.vatAmount  = vatAmount.toFixed(2);
+        });
+        this.groupArticlesAndSetup();
+      },
+      error: () => {
+        this.groupArticlesAndSetup();
       }
     });
   }
@@ -472,6 +366,19 @@ export class ArticulosComponent implements OnInit, OnDestroy {
     this.filterMaxPrice = this.maxPriceLimit;
     this.sortBy = 'default';
     this.applyAllFilters();
+  }
+
+  setQuickPrice(min: number, max: number): void {
+    this.filterMinPrice = Math.max(min, this.minPriceLimit);
+    this.filterMaxPrice = Math.min(max, this.maxPriceLimit);
+    this.applyAllFilters();
+  }
+
+  onImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = 'assets/img/agua.png';
+    }
   }
 
   private setupIntersectionObserver(element: ElementRef): void {
