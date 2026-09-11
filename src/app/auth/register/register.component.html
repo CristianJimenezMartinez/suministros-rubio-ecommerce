@@ -6,8 +6,9 @@
     <app-popup *ngIf="showPopup" [message]="popupMessage" (accepted)="onPopupAccept()"></app-popup>
 
     <!-- Logo -->
-    <div class="auth-brand">
-      <img src="assets/logo/logo.png" alt="Suministros Rubio" class="auth-logo" />
+    <div class="auth-brand d-flex flex-column align-items-center">
+      <img src="assets/logo/logo-clean.svg" alt="Suministros Rubio" class="auth-logo" />
+      <span class="auth-brand-name mt-2 fw-bold text-dark fs-5">Suministros Rubio</span>
     </div>
 
     <div class="auth-header">
@@ -31,7 +32,13 @@
           </div>
           <div class="form-group">
             <label for="password">Contraseña <span class="required">*</span></label>
-            <input id="password" [(ngModel)]="user.password" name="password" type="password" required minlength="6" maxlength="100" placeholder="Mínimo 6 caracteres" #password="ngModel" />
+            <div class="password-input-wrap">
+              <input id="password" [(ngModel)]="user.password" name="password" [type]="showPassword ? 'text' : 'password'" required minlength="6" maxlength="100" placeholder="Mínimo 6 caracteres" #password="ngModel" />
+              <button type="button" class="btn-pwd-toggle" (click)="togglePasswordVisibility()" aria-label="Ver contraseña">
+                <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+            </div>
             <div class="field-error" *ngIf="password.invalid && (password.dirty || password.touched)">Mínimo 6 caracteres.</div>
           </div>
         </div>
@@ -50,19 +57,26 @@
         </h4>
         <div class="form-row">
           <div class="form-group">
-            <label for="surname">Apellido <span class="required">*</span></label>
-            <input id="surname" [(ngModel)]="user.surname" name="surname" type="text" required maxlength="65" placeholder="Apellido" #surname="ngModel" />
+            <label for="name">Nombre <span class="required">*</span></label>
+            <input id="name" [(ngModel)]="user.name" name="name" type="text" required maxlength="50" placeholder="Nombre" #name="ngModel" />
+            <div class="field-error" *ngIf="name.invalid && (name.dirty || name.touched)">Campo obligatorio.</div>
+          </div>
+          <div class="form-group">
+            <label for="surname">Apellidos <span class="required">*</span></label>
+            <input id="surname" [(ngModel)]="user.surname" name="surname" type="text" required maxlength="65" placeholder="Apellidos" #surname="ngModel" />
             <div class="field-error" *ngIf="surname.invalid && (surname.dirty || surname.touched)">Campo obligatorio.</div>
           </div>
+        </div>
+        <div class="form-row">
           <div class="form-group">
             <label for="telf">Teléfono <span class="required">*</span></label>
             <input id="telf" [(ngModel)]="user.telf" name="telf" type="text" required pattern="^[0-9]{9}$" maxlength="20" placeholder="600 000 000" #telf="ngModel" />
             <div class="field-error" *ngIf="telf.invalid && (telf.dirty || telf.touched)">9 dígitos.</div>
           </div>
-        </div>
-        <div class="form-group full-width">
-          <label for="dni">DNI <span class="optional">(opcional)</span></label>
-          <input id="dni" [(ngModel)]="user.dni" name="dni" type="text" maxlength="18" placeholder="12345678A" #dni="ngModel" />
+          <div class="form-group">
+            <label for="dni">DNI / CIF <span class="optional">(para facturación)</span></label>
+            <input id="dni" [(ngModel)]="user.dni" name="dni" type="text" maxlength="18" placeholder="12345678A" #dni="ngModel" />
+          </div>
         </div>
       </div>
 

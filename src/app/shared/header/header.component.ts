@@ -148,6 +148,10 @@ export class HeaderComponent implements OnInit {
     }
   }
 
+  clearSearch(): void {
+    this.searchText = '';
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;

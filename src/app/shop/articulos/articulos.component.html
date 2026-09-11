@@ -1,52 +1,89 @@
 <div class="articulos-page">
 
-  <!-- Barra superior de resultados -->
-  <div class="articulos-topbar" *ngIf="!isLoading">
-    <div class="topbar-left">
-      <h1 *ngIf="groupedArticles && (groupedArticles | keyvalue).length">
-        Catálogo de productos
-      </h1>
-      <span class="result-count" *ngIf="!isLoading">
-        {{ (filteredGroupedArticles | keyvalue).length }} productos
-      </span>
-    </div>
-    <!-- Botón filtros en móvil -->
-    <button class="btn-filter-toggle" (click)="toggleFilter()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="11" y1="18" x2="13" y2="18"></line></svg>
-      Filtros
-      <span class="filter-badge" *ngIf="selectedFilterTypes.length > 0">{{ selectedFilterTypes.length }}</span>
-    </button>
-  </div>
-
-  <div class="articulos-body">
-
-    <!-- SIDEBAR DE FILTROS -->
-    <aside class="filter-sidebar" [class.open]="isFilterOpen">
-      <div class="filter-header">
+  <!-- SIDEBAR DE FILTROS (acoplado directamente debajo del header fijo) -->
+  <aside class="filter-sidebar" [class.open]="isFilterOpen">
+    <div class="filter-header">
+      <div class="d-flex align-items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
         <h3>Filtros</h3>
-        <button class="clear-filters" *ngIf="selectedFilterTypes.length > 0" (click)="clearFilters()">
-          Limpiar todo
-        </button>
       </div>
+      <button class="clear-filters" *ngIf="selectedFamilies.length > 0 || filterMinPrice > minPriceLimit || filterMaxPrice < maxPriceLimit || sortBy !== 'default'" (click)="clearFilters()">
+        Limpiar todo
+      </button>
+    </div>
 
-      <div class="filter-section">
-        <h4 class="filter-section-title">Tipo de artículo</h4>
-        <div class="filter-tags">
-          <label class="filter-tag" *ngFor="let type of availableTypes">
-            <input
-              type="checkbox"
-              [value]="type"
-              [checked]="selectedFilterTypes.includes(type)"
-              (change)="onCheckboxChange($event)"
-            />
-            <span>{{ type }}</span>
-          </label>
+    <!-- SECCIÓN FILTRO: Rango de Precio -->
+    <div class="filter-section" *ngIf="!isLoading && maxPriceLimit > minPriceLimit">
+      <h4 class="filter-section-title">Precio (€)</h4>
+      <div class="price-range-inputs">
+        <div class="price-input-box">
+          <label>Mín</label>
+          <input type="number" [(ngModel)]="filterMinPrice" (change)="onPriceFilterChange()" [min]="minPriceLimit" [max]="filterMaxPrice" />
+        </div>
+        <span class="price-sep">-</span>
+        <div class="price-input-box">
+          <label>Máx</label>
+          <input type="number" [(ngModel)]="filterMaxPrice" (change)="onPriceFilterChange()" [min]="filterMinPrice" [max]="maxPriceLimit" />
         </div>
       </div>
-    </aside>
+    </div>
 
-    <!-- OVERLAY móvil para cerrar sidebar -->
-    <div class="filter-overlay" *ngIf="isFilterOpen" (click)="toggleFilter()"></div>
+    <!-- SECCIÓN FILTRO: Familias / Categorías -->
+    <div class="filter-section" *ngIf="!isLoading && availableFamilies.length > 0">
+      <h4 class="filter-section-title">Familias / Categorías</h4>
+      <div class="filter-categories-list">
+        <label class="filter-category-item" *ngFor="let fam of availableFamilies">
+          <input
+            type="checkbox"
+            [value]="fam.code"
+            [checked]="selectedFamilies.includes(fam.code)"
+            (change)="onFamilyCheckboxChange(fam.code, $event)"
+          />
+          <span class="category-name">{{ fam.name }}</span>
+          <span class="category-count">{{ fam.count }}</span>
+        </label>
+      </div>
+    </div>
+  </aside>
+
+  <!-- OVERLAY móvil para cerrar sidebar -->
+  <div class="filter-overlay" *ngIf="isFilterOpen" (click)="toggleFilter()"></div>
+
+  <!-- COLUMNA PRINCIPAL DE PRODUCTOS -->
+  <div class="articulos-main">
+
+    <!-- Topbar dentro de la columna de productos -->
+    <div class="articulos-topbar" *ngIf="!isLoading">
+      <div class="topbar-left">
+        <h1 *ngIf="groupedArticles && (groupedArticles | keyvalue).length">
+          Catálogo de Productos
+        </h1>
+        <span class="result-count" *ngIf="!isLoading">
+          {{ (filteredGroupedArticles | keyvalue).length }} productos disponibles
+        </span>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Selector de ordenación -->
+        <div class="sort-wrapper">
+          <label for="sortSelect">Ordenar:</label>
+          <select id="sortSelect" [(ngModel)]="sortBy" (change)="onSortChange()">
+            <option value="default">Relevancia</option>
+            <option value="price-asc">Precio: Menor a Mayor</option>
+            <option value="price-desc">Precio: Mayor a Menor</option>
+            <option value="name-asc">Nombre: A - Z</option>
+            <option value="name-desc">Nombre: Z - A</option>
+          </select>
+        </div>
+
+        <!-- Botón filtros en móvil -->
+        <button class="btn-filter-toggle" (click)="toggleFilter()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="11" y1="18" x2="13" y2="18"></line></svg>
+          Filtros
+          <span class="filter-badge" *ngIf="selectedFamilies.length > 0">{{ selectedFamilies.length }}</span>
+        </button>
+      </div>
+    </div>
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="articulos-content">
@@ -63,19 +100,19 @@
           <!-- Imagen -->
           <div class="product-img-wrap">
             <img
-              *ngIf="selectedVariants[group.key].imgart"
+              *ngIf="selectedVariants[group.key]?.imgart"
               [src]="selectedVariants[group.key].imgart"
               [alt]="group.key"
               loading="lazy"
             />
-            <div class="product-img-placeholder" *ngIf="!selectedVariants[group.key].imgart">
+            <div class="product-img-placeholder" *ngIf="!selectedVariants[group.key]?.imgart">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
             </div>
           </div>
 
           <!-- Info -->
           <div class="product-info">
-            <h3 class="product-name">{{ group.key }}</h3>
+            <h3 class="product-name" [title]="group.key">{{ group.key }}</h3>
             <p class="product-code">Ref: {{ selectedVariants[group.key].codart }}</p>
 
             <!-- Variante / medida -->
@@ -89,8 +126,10 @@
 
             <!-- Precio -->
             <div class="product-price">
-              <span class="price-main">{{ selectedVariants[group.key].pcoart }} €</span>
-              <span class="price-tax">IVA incluido</span>
+              <div class="price-stack">
+                <span class="price-main">{{ selectedVariants[group.key].pcoart }} €</span>
+                <span class="price-tax">IVA incluido</span>
+              </div>
             </div>
           </div>
 
@@ -105,17 +144,20 @@
       <!-- Estado vacío -->
       <div class="empty-state" *ngIf="!isLoading && (filteredGroupedArticles | keyvalue).length === 0">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <h3>Sin resultados</h3>
-        <p>Prueba con otros filtros</p>
-        <button class="btn-clear" (click)="clearFilters()">Limpiar filtros</button>
+        <h3>Sin productos con estos filtros</h3>
+        <p>Prueba a ampliar el rango de precios o seleccionar otras categorías.</p>
+        <button class="btn-clear" (click)="clearFilters()">Restablecer filtros</button>
       </div>
 
-      <!-- Botón Ver más y Centinela de Scroll Infinito -->
+      <!-- Centinela y Botón Cargar Más -->
       <div class="load-more-wrap"
            *ngIf="!isLoading && (filteredGroupedArticles | keyvalue).length > displayedCount">
         <div #infiniteScrollSentinel class="scroll-sentinel" style="height: 1px;"></div>
         <button class="btn-load-more" (click)="loadMore()">
-          Ver más productos
+          <span>Ver más productos</span>
+          <span class="remaining-pill">
+            +{{ (filteredGroupedArticles | keyvalue).length - displayedCount }} restantes
+          </span>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
       </div>

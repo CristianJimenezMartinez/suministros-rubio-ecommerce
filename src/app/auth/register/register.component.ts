@@ -17,6 +17,7 @@ import { PopupComponent } from '../../popup/popup.component';
 export class RegisterComponent {
   user = {
     username: '',
+    name: '',
     surname: '',
     email: '',
     address: '',
@@ -25,11 +26,12 @@ export class RegisterComponent {
     cp: '',
     pob: '',
     prov: '',
-    pais: '',
+    pais: 'España',
     tdc: '',
     password: ''
   };
 
+  showPassword: boolean = false;
   loading: boolean = false;
   showPopup: boolean = false;
   popupMessage: string = '';
@@ -38,48 +40,59 @@ export class RegisterComponent {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  register() {
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  async register() {
     if (this.loading) return;
 
     this.loading = true;
-    // Hashea la contraseña antes de enviarla
-    const saltRounds = 10;
-    const hashedPassword = bcrypt.hashSync(this.user.password, saltRounds);
+    try {
+      // Hashea la contraseña de forma asíncrona sin bloquear el hilo principal
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(this.user.password, saltRounds);
 
-    // Prepara el payload con la contraseña hasheada
-    const payload = {
-      username: this.user.username,
-      surname: this.user.surname,
-      email: this.user.email,
-      address: this.user.address,
-      dni: this.user.dni,
-      telf: this.user.telf,
-      cp: this.user.cp,
-      pob: this.user.pob,
-      prov: this.user.prov,
-      pais: this.user.pais,
-      tdc: this.user.tdc,
-      password: hashedPassword
-    };
+      // Prepara el payload con la contraseña hasheada
+      const payload = {
+        username: this.user.name ? `${this.user.name} ${this.user.surname}`.trim() : this.user.username,
+        name: this.user.name,
+        surname: this.user.surname,
+        email: this.user.email,
+        address: this.user.address,
+        dni: this.user.dni,
+        telf: this.user.telf,
+        cp: this.user.cp,
+        pob: this.user.pob,
+        prov: this.user.prov,
+        pais: this.user.pais || 'España',
+        tdc: this.user.tdc,
+        password: hashedPassword
+      };
 
-    console.log(payload);
+      console.log('Payload de registro:', payload);
 
-    this.authService.register(payload).subscribe({
-      next: () => {
-        // Configura el mensaje y bandera para redirigir en el popup
-        this.popupMessage = 'Usuario registrado correctamente';
-        this.redirectOnAccept = true;
-        this.showPopup = true;
-        this.loading = false; // ya no se carga
-      },
-      error: (err) => {
-        console.error('Error al registrar el usuario:', err);
-        this.popupMessage = 'Hubo un error al registrar el usuario';
-        this.redirectOnAccept = false; // en error, quizá no redirigir o lo rediriges a la misma página
-        this.showPopup = true;
-        this.loading = false; // deshabilita el spinner para permitir otra acción
-      }
-    });
+      this.authService.register(payload).subscribe({
+        next: () => {
+          // Configura el mensaje y bandera para redirigir en el popup
+          this.popupMessage = '¡Usuario registrado correctamente! Ya puedes iniciar sesión.';
+          this.redirectOnAccept = true;
+          this.showPopup = true;
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error al registrar el usuario:', err);
+          this.popupMessage = 'Hubo un error al registrar el usuario. Por favor revisa los datos introducidos.';
+          this.redirectOnAccept = false;
+          this.showPopup = true;
+          this.loading = false;
+        }
+      });
+    } catch (e) {
+      this.loading = false;
+      this.popupMessage = 'Error al procesar la solicitud.';
+      this.showPopup = true;
+    }
   }
 
   // Función para manejar el clic en "Aceptar" del popup

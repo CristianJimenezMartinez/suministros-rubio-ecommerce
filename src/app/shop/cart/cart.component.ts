@@ -97,6 +97,23 @@ export class CartComponent implements OnInit {
     this.loadCart();
   }
 
+  incrementQuantity(item: any): void {
+    this.updateQuantity(item, item.quantity + 1);
+  }
+
+  decrementQuantity(item: any): void {
+    if (item.quantity > 1) {
+      this.updateQuantity(item, item.quantity - 1);
+    } else {
+      this.removeItem(item);
+    }
+  }
+
+  goToShop(): void {
+    this.closeCart();
+    this.router.navigate(['/articulos']);
+  }
+
   continueCheckout(): void {
     this.onStepChange('checkout');
   }

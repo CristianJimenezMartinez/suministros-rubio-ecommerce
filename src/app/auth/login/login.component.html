@@ -3,13 +3,20 @@
   <div class="auth-card">
 
     <!-- Logo / Marca -->
-    <div class="auth-brand">
-      <img src="assets/logo/logo.png" alt="Suministros Rubio" class="auth-logo" />
+    <div class="auth-brand d-flex flex-column align-items-center">
+      <img src="assets/logo/logo-clean.svg" alt="Suministros Rubio" class="auth-logo" />
+      <span class="auth-brand-name mt-2 fw-bold text-dark fs-5">Suministros Rubio</span>
     </div>
 
     <div class="auth-header">
       <h1>Bienvenido de nuevo</h1>
       <p>Accede a tu cuenta para continuar</p>
+    </div>
+
+    <!-- Mensaje de error si falla la autenticación -->
+    <div class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 mb-3 fs-6" *ngIf="errorMessage">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <span>{{ errorMessage }}</span>
     </div>
 
     <form (ngSubmit)="login()" class="auth-form">
@@ -18,9 +25,9 @@
       <div class="form-group">
         <label for="username">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          Nombre de usuario
+          Nombre de usuario o email
         </label>
-        <input id="username" [(ngModel)]="username" name="username" type="text" required placeholder="Tu nombre de usuario" autocomplete="username" />
+        <input id="username" [(ngModel)]="username" name="username" type="text" required placeholder="Tu usuario" autocomplete="username" />
       </div>
 
       <!-- Contraseña -->
@@ -29,12 +36,19 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
           Contraseña
         </label>
-        <input id="password" [(ngModel)]="password" name="password" type="password" required placeholder="Tu contraseña" autocomplete="current-password" />
+        <div class="password-input-wrap">
+          <input id="password" [(ngModel)]="password" name="password" [type]="showPassword ? 'text' : 'password'" required placeholder="Tu contraseña" autocomplete="current-password" />
+          <button type="button" class="btn-pwd-toggle" (click)="togglePasswordVisibility()" aria-label="Ver contraseña">
+            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          </button>
+        </div>
       </div>
 
-      <button type="submit" class="btn-primary-auth">
-        Iniciar sesión
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><polyline points="12 5 19 12 12 19"></polyline></svg>
+      <button type="submit" class="btn-primary-auth" [disabled]="loading || !username || !password">
+        <span *ngIf="!loading">Iniciar sesión</span>
+        <span *ngIf="loading">Comprobando...</span>
+        <svg *ngIf="!loading" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><polyline points="12 5 19 12 12 19"></polyline></svg>
       </button>
 
     </form>

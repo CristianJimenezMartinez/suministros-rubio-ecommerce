@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
+import { FamilyService, Family } from '../../services/family.service';
 import { HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../services/cart.service';
@@ -38,13 +40,14 @@ export interface Article {
 
 @Component({
   selector: 'app-articulos',
-  imports: [HttpClientModule, CommonModule, LoadingComponent],
+  imports: [HttpClientModule, CommonModule, LoadingComponent, FormsModule],
   templateUrl: './articulos.component.html',
   styleUrls: ['./articulos.component.sass'],
   standalone: true
 })
 export class ArticulosComponent implements OnInit, OnDestroy {
   apiService = inject(DataService);
+  familyService = inject(FamilyService);
   cartService = inject(CartService);
   ratesService = inject(RatesService);
 
@@ -60,12 +63,25 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   // Variante seleccionada por cada grupo
   selectedVariants: { [key: string]: Article } = {};
 
-  // Tipos disponibles para filtrar (primeras palabras sin duplicados)
-  availableTypes: string[] = [];
+  // Familias y Categorías reales
+  familyNamesMap: { [code: string]: string } = {};
+  availableFamilies: { code: string; name: string; count: number }[] = [];
+  selectedFamilies: string[] = [];
 
-  // Paginación (al estilo de categorías)
+  // Rango de precio
+  minPriceLimit: number = 0;
+  maxPriceLimit: number = 1000;
+  filterMinPrice: number = 0;
+  filterMaxPrice: number = 1000;
+
+  // Ordenación
+  sortBy: string = 'default';
+
+  // Paginación y control de scroll infinito
   pageSize: number = 12;
   displayedCount: number = 12;
+  autoScrollCount: number = 0;
+  readonly maxAutoScrolls: number = 3;
 
   // Indicadores de carga y modo búsqueda
   isLoading: boolean = true;
@@ -73,7 +89,6 @@ export class ArticulosComponent implements OnInit, OnDestroy {
 
   // Propiedades para el filtro integrado
   isFilterOpen: boolean = true;
-  selectedFilterTypes: string[] = [];
 
   private observer!: IntersectionObserver;
 
@@ -89,6 +104,19 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
+    // Cargar catálogo de familias para nombres legibles
+    this.familyService.getFamily().subscribe({
+      next: (fams) => {
+        fams.forEach(f => {
+          this.familyNamesMap[f.codfam] = f.desfam;
+        });
+        if (this.articles.length > 0) {
+          this.extractFamilies();
+        }
+      },
+      error: () => {}
+    });
+
     this.route.queryParams.subscribe(params => {
       const query = params['query'];
       if (query) {
@@ -319,7 +347,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Método para agrupar artículos y configurar variantes, paginación y filtros
+  // Método para agrupar artículos y configurar variantes, paginación y filtros reales
   private groupArticlesAndSetup(): void {
     this.groupedArticles = this.groupArticles(this.articles);
     for (const key in this.groupedArticles) {
@@ -327,29 +355,111 @@ export class ArticulosComponent implements OnInit, OnDestroy {
         this.selectedVariants[key] = this.groupedArticles[key][0];
       }
     }
-    this.filteredGroupedArticles = { ...this.groupedArticles };
-    this.availableTypes = this.extractArticleTypes(this.articles);
-    // Paginación al estilo "Ver más": los artículos se mostrarán según displayedCount
+
+    // Calcular límites de precio
+    let minP = 999999;
+    let maxP = 0;
+    this.articles.forEach(a => {
+      const p = parseFloat(a.pcoart) || 0;
+      if (p < minP) minP = p;
+      if (p > maxP) maxP = p;
+    });
+    this.minPriceLimit = Math.floor(minP > 0 && minP < 999999 ? minP : 0);
+    this.maxPriceLimit = Math.ceil(maxP > 0 ? maxP : 100);
+    this.filterMinPrice = this.minPriceLimit;
+    this.filterMaxPrice = this.maxPriceLimit;
+
+    this.extractFamilies();
+    this.applyAllFilters();
     this.isLoading = false;
   }
 
-  onFilterChanged(selectedTypes: string[]): void {
-    if (selectedTypes.length === 0) {
-      this.filteredGroupedArticles = { ...this.groupedArticles };
-    } else {
-      const filtered: { [key: string]: Article[] } = {};
-      for (const key in this.groupedArticles) {
-        if (this.groupedArticles.hasOwnProperty(key)) {
-          const firstWord = key.split(' ')[0];
-          if (selectedTypes.includes(firstWord)) {
-            filtered[key] = this.groupedArticles[key];
-          }
+  private extractFamilies(): void {
+    const famCounts: { [code: string]: number } = {};
+    for (const key in this.groupedArticles) {
+      if (this.groupedArticles.hasOwnProperty(key)) {
+        const item = this.selectedVariants[key] || this.groupedArticles[key][0];
+        const code = item?.famart || 'OTROS';
+        famCounts[code] = (famCounts[code] || 0) + 1;
+      }
+    }
+
+    this.availableFamilies = Object.keys(famCounts).map(code => ({
+      code,
+      name: this.familyNamesMap[code] || code,
+      count: famCounts[code]
+    })).sort((a, b) => b.count - a.count);
+  }
+
+  applyAllFilters(): void {
+    const filtered: { [key: string]: Article[] } = {};
+
+    for (const key in this.groupedArticles) {
+      if (this.groupedArticles.hasOwnProperty(key)) {
+        const item = this.selectedVariants[key] || this.groupedArticles[key][0];
+        const price = parseFloat(item.pcoart) || 0;
+        const famCode = item.famart || 'OTROS';
+
+        // Filtro por familia
+        const matchesFamily = this.selectedFamilies.length === 0 || this.selectedFamilies.includes(famCode);
+
+        // Filtro por precio
+        const matchesPrice = price >= this.filterMinPrice && price <= this.filterMaxPrice;
+
+        if (matchesFamily && matchesPrice) {
+          filtered[key] = this.groupedArticles[key];
         }
       }
-      this.filteredGroupedArticles = filtered;
     }
-    // Reiniciar el contador de artículos mostrados al filtrar
+
+    // Ordenación
+    const entries = Object.entries(filtered);
+    if (this.sortBy === 'price-asc') {
+      entries.sort((a, b) => {
+        const pA = parseFloat(this.selectedVariants[a[0]]?.pcoart || '0');
+        const pB = parseFloat(this.selectedVariants[b[0]]?.pcoart || '0');
+        return pA - pB;
+      });
+    } else if (this.sortBy === 'price-desc') {
+      entries.sort((a, b) => {
+        const pA = parseFloat(this.selectedVariants[a[0]]?.pcoart || '0');
+        const pB = parseFloat(this.selectedVariants[b[0]]?.pcoart || '0');
+        return pB - pA;
+      });
+    } else if (this.sortBy === 'name-asc') {
+      entries.sort((a, b) => a[0].localeCompare(b[0]));
+    } else if (this.sortBy === 'name-desc') {
+      entries.sort((a, b) => b[0].localeCompare(a[0]));
+    }
+
+    const sortedObj: { [key: string]: Article[] } = {};
+    for (const [k, v] of entries) {
+      sortedObj[k] = v;
+    }
+
+    this.filteredGroupedArticles = sortedObj;
     this.displayedCount = this.pageSize;
+    this.autoScrollCount = 0;
+  }
+
+  onFamilyCheckboxChange(famCode: string, event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      if (!this.selectedFamilies.includes(famCode)) {
+        this.selectedFamilies.push(famCode);
+      }
+    } else {
+      this.selectedFamilies = this.selectedFamilies.filter(c => c !== famCode);
+    }
+    this.applyAllFilters();
+  }
+
+  onPriceFilterChange(): void {
+    this.applyAllFilters();
+  }
+
+  onSortChange(): void {
+    this.applyAllFilters();
   }
 
   toggleFilter(): void {
@@ -357,30 +467,21 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.selectedFilterTypes = [];
-    this.onFilterChanged([]);
-  }
-
-  onCheckboxChange(event: Event): void {
-    const checkbox = event.target as HTMLInputElement;
-    const value = checkbox.value;
-    if (checkbox.checked) {
-      if (!this.selectedFilterTypes.includes(value)) {
-        this.selectedFilterTypes.push(value);
-      }
-    } else {
-      this.selectedFilterTypes = this.selectedFilterTypes.filter(type => type !== value);
-    }
-    this.onFilterChanged(this.selectedFilterTypes);
+    this.selectedFamilies = [];
+    this.filterMinPrice = this.minPriceLimit;
+    this.filterMaxPrice = this.maxPriceLimit;
+    this.sortBy = 'default';
+    this.applyAllFilters();
   }
 
   private setupIntersectionObserver(element: ElementRef): void {
     this.observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !this.isLoading) {
+      if (entries[0].isIntersecting && !this.isLoading && this.autoScrollCount < this.maxAutoScrolls) {
+        this.autoScrollCount++;
         this.loadMore();
       }
     }, {
-      rootMargin: '300px'
+      rootMargin: '200px'
     });
     this.observer.observe(element.nativeElement);
   }
