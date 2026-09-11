@@ -1,0 +1,47 @@
+<!-- login.component.html -->
+<div class="auth-page">
+  <div class="auth-card">
+
+    <!-- Logo / Marca -->
+    <div class="auth-brand">
+      <img src="assets/logo/logo.png" alt="Suministros Rubio" class="auth-logo" />
+    </div>
+
+    <div class="auth-header">
+      <h1>Bienvenido de nuevo</h1>
+      <p>Accede a tu cuenta para continuar</p>
+    </div>
+
+    <form (ngSubmit)="login()" class="auth-form">
+
+      <!-- Usuario -->
+      <div class="form-group">
+        <label for="username">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Nombre de usuario
+        </label>
+        <input id="username" [(ngModel)]="username" name="username" type="text" required placeholder="Tu nombre de usuario" autocomplete="username" />
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="password">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Contraseña
+        </label>
+        <input id="password" [(ngModel)]="password" name="password" type="password" required placeholder="Tu contraseña" autocomplete="current-password" />
+      </div>
+
+      <button type="submit" class="btn-primary-auth">
+        Iniciar sesión
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+
+    </form>
+
+    <div class="auth-footer">
+      <p>¿No tienes cuenta? <a routerLink="/register">Regístrate gratis</a></p>
+    </div>
+
+  </div>
+</div>

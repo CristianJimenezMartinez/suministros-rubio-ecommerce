@@ -1,0 +1,81 @@
+<div class="categorias-container">
+  <div class="main-layout">
+
+    <!-- Panel de filtros -->
+    <div class="filter-panel">
+      <h3 class="toggle-filter" (click)="toggleFilter()">
+        Filtros
+        <span *ngIf="isFilterOpen">&#9650;</span>
+        <span *ngIf="!isFilterOpen">&#9660;</span>
+      </h3>
+      <div class="filter-group" *ngIf="isFilterOpen">
+        <fieldset>
+          <legend>Filtrar por letra:</legend>
+          <ul>
+            <li *ngFor="let type of availableTypes">
+              <label>
+                <input
+                  type="checkbox"
+                  [value]="type"
+                  (change)="onCheckboxChange($event)"
+                  id="{{ type }}"
+                />
+                <span>{{ type }}</span>
+              </label>
+            </li>
+          </ul>
+        </fieldset>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="content">
+
+      <!-- Título dinámico -->
+      <div class="title-card" *ngIf="!isLoading">
+  <!-- Hay categorías: título principal -->
+  <h1 *ngIf="filteredFamilies && filteredFamilies.length">
+    Explora nuestras categorías
+  </h1>
+
+  <!-- No hay categorías: mensaje genérico -->
+  <h1 *ngIf="!filteredFamilies || filteredFamilies.length === 0">
+    Algo no ocurrió como se esperaba
+  </h1>
+
+  <!-- Detalle de error (opcional) -->
+  <p *ngIf="errorMessage" class="error-detail">
+    {{ errorMessage }}
+  </p>
+</div>
+      <!-- Spinner de carga -->
+      <app-loading *ngIf="isLoading"></app-loading>
+
+      <!-- Lista de categorías -->
+      <section class="categories" *ngIf="!isLoading && filteredFamilies?.length">
+  <div
+    class="category-card"
+    *ngFor="let fam of filteredFamilies | slice: 0 : displayedCount; trackBy: trackFam"
+  >
+    <h3>{{ fam.desfam }}</h3>
+
+    <img
+      [src]="fam.imageUrl || 'assets/img/placeholder.png'"
+      [alt]="'Imagen de ' + fam.desfam"
+      loading="lazy"
+    />
+
+    <button (click)="goToArticles(fam.codfam)">Ver Artículos</button>
+  </div>
+</section>
+
+      <!-- Botón “Ver más” -->
+      <div
+        class="load-more"
+        *ngIf="!isLoading && filteredFamilies.length > displayedCount"
+      >
+        <button (click)="loadMore()">Ver más</button>
+      </div>
+    </div>
+  </div>
+</div>

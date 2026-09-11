@@ -1,0 +1,38 @@
+@use '../../../../_variables' as *
+
+.cookie-banner 
+  position: fixed
+  bottom: 0
+  left: 20%
+  right: 20%
+  background-color: rgba(0, 0, 0, 0.6)
+  color: white
+  display: flex
+  align-items: center
+  justify-content: space-between
+  padding: 1rem 2rem
+  max-width: auto
+  z-index: 10000
+
+  &__text 
+    font-size: 0.9rem;
+    a 
+      text-decoration: underline;
+      color: $yellow-color;
+      &:hover 
+        color: $primary-hover-color-button
+      
+    
+  
+
+  .btn-accept 
+    background-color: $yellow-color
+    color: black
+    border: none
+    padding: 0.5rem 1rem
+    border-radius: 0.25rem
+    cursor: pointer
+    transition: background-color 0.3s
+
+    &:hover 
+      background-color: $primary-hover-color-button

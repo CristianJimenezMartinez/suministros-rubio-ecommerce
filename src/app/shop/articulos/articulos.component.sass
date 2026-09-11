@@ -1,0 +1,394 @@
+@use '../../../_variables' as *
+
+// ─── PÁGINA PRINCIPAL ──────────────────────────────────────────────
+.articulos-page
+  display: flex
+  flex-direction: column
+  min-height: calc(100vh - 80px)
+  background-color: #f8fafc
+
+// ─── BARRA SUPERIOR ────────────────────────────────────────────────
+.articulos-topbar
+  display: flex
+  align-items: center
+  justify-content: space-between
+  padding: 1.25rem 2rem
+  background: #ffffff
+  border-bottom: 1px solid #e2e8f0
+  position: sticky
+  top: 80px
+  z-index: 10
+
+  .topbar-left
+    display: flex
+    align-items: baseline
+    gap: 1rem
+
+    h1
+      font-size: 1.4rem
+      font-weight: 700
+      color: #0f172a
+      margin: 0
+
+    .result-count
+      font-size: 0.88rem
+      color: #64748b
+      font-weight: 500
+
+  .btn-filter-toggle
+    display: none
+    align-items: center
+    gap: 0.4rem
+    padding: 0.5rem 1rem
+    background: #f1f5f9
+    border: 1px solid #e2e8f0
+    border-radius: 8px
+    font-size: 0.9rem
+    font-weight: 600
+    color: #374151
+    cursor: pointer
+    transition: all 0.2s ease
+    position: relative
+
+    &:hover
+      background: var(--primary-color)
+      color: white
+      border-color: var(--primary-color)
+
+    .filter-badge
+      position: absolute
+      top: -6px
+      right: -6px
+      background: var(--primary-color)
+      color: white
+      font-size: 0.7rem
+      font-weight: 700
+      min-width: 18px
+      height: 18px
+      padding: 0 4px
+      border-radius: 10px
+      display: flex
+      align-items: center
+      justify-content: center
+
+  @media (max-width: 768px)
+    .btn-filter-toggle
+      display: flex
+
+// ─── CUERPO: SIDEBAR + CONTENIDO ──────────────────────────────────
+.articulos-body
+  display: flex
+  flex: 1
+  gap: 0
+
+// ─── SIDEBAR FILTROS ──────────────────────────────────────────────
+.filter-sidebar
+  width: 260px
+  flex-shrink: 0
+  background: #ffffff
+  border-right: 1px solid #e2e8f0
+  padding: 1.5rem 1.25rem
+  position: sticky
+  top: calc(80px + 61px) // header + topbar
+  height: calc(100vh - 80px - 61px)
+  overflow-y: auto
+
+  // Scrollbar elegante
+  &::-webkit-scrollbar
+    width: 4px
+  &::-webkit-scrollbar-track
+    background: transparent
+  &::-webkit-scrollbar-thumb
+    background: #cbd5e1
+    border-radius: 4px
+
+  @media (max-width: 768px)
+    position: fixed
+    top: 0
+    left: -280px
+    height: 100vh
+    z-index: 200
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1)
+    box-shadow: none
+    padding-top: 2rem
+
+    &.open
+      left: 0
+      box-shadow: 4px 0 20px rgba(0,0,0,0.15)
+
+.filter-header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  margin-bottom: 1.5rem
+
+  h3
+    font-size: 1rem
+    font-weight: 700
+    color: #0f172a
+    margin: 0
+
+  .clear-filters
+    font-size: 0.78rem
+    color: var(--primary-color)
+    font-weight: 600
+    background: none
+    border: none
+    cursor: pointer
+    padding: 0
+    transition: color 0.2s
+
+    &:hover
+      color: #047857
+
+.filter-section
+  margin-bottom: 1.5rem
+
+  .filter-section-title
+    font-size: 0.78rem
+    font-weight: 700
+    color: #64748b
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    margin: 0 0 0.75rem 0
+
+.filter-tags
+  display: flex
+  flex-wrap: wrap
+  gap: 0.5rem
+
+.filter-tag
+  display: inline-flex
+  align-items: center
+  cursor: pointer
+
+  input[type="checkbox"]
+    display: none
+
+  span
+    padding: 0.3rem 0.7rem
+    border: 1.5px solid #e2e8f0
+    border-radius: 20px
+    font-size: 0.8rem
+    font-weight: 500
+    color: #475569
+    transition: all 0.2s ease
+    background: #f8fafc
+
+  input:checked + span
+    background: var(--primary-color)
+    border-color: var(--primary-color)
+    color: white
+
+  &:hover span
+    border-color: var(--primary-color)
+    color: var(--primary-color)
+
+// Overlay móvil
+.filter-overlay
+  display: none
+
+  @media (max-width: 768px)
+    display: block
+    position: fixed
+    inset: 0
+    background: rgba(0,0,0,0.4)
+    z-index: 199
+    backdrop-filter: blur(2px)
+
+// ─── CONTENIDO PRINCIPAL ──────────────────────────────────────────
+.articulos-content
+  flex: 1
+  padding: 2rem
+  min-width: 0
+
+// ─── GRID DE PRODUCTOS ────────────────────────────────────────────
+.products-grid
+  display: grid
+  grid-template-columns: repeat(4, 1fr)
+  gap: 1.25rem
+
+  @media (max-width: 1200px)
+    grid-template-columns: repeat(3, 1fr)
+  @media (max-width: 900px)
+    grid-template-columns: repeat(2, 1fr)
+  @media (max-width: 480px)
+    grid-template-columns: 1fr
+
+// ─── TARJETA DE PRODUCTO ──────────────────────────────────────────
+.product-card
+  background: #ffffff
+  border: 1px solid #e2e8f0
+  border-radius: 12px
+  display: flex
+  flex-direction: column
+  overflow: hidden
+  transition: all 0.25s ease
+  position: relative
+
+  &:hover
+    transform: translateY(-3px)
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1)
+    border-color: var(--primary-color)
+
+.product-img-wrap
+  width: 100%
+  height: 160px
+  background: #f8fafc
+  display: flex
+  align-items: center
+  justify-content: center
+  overflow: hidden
+  border-bottom: 1px solid #f1f5f9
+
+  img
+    width: 100%
+    height: 100%
+    object-fit: contain
+    padding: 0.5rem
+    transition: transform 0.3s ease
+
+  &:hover img
+    transform: scale(1.04)
+
+.product-img-placeholder
+  color: #cbd5e1
+  display: flex
+  align-items: center
+  justify-content: center
+  width: 100%
+  height: 100%
+
+.product-info
+  padding: 0.9rem
+  flex: 1
+  display: flex
+  flex-direction: column
+  gap: 0.35rem
+
+.product-name
+  font-size: 0.85rem
+  font-weight: 600
+  color: #1e293b
+  margin: 0
+  line-height: 1.3
+  display: -webkit-box
+  -webkit-line-clamp: 2
+  -webkit-box-orient: vertical
+  overflow: hidden
+
+.product-code
+  font-size: 0.75rem
+  color: #94a3b8
+  margin: 0
+
+.product-variant
+  font-size: 0.8rem
+  padding: 0.3rem 0.5rem
+  border: 1px solid #e2e8f0
+  border-radius: 6px
+  background: #f8fafc
+  color: #374151
+  cursor: pointer
+  margin-top: 0.25rem
+  width: 100%
+
+  &:focus
+    outline: none
+    border-color: var(--primary-color)
+
+.product-price
+  display: flex
+  align-items: baseline
+  gap: 0.4rem
+  margin-top: auto
+  padding-top: 0.5rem
+
+  .price-main
+    font-size: 1.05rem
+    font-weight: 700
+    color: #0f172a
+
+  .price-tax
+    font-size: 0.72rem
+    color: #94a3b8
+
+.btn-add-cart
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 0.4rem
+  width: 100%
+  padding: 0.6rem
+  background: var(--accent-color)
+  color: #000
+  border: none
+  font-size: 0.82rem
+  font-weight: 600
+  cursor: pointer
+  transition: all 0.2s ease
+
+  &:hover
+    background: var(--accent-hover)
+    transform: none
+
+  svg
+    flex-shrink: 0
+
+// ─── ESTADO VACÍO ─────────────────────────────────────────────────
+.empty-state
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  gap: 1rem
+  padding: 4rem 2rem
+  text-align: center
+  color: #94a3b8
+
+  h3
+    font-size: 1.2rem
+    font-weight: 600
+    color: #475569
+    margin: 0
+
+  p
+    font-size: 0.9rem
+    margin: 0
+
+  .btn-clear
+    padding: 0.6rem 1.5rem
+    background: var(--primary-color)
+    color: white
+    border: none
+    border-radius: 8px
+    font-weight: 600
+    cursor: pointer
+    transition: all 0.2s ease
+
+    &:hover
+      background: #059669
+
+// ─── VER MÁS ──────────────────────────────────────────────────────
+.load-more-wrap
+  display: flex
+  justify-content: center
+  padding: 2rem 0
+
+  .btn-load-more
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    padding: 0.7rem 2rem
+    background: white
+    border: 2px solid var(--primary-color)
+    color: var(--primary-color)
+    font-size: 0.9rem
+    font-weight: 600
+    border-radius: 10px
+    cursor: pointer
+    transition: all 0.25s ease
+
+    &:hover
+      background: var(--primary-color)
+      color: white

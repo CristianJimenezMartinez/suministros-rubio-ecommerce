@@ -1,0 +1,81 @@
+<!-- src/app/payment/payment.component.html -->
+ <app-loading *ngIf="processing"></app-loading>
+<div class="payment" [class.dimmed]="processing">
+  <!-- Selección de método en acordeón -->
+  <div class="method-selector">
+
+    <!-- Stripe -->
+    <!-- <div class="dropdown">
+      <div
+        class="dropdown-header"
+        [class.active]="selectedMethod==='stripe'"
+        (click)="selectMethod('stripe')"
+      >
+        <span>Pagar con Tarjeta</span>
+        <i class="arrow" [class.open]="selectedMethod==='stripe'"></i>
+      </div>
+      <div class="dropdown-body" *ngIf="selectedMethod==='stripe'">
+        <form (submit)="payStripe($event)">
+          <ngx-stripe-card
+            [options]="cardOptions"
+            [elementsOptions]="elementsOptions"
+          ></ngx-stripe-card>
+          <div class="actions">
+            <button type="submit" [disabled]="processing">
+              {{ processing ? 'Procesando...' : 'Confirmar con Tarjeta' }}
+            </button>
+            <button type="button" (click)="onCancel()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div> -->
+
+<!-- PayPal -->
+    <div class="dropdown">
+      <div
+        class="dropdown-header"
+        [class.active]="selectedMethod==='paypal'"
+        (click)="selectMethod('paypal')"
+      >
+        <span>Pagar con PayPal</span>
+        <i class="arrow" [class.open]="selectedMethod==='paypal'"></i>
+      </div>
+      <div class="dropdown-body" *ngIf="selectedMethod==='paypal'">
+        <div id="paypal-button-container"></div>
+        <div class="actions">
+          <button *ngIf="processing" disabled>Procesando...</button>
+          <button *ngIf="!processing" type="button" (click)="onCancel()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Redsys -->
+    <div class="dropdown">
+      <div
+        class="dropdown-header"
+        [class.active]="selectedMethod==='redsys'"
+        (click)="selectMethod('redsys')"
+      >
+        <span>Pagar con Tarjeta (Redsys)</span>
+        <i class="arrow" [class.open]="selectedMethod==='redsys'"></i>
+      </div>
+      <div class="dropdown-body" *ngIf="selectedMethod==='redsys'">
+        <div id="redsys-card-form"></div>
+        <input type="hidden" id="redsys-token" />
+        <input type="hidden" id="redsys-error" />
+
+        <div class="actions">
+          <button type="button" (click)="onCancel()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p *ngIf="!selectedMethod" class="choose-method">
+    Por favor, selecciona un método de pago.
+  </p>
+  <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
+</div>
+
+    

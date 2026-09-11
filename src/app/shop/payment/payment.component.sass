@@ -1,0 +1,97 @@
+// src/app/payment/payment.component.sass
+@use '../../../_variables' as *
+
+.payment
+  .method-selector
+    background: $dropdown-bg
+    border-radius: 4px
+    overflow: hidden
+    box-shadow: 0 2px 4px $dropdown-shadow
+
+    .dropdown
+      margin-bottom: 8px
+
+      &:last-child
+        margin-bottom: 0
+
+      .dropdown-header
+        display: flex
+        justify-content: space-between
+        align-items: center
+        padding: 12px 16px
+        cursor: pointer
+        background-color: $dropdown-bg
+        border: 1px solid $dropdown-border
+        color: #333
+        user-select: none
+        transition: background-color 0.2s, color 0.2s
+
+        &.active
+          background-color: $primary-color
+          color: #fff
+
+          .arrow
+            border-top-color: #fff
+
+        .arrow
+          display: inline-block
+          width: 0
+          height: 0
+          border-left: 6px solid transparent
+          border-right: 6px solid transparent
+          border-top: 6px solid currentColor
+          transition: transform 0.2s
+
+          &.open
+            transform: rotate(180deg)
+
+      .dropdown-body
+        border-top: none
+        border: 1px solid $dropdown-border
+        padding: 16px
+        background-color: $dropdown-bg
+        box-shadow: 0 2px 4px $dropdown-shadow
+
+        form
+          display: flex
+          flex-direction: column
+          gap: 16px
+
+        .paypal-section
+          display: flex
+          flex-direction: column
+          gap: 16px
+
+        .actions
+          text-align: right
+
+          button
+            padding: 8px 16px
+            font-size: 1rem
+            cursor: pointer
+            background-color: $primary-color
+            border: none
+            color: white
+            border-radius: 4px
+            transition: background-color 0.3s
+
+            &:hover
+              background-color: $primary-hover
+
+  .choose-method
+    margin: 12px 0
+    color: #666
+
+  #redsys-card-form
+    margin-bottom: 1.5rem
+    min-height: 220px
+    display: block
+    width: 100%
+
+.payment
+  position: relative
+
+.payment.dimmed
+  opacity: 0.5
+  pointer-events: none
+  

@@ -1,0 +1,87 @@
+<div class="cart-container" *ngIf="currentStep !== 'none'">
+  <div class="cart-popup">
+    <button class="close-button" (click)="closeCart()">X</button>
+
+    <!-- Vista del Carrito -->
+    <div *ngIf="currentStep === 'cart'" class="cart">
+      <h2>Tus Productos</h2>
+
+      <div *ngIf="items.length === 0">
+        <p>Tu carrito está vacío.</p>
+      </div>
+
+      <div *ngIf="items.length > 0">
+        <section class="categories">
+          <div class="category-card" *ngFor="let item of items">
+            <img *ngIf="item.img" [src]="item.img" alt="Imagen de {{ item.name }}">
+            <h3>{{ item.name }}</h3>
+            <p>Precio unitario: {{ item.price.toFixed(2) }} €</p>
+
+            <div class="quantity-control">
+              <label>Cantidad:</label>
+              <input
+                #qtyInput
+                type="number"
+                min="1"
+                [value]="item.quantity"
+                (change)="updateQuantity(item, qtyInput.valueAsNumber)"
+              />
+            </div>
+
+            <p>Subtotal artículo: {{ ((item.price * item.quantity).toFixed(2)) }} €</p>
+            <button (click)="removeItem(item)">Eliminar</button>
+          </div>
+        </section>
+
+        <div class="total">
+          <p>Subtotal productos: {{ subtotal }} €</p>
+          <p>
+             Envío:
+             <ng-container *ngIf="shippingCost > 0">
+               {{ shippingCost.toFixed(2)}} €
+             </ng-container>
+             <ng-container *ngIf="shippingCost === 0">
+               Gratis (recogida en tienda)
+             </ng-container>
+           </p>
+          <hr>
+          <p><strong>Total con envío: {{ total.toFixed(2) }} €</strong></p>
+        </div>
+
+        <div class="continue">
+          <button (click)="continueCheckout(); $event.stopPropagation()">Continuar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista del Checkout -->
+    <div *ngIf="currentStep === 'checkout'" class="checkout">
+      <app-checkout
+        [cartItems]="items"
+        (checkoutCompleted)="handleCheckoutCompleted($event)"
+        (cancelCheckout)="onStepChange('cart')"
+      ></app-checkout>
+    </div>
+
+    <!-- Vista de Pago -->
+    <div *ngIf="currentStep === 'payment'" class="payment">
+      <app-payment
+        [cartItems]="cartItemsForPayment"
+        [order]="orderToPay" 
+        [shippingData]="checkoutData.shippingData"
+        [shippingMethod]="checkoutData.shippingMethod"
+        [shippingCost]="checkoutData.shippingCost"
+        (paymentConfirmed)="handlePaymentConfirmed($event)"
+        (paymentError)="handlePaymentError($event)"
+        (cancel)="onStepChange('checkout')"
+      ></app-payment>
+    </div>
+  </div>
+
+</div>
+<app-loading *ngIf="loading$ | async" class="global-spinner"></app-loading>
+<app-popup
+  *ngIf="showPopup"
+  [message]="popupMessage"
+  (accepted)="closePopup()"
+></app-popup>

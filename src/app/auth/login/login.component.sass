@@ -1,0 +1,237 @@
+@use '../../../_variables' as *
+
+// ─── FONDO DE PÁGINA AUTH ──────────────────────────────
+.auth-page
+  min-height: 100vh
+  display: flex
+  align-items: center
+  justify-content: center
+  background: linear-gradient(135deg, #f0fdf8 0%, #e6f7f1 50%, #f8fafc 100%)
+  padding: 2rem 1rem
+
+// ─── TARJETA CENTRAL ───────────────────────────────────
+.auth-card
+  background: #ffffff
+  border-radius: 20px
+  box-shadow: 0 8px 40px rgba(16, 185, 129, 0.1), 0 2px 12px rgba(0, 0, 0, 0.06)
+  padding: 2.5rem 2.25rem
+  width: 100%
+  max-width: 440px
+  border: 1px solid rgba(16, 185, 129, 0.12)
+  animation: cardIn 0.4s ease-out
+
+@keyframes cardIn
+  from
+    opacity: 0
+    transform: translateY(16px)
+  to
+    opacity: 1
+    transform: translateY(0)
+
+// ─── LOGO / MARCA ──────────────────────────────────────
+.auth-brand
+  text-align: center
+  margin-bottom: 1.5rem
+
+.auth-logo
+  height: 56px
+  width: auto
+  object-fit: contain
+
+// ─── CABECERA DE FORMULARIO ────────────────────────────
+.auth-header
+  text-align: center
+  margin-bottom: 2rem
+
+  h1
+    font-size: 1.5rem
+    font-weight: 700
+    color: #0f172a
+    margin: 0 0 0.35rem 0
+
+  p
+    font-size: 0.9rem
+    color: #64748b
+    margin: 0
+
+// ─── FORMULARIO ────────────────────────────────────────
+.auth-form
+  display: flex
+  flex-direction: column
+  gap: 1.25rem
+
+.form-group
+  display: flex
+  flex-direction: column
+  gap: 0.4rem
+
+  label
+    display: flex
+    align-items: center
+    gap: 0.4rem
+    font-size: 0.85rem
+    font-weight: 600
+    color: #374151
+
+    svg
+      color: var(--primary-color)
+      flex-shrink: 0
+
+  input
+    padding: 0.7rem 1rem
+    font-size: 0.95rem
+    border: 1.5px solid #e2e8f0
+    border-radius: 10px
+    outline: none
+    background-color: #f8fafc
+    transition: all 0.25s ease
+    color: #0f172a
+    width: 100%
+
+    &::placeholder
+      color: #94a3b8
+
+    &:focus
+      border-color: var(--primary-color)
+      background-color: #ffffff
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12)
+
+// ─── BOTÓN PRIMARIO ────────────────────────────────────
+.btn-primary-auth
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 0.5rem
+  width: 100%
+  padding: 0.8rem 1.5rem
+  background: linear-gradient(135deg, var(--primary-color), #059669)
+  color: white
+  border: none
+  border-radius: 10px
+  font-size: 1rem
+  font-weight: 600
+  cursor: pointer
+  transition: all 0.25s ease
+  margin-top: 0.5rem
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3)
+
+  &:hover
+    background: linear-gradient(135deg, #059669, #047857)
+    transform: translateY(-1px)
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4)
+
+  &:active
+    transform: translateY(0)
+
+  svg
+    transition: transform 0.2s ease
+
+  &:hover svg
+    transform: translateX(3px)
+
+// ─── PIE DEL FORMULARIO ────────────────────────────────
+.auth-footer
+  text-align: center
+  margin-top: 1.5rem
+  padding-top: 1.5rem
+  border-top: 1px solid #f1f5f9
+
+  p
+    font-size: 0.88rem
+    color: #64748b
+    margin: 0
+
+  a
+    color: var(--primary-color)
+    font-weight: 600
+    text-decoration: none
+    transition: color 0.2s ease
+
+    &:hover
+      color: #047857
+      text-decoration: underline
+
+
+/* Cada contenedor se posiciona en el centro de la pantalla */
+.login-container, .register-container, .profile-container
+  position: absolute
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)  // Centrado vertical y horizontal
+  max-width: 400px
+  width: 90%                // Ajusta para que no se desborde en pantallas pequeñas
+  padding: 20px
+  border: 1px solid $border-color
+  border-radius: 8px
+  background-color: #f9f9f9
+
+h2
+  text-align: center
+  font-size: 1.5rem
+  margin-bottom: 1.5rem
+
+form
+  display: flex
+  flex-direction: column
+  gap: 1.5rem
+
+/* Input styles */
+input
+  padding: 10px
+  font-size: 1rem
+  border: 1px solid #ccc
+  border-radius: 4px
+  width: 100%
+
+  &:focus
+    outline: none
+    border-color: $primary-color
+
+/* Button styles */
+button
+  padding: 10px
+  font-size: 1rem
+  background-color: $primary-color
+  color: white
+  border: none
+  border-radius: 4px
+  cursor: pointer
+  width: 100%
+
+  &:hover
+    background-color: $primary-hover-color
+
+p
+  text-align: center
+
+a
+  color: $primary-color
+  text-decoration: none
+  font-size: 1rem
+  transition: color 0.3s
+
+  &:hover
+    text-decoration: underline
+    color: $primary-hover-color
+
+/* Estilos para los botones de login y register */
+.user-section
+  margin-left: auto
+  display: flex
+  gap: 0
+  align-items: center
+
+  a
+    background-color: $yellow-color
+    color: black
+    font-size: 1rem
+    text-decoration: none
+    padding: 8px 16px
+    border-radius: 4px
+    border: 1px solid $yellow-color
+    transition: background-color 0.3s, color 0.3s
+    margin-right: 0
+
+    &:hover
+      background-color: $primary-hover-color-button
+      color: white

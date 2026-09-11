@@ -1,0 +1,6 @@
+<div class="cookie-banner d-flex align-items-center justify-content-between px-4 py-3" *ngIf="!(consent$ | async)">
+  <div class="cookie-banner__text">
+Esta web usa cookies técnicas estrictamente necesarias para su correcto funcionamiento. Además, utilizamos otras cookies adicionales para mejorar el servicio, personalizar contenidos y cumplir con requisitos legales.    <a routerLink="/politica-cookies" class="ml-2">Más información</a>
+  </div>
+  <button class="btn btn-sm btn-accept" (click)="accept()">Aceptar</button>
+</div>
