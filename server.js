@@ -25,7 +25,12 @@ app.use((req, res, next) => {
   next();
 });
 
+const path = require('path');
+
 app.use(express.json());
+
+// Serve static assets (images, logos, factusol photos)
+app.use('/assets', express.static(path.join(__dirname, 'src/assets')));
 
 // Logger
 app.use((req, res, next) => {
