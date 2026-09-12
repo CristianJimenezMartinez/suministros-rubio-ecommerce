@@ -6,13 +6,17 @@ import type { PaymentIntent } from '@stripe/stripe-js';
 import { environment } from '../../enviroments/environment';
 
 export interface ShippingData {
-  fullName:  string;
-  address:   string;
-  city:      string;
-  postalCode:string;
-  country:   string;
-  phone:     string;
-  email:     string;
+  fullName:     string;
+  address:      string;
+  city:         string;
+  postalCode:   string;
+  country:      string;
+  phone:        string;
+  email:        string;
+  nif?:         string;
+  customerType?: string;
+  companyName?: string;
+  province?:    string;
 }
 
 export type PaymentMethodType = 'stripe' | 'paypal' | 'redsys';
@@ -31,6 +35,9 @@ export interface ProcessOrderResponse {
   rawResult?: any;
   paymentIntent?: PaymentIntent;
   pedidoId?: number;
+  orderNumber?: string;
+  message?: string;
+  success?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

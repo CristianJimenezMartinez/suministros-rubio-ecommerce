@@ -93,7 +93,29 @@ export class PaymentComponent implements OnInit, OnDestroy {
     private loading: LoadingService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.ensureOrderTotals();
+  }
+
+  ensureOrderTotals(): void {
+    if (!this.order) return;
+    const shipping = Number(this.shippingCost != null ? this.shippingCost : (this.order.shippingCost || 0));
+    if (!this.order.cabecera) {
+      this.order.cabecera = {};
+    }
+    this.order.cabecera.ipor1pcl = parseFloat(shipping.toFixed(2));
+
+    if (this.order.total != null && this.order.total > 0) {
+      this.order.cabecera.totpcl = parseFloat(Number(this.order.total).toFixed(2));
+    } else {
+      const net = Number(this.order.cabecera.net1pcl || 0);
+      const iva = Number(this.order.cabecera.iiva1pcl || 0);
+      const gross = Number(this.order.cabecera.totpcl || (net + iva));
+      const calculatedTotal = parseFloat((gross + shipping).toFixed(2));
+      this.order.cabecera.totpcl = calculatedTotal;
+      this.order.total = calculatedTotal;
+    }
+  }
 
   ngOnDestroy(): void {
     if (this.redsysListener) {
@@ -121,6 +143,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   private renderRedsysForm() {
     if (!this.order || typeof window.getInSiteForm !== 'function') return;
+    this.ensureOrderTotals();
     window.getInSiteForm(
       'redsys-card-form','','','','',
       'Pagar con Redsys',
@@ -170,6 +193,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   private confirmRedsysPayment(idOper: string) {
     this.loading.show();
+    this.ensureOrderTotals();
     const payload: ProcessOrderPayload = {
       order: this.order,
       paymentMethodId: idOper,
@@ -178,8 +202,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
       shippingCost: this.shippingCost,
       paymentMethodType: 'redsys'
     };
-    this.paymentService.processOrder(payload).subscribe({
-      next: ({ rawResult }) => this.onSuccess(idOper, rawResult),
+    this.paymentService.processGlobal(payload).subscribe({
+      next: (resp: any) => this.onSuccess(idOper, resp?.rawResult || resp),
       error: () => {
         this.loading.hide();
         this.paymentError.emit('Error backend Redsys');
@@ -192,6 +216,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     e.preventDefault();
     this.loading.show();
     this.errorMessage = '';
+    this.ensureOrderTotals();
 
     const pmData = {
       type:'card',
@@ -229,14 +254,14 @@ export class PaymentComponent implements OnInit, OnDestroy {
             if (con.error || con.paymentIntent?.status!=='succeeded') {
               throw con.error||new Error('3D Secure no completado');
             }
-            this.onSuccess(pm, con.paymentIntent);
+            this.onSuccess(pm, con.paymentIntent || resp);
           })
           .catch(err => {
             this.loading.hide();
             this.paymentError.emit(err.message||'Error 3D Secure');
           });
         } else {
-          this.onSuccess(pm, resp.paymentIntent!);
+          this.onSuccess(pm, resp.paymentIntent || resp);
         }
       },
       error: err => {
@@ -274,11 +299,13 @@ export class PaymentComponent implements OnInit, OnDestroy {
   },
 
   createOrder: (_data: unknown, actions: any) => {
-    const amount = (
-      this.order.cabecera.net1pcl +
-      this.order.cabecera.iiva1pcl +
-      this.shippingCost
-    ).toFixed(2);
+    this.ensureOrderTotals();
+    const totalAmount = this.order?.cabecera?.totpcl ?? (
+      Number(this.order?.cabecera?.net1pcl || 0) +
+      Number(this.order?.cabecera?.iiva1pcl || 0) +
+      Number(this.shippingCost || 0)
+    );
+    const amount = Number(totalAmount).toFixed(2);
     return actions.order.create({
       purchase_units: [{ amount: { currency_code: 'EUR', value: amount } }]
     });
@@ -286,6 +313,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   onApprove: async (_data: unknown, actions: any) => {
     try {
+      this.ensureOrderTotals();
       const capture = await actions.order.capture();
       const payload: ProcessOrderPayload = {
         order: this.order,
@@ -296,7 +324,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
         paymentMethodType: 'paypal'
       };
       this.paymentService.processOrder(payload).subscribe({
-        next: () => this.onSuccess(capture.id, capture),
+        next: (resp: any) => this.onSuccess(capture.id, resp?.pedidoId != null ? resp : capture),
         error: () => {
           this.loading.hide();
           this.paymentError.emit('Error backend PayPal');

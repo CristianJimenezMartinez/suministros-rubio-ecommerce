@@ -1,44 +1,69 @@
 <div class="checkout-container">
   <h2>Finalizar Compra</h2>
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
   <form (ngSubmit)="submitCheckout()" #checkoutForm="ngForm">
+    <!-- Tipo de Cliente -->
+    <div class="form-group">
+      <label for="customerType">Tipo de cliente <span class="required-star">*</span>:</label>
+      <select id="customerType" name="customerType" [(ngModel)]="shippingData.customerType" required>
+        <option value="particular">Particular</option>
+        <option value="empresa">Empresa / Autónomo</option>
+      </select>
+    </div>
+
+    <!-- Razón Social / Nombre Comercial (solo si es Empresa/Autónomo) -->
+    <div class="form-group" *ngIf="shippingData.customerType === 'empresa'">
+      <label for="companyName">Razón Social / Nombre Comercial (opcional):</label>
+      <input type="text" id="companyName" name="companyName" [(ngModel)]="shippingData.companyName" placeholder="Ej. Mi Empresa S.L.">
+    </div>
+
+    <!-- NIF / CIF / NIE Obligatorio -->
+    <div class="form-group">
+      <label for="nif">NIF / CIF / NIE <span class="required-star">*</span>:</label>
+      <input type="text" id="nif" name="nif" [(ngModel)]="shippingData.nif" required placeholder="Ej. 12345678Z o B12345678">
+    </div>
+
     <!-- Datos de Envío -->
     <div class="form-group">
-      <label>Nombre completo:</label>
-      <input type="text" name="fullName" [(ngModel)]="shippingData.fullName" required>
+      <label for="fullName">Nombre completo <span class="required-star">*</span>:</label>
+      <input type="text" id="fullName" name="fullName" [(ngModel)]="shippingData.fullName" required>
     </div>
     <div class="form-group">
-      <label>Dirección:</label>
-      <input type="text" name="address" [(ngModel)]="shippingData.address" required>
+      <label for="address">Dirección <span class="required-star">*</span>:</label>
+      <input type="text" id="address" name="address" [(ngModel)]="shippingData.address" required>
     </div>
     <div class="form-group">
-      <label>Ciudad:</label>
-      <input type="text" name="city" [(ngModel)]="shippingData.city" required>
+      <label for="city">Ciudad <span class="required-star">*</span>:</label>
+      <input type="text" id="city" name="city" [(ngModel)]="shippingData.city" required>
     </div>
     <div class="form-group">
-      <label>Provincia:</label>
-      <input type="text" name="province" [(ngModel)]="shippingData.province" required>
+      <label for="province">Provincia <span class="required-star">*</span>:</label>
+      <input type="text" id="province" name="province" [(ngModel)]="shippingData.province" required>
     </div>
     <div class="form-group">
-      <label>Código postal:</label>
-      <input type="text" name="postalCode" [(ngModel)]="shippingData.postalCode" required>
+      <label for="postalCode">Código postal <span class="required-star">*</span>:</label>
+      <input type="text" id="postalCode" name="postalCode" [(ngModel)]="shippingData.postalCode" required>
     </div>
     <div class="form-group">
-    <label>País:</label>
-    <!-- Cambiado a select con solo "España" -->
-    <select name="country"
-            [(ngModel)]="shippingData.country"
-            required>
-      <option value="">Selecciona un país</option>
-      <option value="España">España</option>
-    </select>
-  </div>
-    <div class="form-group">
-      <label>Teléfono:</label>
-      <input type="tel" name="phone" [(ngModel)]="shippingData.phone" required>
+      <label for="country">País <span class="required-star">*</span>:</label>
+      <!-- Cambiado a select con solo "España" -->
+      <select id="country" name="country"
+              [(ngModel)]="shippingData.country"
+              required>
+        <option value="">Selecciona un país</option>
+        <option value="España">España</option>
+      </select>
     </div>
     <div class="form-group">
-      <label>Email:</label>
-      <input type="email" name="email" [(ngModel)]="shippingData.email" required>
+      <label for="phone">Teléfono <span class="required-star">*</span>:</label>
+      <input type="tel" id="phone" name="phone" [(ngModel)]="shippingData.phone" required>
+    </div>
+    <div class="form-group">
+      <label for="email">Email <span class="required-star">*</span>:</label>
+      <input type="email" id="email" name="email" [(ngModel)]="shippingData.email" required>
     </div>
 
     <!-- Selección del Método de Envío -->

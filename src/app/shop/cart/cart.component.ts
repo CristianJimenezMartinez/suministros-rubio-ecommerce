@@ -151,8 +151,14 @@ export class CartComponent implements OnInit {
       clientId = 0;
     }
   
+    const shippingCost = checkoutData.shippingCost != null ? Number(checkoutData.shippingCost) : this.shippingCost;
+    const realTotal = checkoutData.total != null ? Number(checkoutData.total) : parseFloat((grossSum + shippingCost).toFixed(2));
+
     // 3) Construir el pedido, convirtiendo a número con dos decimales
     this.orderToPay = {
+      total: parseFloat(realTotal.toFixed(2)),
+      subtotal: parseFloat(grossSum.toFixed(2)),
+      shippingCost: parseFloat(shippingCost.toFixed(2)),
       cabecera: {
         tippcl:   '3',
         codpcl:   0,
@@ -161,22 +167,26 @@ export class CartComponent implements OnInit {
         agepcl:   '',
         clipcl:   clientId.toString(),
   
-        cempcl:   checkoutData.shippingData.email,     // <--- nuevo
-        cpapcl:   checkoutData.shippingData.country,   // <--- nuevo
+        cempcl:   checkoutData.shippingData.email,     // <--- email
+        cpapcl:   checkoutData.shippingData.country,   // <--- país
   
         tivpcl:   items[0]?.vatType ?? '0',
         reqpcl:   '0',
         almpcl:   'GEN',
-        cnopcl:   checkoutData.shippingData.fullName,
+        cnopcl:   checkoutData.shippingData.companyName && checkoutData.shippingData.customerType === 'empresa'
+                    ? `${checkoutData.shippingData.fullName} (${checkoutData.shippingData.companyName})`
+                    : checkoutData.shippingData.fullName,
         cdopcl:   checkoutData.shippingData.address,
         cpopcl:   checkoutData.shippingData.city,
         ccppcl:   checkoutData.shippingData.postalCode,
         cprpcl:   checkoutData.shippingData.province,
         telpcl:   checkoutData.shippingData.phone,
+        cnipcl:   checkoutData.shippingData.nif || '', // <--- Factusol NIF/CIF
         
+        ipor1pcl: parseFloat(shippingCost.toFixed(2)), // <--- Factusol costes de envío (portes)
         net1pcl:  parseFloat(netSum.toFixed(2)),
         iiva1pcl: parseFloat(vatSum.toFixed(2)),
-        totpcl:   parseFloat(grossSum.toFixed(2))
+        totpcl:   parseFloat(realTotal.toFixed(2))     // <--- Total real con IVA y portes
       },
       lineas: items.map((item: any, idx: number) => ({
         tiplpc: '3',
@@ -207,18 +217,9 @@ export class CartComponent implements OnInit {
   }): void {
     /* console.log('Pago confirmado:', paymentData); */
 
-    const payload: ProcessOrderPayload = {
-      order:             this.orderToPay,
-      paymentMethodId:   paymentData.paymentMethodId,
-      shippingData:      this.checkoutData.shippingData,
-      shippingMethod:    this.checkoutData.shippingMethod,
-      shippingCost:      this.checkoutData.shippingCost,
-      paymentMethodType: paymentData.paymentMethodType
-    };
-
     const onSuccess = (resp: any) => {
-/*       console.log(`processOrder (${paymentData.paymentMethodType}) response:`, resp);
- */      if (resp.pedidoId != null) {
+      /* console.log(`processOrder (${paymentData.paymentMethodType}) response:`, resp); */
+      if (resp?.pedidoId != null) {
         this.feedbackService.joinRoom(resp.pedidoId.toString());
       }
       this.cartService.clearCart();
@@ -229,9 +230,24 @@ export class CartComponent implements OnInit {
         : paymentData.paymentMethodType === 'stripe'
           ? '¡Tu compra con tarjeta se ha realizado con éxito!'
           : '¡Tu compra con PayPal se ha realizado con éxito!';
-      this.loading.hide()
+      this.loading.hide();
       this.showPopup = true;
       // NO escondemos el spinner aquí: lo dejamos hasta que el usuario cierre popup
+    };
+
+    // Si la pasarela en PaymentComponent ya envió y registró el pedido (obteniendo pedidoId)
+    if (paymentData.raw?.pedidoId != null) {
+      onSuccess(paymentData.raw);
+      return;
+    }
+
+    const payload: ProcessOrderPayload = {
+      order:             this.orderToPay,
+      paymentMethodId:   paymentData.paymentMethodId,
+      shippingData:      this.checkoutData.shippingData,
+      shippingMethod:    this.checkoutData.shippingMethod,
+      shippingCost:      this.checkoutData.shippingCost,
+      paymentMethodType: paymentData.paymentMethodType
     };
 
     const onError = (err: any) => {
