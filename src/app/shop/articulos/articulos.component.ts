@@ -215,7 +215,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
           next: (result) => {
             if (result && result.articles && result.articles.length > 0) {
               this.measures = (result.measures || [])
-                .map((m: any) => m.desume)
+                .map((m: any) => (typeof m === 'string' ? m : m?.desume || ''))
                 .filter((s: string) => s && s.trim() !== '');
               this.processApiArticles(result.articles);
             }

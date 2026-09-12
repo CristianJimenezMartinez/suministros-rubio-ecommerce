@@ -1,10 +1,10 @@
 export const environment = {
-    production: true,
-    apiUrl: 'https://suministrosrubios.duckdns.org/api',
-    paypalClientId: 'ATI5-ST05Qcwr90NmuwZHFZK6-DRJ4Ah0RI1yUuqcn9t5AlwA8Kvsl8FSnYD7IfjfiVXVQ0qG3bMqUia',
-    redsysFuc: '164244113',
-    redsysTerminal: '100'
-  };
+  production: false,
+  apiUrl: 'http://127.0.0.1:3000/api',
+  paypalClientId: 'ATI5-ST05Qcwr90NmuwZHFZK6-DRJ4Ah0RI1yUuqcn9t5AlwA8Kvsl8FSnYD7IfjfiVXVQ0qG3bMqUia',
+  redsysFuc: '164244113',
+  redsysTerminal: '100'
+};
 
   export const environmentProd = {
     production: true,
