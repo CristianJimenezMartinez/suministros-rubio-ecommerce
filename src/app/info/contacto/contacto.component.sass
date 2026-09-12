@@ -1,49 +1,175 @@
-@use '../../../_variables' as * // Importa tus variables si procede
+@use '../../../_variables' as *
 
-.card-container
-  max-width: 1000px
-  margin: 40px auto 20px auto
-  padding: 40px
-  border: 1px solid #ddd
-  border-radius: 8px
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1)
-  background: #fff
-  font-family: Arial, sans-serif
-  text-align: center   // <-- centramos todo el texto
+:host
+  display: block
+  background-color: #f8fafc
+  min-height: calc(100vh - 80px)
+  padding: 3rem 1.5rem 4rem 1.5rem
 
-  h2
-    margin-bottom: 20px
-    color: #333
+.contact-page
+  max-width: 1100px
+  margin: 0 auto
+  display: flex
+  flex-direction: column
+  gap: 3rem
 
-  h3
-    margin-top: 20px
-    margin-bottom: 10px
-    color: #444
+.contact-header
+  text-align: center
+  max-width: 700px
+  margin: 0 auto
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 0.75rem
+
+  .contact-badge
+    background: #e0f2fe
+    color: #0369a1
+    padding: 0.35rem 0.85rem
+    border-radius: 20px
+    font-size: 0.8rem
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: 0.05em
+
+  h1
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem)
+    font-weight: 800
+    color: #0f172a
+    margin: 0
 
   p
-    color: #555
-    margin-bottom: 15px
+    font-size: 1.05rem
+    color: #64748b
+    line-height: 1.6
+    margin: 0
 
-  ul
-    list-style: none     // quitamos los puntos
-    padding: 0
-    margin-top: 20px
+.contact-grid
+  display: grid
+  grid-template-columns: repeat(4, 1fr)
+  gap: 1.5rem
 
-  li
-    margin-bottom: 10px
-    color: #444
+  @media (max-width: 1024px)
+    grid-template-columns: repeat(2, 1fr)
 
-// Ajustes responsive
-@media (max-width: 768px)
-  .card-container
-    max-width: 90%
-    padding: 20px
-    margin: 20px auto
+  @media (max-width: 600px)
+    grid-template-columns: 1fr
 
-    h2
-      font-size: 1.5rem
-    h3
-      font-size: 1.2rem
-    p,
-    li
-      font-size: 0.95rem
+.contact-card
+  background: #ffffff
+  border: 1px solid #e2e8f0
+  border-radius: 16px
+  padding: 2rem 1.5rem
+  display: flex
+  flex-direction: column
+  align-items: center
+  text-align: center
+  box-shadow: 0 4px 15px -2px rgba(15, 23, 42, 0.04)
+  transition: transform 0.2s ease, box-shadow 0.2s ease
+
+  &:hover
+    transform: translateY(-3px)
+    box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08)
+
+  .card-icon
+    width: 52px
+    height: 52px
+    border-radius: 12px
+    background: #f1f5f9
+    color: var(--primary-color)
+    display: flex
+    align-items: center
+    justify-content: center
+    margin-bottom: 1.25rem
+
+    svg
+      width: 26px
+      height: 26px
+
+  h3
+    font-size: 1.05rem
+    font-weight: 700
+    color: #0f172a
+    margin: 0 0 0.5rem 0
+
+  .card-highlight
+    font-size: 1.15rem
+    font-weight: 700
+    color: var(--primary-color)
+    margin: 0 0 0.5rem 0
+    word-break: break-all
+
+  .card-subtext
+    font-size: 0.85rem
+    color: #64748b
+    line-height: 1.5
+    margin: 0 0 1.25rem 0
+    flex: 1
+
+  .btn-card
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    padding: 0.6rem 1.25rem
+    border-radius: 8px
+    background: var(--primary-color)
+    color: #ffffff
+    font-size: 0.88rem
+    font-weight: 600
+    text-decoration: none
+    transition: background 0.2s ease
+    width: 100%
+
+    &:hover
+      background: #059669
+
+  .badge-status
+    display: inline-block
+    padding: 0.35rem 0.75rem
+    background: #f0fdf4
+    border: 1px solid #bbf7d0
+    color: #166534
+    font-size: 0.75rem
+    font-weight: 600
+    border-radius: 20px
+
+.company-banner
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%)
+  border-radius: 20px
+  padding: 2.5rem 2rem
+  text-align: center
+  color: #ffffff
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 1rem
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.1)
+
+  h2
+    font-size: 1.5rem
+    font-weight: 800
+    margin: 0
+    color: #ffffff
+
+  p
+    font-size: 0.95rem
+    color: #94a3b8
+    max-width: 600px
+    margin: 0
+
+  .tags-container
+    display: flex
+    flex-wrap: wrap
+    gap: 0.6rem
+    justify-content: center
+    margin-top: 0.5rem
+
+  .tag
+    background: rgba(255, 255, 255, 0.08)
+    border: 1px solid rgba(255, 255, 255, 0.15)
+    color: #cbd5e1
+    padding: 0.35rem 0.85rem
+    border-radius: 20px
+    font-size: 0.8rem
+    font-weight: 500
+

@@ -1,75 +1,110 @@
-@use '../../../../_variables' as * // Importar tus variables globales si procede
+@use '../../../../_variables' as *
+
+:host
+  display: block
+  background-color: #f8fafc
+  min-height: calc(100vh - 80px)
+  padding: 2.5rem 1rem 4rem 1rem
 
 .card-container
-  max-width: 1000px
-  margin: 50px auto 20px auto
-  padding: 30px
-  border: 1px solid #ddd
-  border-radius: 8px
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1)
-  background: #fff
-  font-family: Arial, sans-serif
-  display: flex
-  flex-direction: column
-  align-items: center  // Centrar los elementos dentro de la tarjeta
-  justify-content: flex-start // Alineación superior
-  color: #444
+  max-width: 900px
+  margin: 0 auto
+  padding: 3rem
+  border: 1px solid #e2e8f0
+  border-radius: 16px
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05)
+  background: #ffffff
+  color: #334155
 
   .company-icon
     display: block
-    margin: 0 auto 1.5rem  // Centrar la imagen horizontalmente
-    width: 100px
+    margin: 0 auto 1.5rem
+    width: 72px
     height: auto
+    border-radius: 12px
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06)
+
+  .update-tag
+    text-align: center
+    color: #64748b
+    font-size: 0.85rem
+    margin-bottom: 2rem
+
+  .intro-text
+    font-size: 1.05rem
+    line-height: 1.7
+    color: #334155
+    background: #f1f5f9
+    padding: 1.25rem 1.5rem
+    border-radius: 10px
+    border-left: 4px solid var(--primary-color)
+    margin-bottom: 2.5rem
 
   h2
-    text-align: center
-    margin-bottom: 30px
-    color: #333
-    font-size: 2rem
-
-  h3
-    color: #333
-    font-size: 1.5rem
-    margin-top: 20px
+    text-align: left
+    margin-top: 2.25rem
+    margin-bottom: 0.75rem
+    color: #0f172a
+    font-size: 1.25rem
+    font-weight: 700
+    display: flex
+    align-items: center
+    gap: 0.5rem
 
   p
-    color: #555
-    margin-bottom: 20px
-    line-height: 1.6
-    font-size: 1rem
+    color: #475569
+    margin-bottom: 1rem
+    line-height: 1.7
+    font-size: 0.95rem
 
   a
-    color: $primary-color  // Tomar el color del texto principal
+    color: var(--primary-color)
     text-decoration: none
-    transition: color 0.3s ease, text-decoration 0.3s ease
+    font-weight: 500
+    transition: color 0.2s ease
 
     &:hover
-      text-decoration: underline  // Subrayar al pasar el ratón
+      text-decoration: underline
 
   ul
-    list-style: disc inside
-    padding-left: 20px
-    margin-bottom: 20px
+    list-style: none
+    padding: 0
+    margin: 0 0 1.5rem 0
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
 
   li
-    margin-bottom: 10px
-    color: #444
-    font-size: 1rem
+    position: relative
+    padding-left: 1.5rem
+    color: #475569
+    font-size: 0.95rem
+    line-height: 1.6
 
-// Ajustes para móviles
-@media (max-width: 768px)
-  .card-container
-    max-width: 90%      // Reducir el ancho para pantallas pequeñas
-    padding: 20px       // Reducir el padding para un espacio más compacto
-    margin: 10px auto   // Ajuste del margen superior e inferior
+    strong
+      color: #1e293b
 
-    h2
-      font-size: 1.5rem   // Fuente ligeramente menor
-
-    h3
+    &::before
+      content: '•'
+      position: absolute
+      left: 0.25rem
+      top: 0
+      color: var(--primary-color)
+      font-weight: bold
       font-size: 1.2rem
 
-    p,
-    ul,
-    li
-      font-size: 0.95rem   // Reducir ligeramente tamaños de fuente
+// Responsive
+@media (max-width: 768px)
+  :host
+    padding: 1.5rem 0.75rem 3rem 0.75rem
+
+  .card-container
+    padding: 1.75rem 1.25rem
+    border-radius: 12px
+
+    h2
+      font-size: 1.15rem
+
+    p, li
+      font-size: 0.9rem
+

@@ -1,60 +1,89 @@
-@use '../../../_variables' as * // Importar tus variables globales si procede
+@use '../../../_variables' as *
+
+:host
+  display: block
+  background-color: #f8fafc
+  min-height: calc(100vh - 80px)
+  padding: 3rem 1.5rem 4rem 1.5rem
 
 .card-container
-  max-width: 1500px
-  margin: 40px auto 20px auto
-  padding: 20px
-  border: 1px solid #ddd
-  border-radius: 8px
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1)
-  background: #fff
-  font-family: Arial, sans-serif
+  max-width: 1000px
+  margin: 0 auto 2.5rem auto
+  padding: 3rem
+  border: 1px solid #e2e8f0
+  border-radius: 16px
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05)
+  background: #ffffff
+  color: #334155
 
-  // Icono de la empresa, centrado y con un tamaño razonable
   .company-icon
     display: block
     margin: 0 auto 1.5rem
     width: 80px
     height: auto
+    border-radius: 14px
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)
 
   h2
     text-align: center
-    margin-bottom: 20px
-    color: #333
+    margin-bottom: 2rem
+    color: #0f172a
+    font-size: 2rem
+    font-weight: 800
+    position: relative
+    padding-bottom: 0.75rem
 
-  h3
-    margin-top: 20px
-    color: #444
+    &::after
+      content: ''
+      position: absolute
+      left: 50%
+      transform: translateX(-50%)
+      bottom: 0
+      width: 50px
+      height: 3px
+      background-color: var(--primary-color)
 
   p
-    color: #555
-    margin-bottom: 15px
+    color: #475569
+    margin-bottom: 1.25rem
+    line-height: 1.7
+    font-size: 1rem
 
-  ul
-    list-style: disc inside
-    padding-left: 20px
-    margin-bottom: 15px
+  .services
+    display: flex
+    flex-direction: column
+    gap: 1.75rem
 
-  li
-    margin-bottom: 10px
-    color: #444
+  .service
+    background: #f8fafc
+    border: 1px solid #e2e8f0
+    border-radius: 12px
+    padding: 1.5rem
+    border-left: 4px solid var(--primary-color)
 
-// Ajustes para móviles
+    h3
+      margin: 0 0 0.5rem 0
+      color: #0f172a
+      font-size: 1.2rem
+      font-weight: 700
+
+    p
+      margin: 0
+      color: #475569
+      font-size: 0.95rem
+      line-height: 1.6
+
 @media (max-width: 768px)
-  .card-container
-    max-width: 90%      // Reducir el ancho para pantallas pequeñas
-    padding: 15px       // Reducir el padding para un espacio más compacto
-    margin: 10px auto   // Ajuste del margen superior e inferior
+  :host
+    padding: 1.5rem 0.75rem 3rem 0.75rem
 
-    // Ajuste en el tamaño del icono
-    .company-icon
-      width: 60px
+  .card-container
+    padding: 1.75rem 1.25rem
+    border-radius: 12px
 
     h2
-      font-size: 1.5rem   // Fuente ligeramente menor
-    h3
-      font-size: 1.2rem
-    p,
-    ul,
-    li
-      font-size: 0.95rem   // Reducir ligeramente tamaños de fuente
+      font-size: 1.5rem
+
+    p
+      font-size: 0.92rem
+
