@@ -39,8 +39,11 @@
     <!-- SECCIÓN FILTRO: Familias / Categorías -->
     <div class="filter-section" *ngIf="availableFamilies.length > 0">
       <h4 class="filter-section-title">Familias / Categorías</h4>
+      <div class="family-search-box mb-2" *ngIf="availableFamilies.length > 15">
+        <input type="text" [(ngModel)]="searchFamilyText" placeholder="Filtrar familias..." class="form-control form-control-sm" style="font-size: 0.78rem; border-radius: 6px;" />
+      </div>
       <div class="filter-categories-list">
-        <label class="filter-category-item" *ngFor="let fam of availableFamilies" [class.checked]="selectedFamilies.includes(fam.code)">
+        <label class="filter-category-item" *ngFor="let fam of displayedAvailableFamilies; trackBy: trackByCode" [class.checked]="selectedFamilies.includes(fam.code)">
           <input
             type="checkbox"
             [value]="fam.code"
@@ -51,6 +54,9 @@
           <span class="category-count">{{ fam.count }}</span>
         </label>
       </div>
+      <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 mt-2 text-start" style="font-size: 0.78rem; color: #10b981;" *ngIf="!searchFamilyText && availableFamilies.length > 30" (click)="showAllFamilies = !showAllFamilies">
+        {{ showAllFamilies ? 'Mostrar menos' : '+ Ver todas (' + availableFamilies.length + ')' }}
+      </button>
     </div>
   </aside>
 
@@ -67,7 +73,7 @@
           Catálogo de Productos
         </h1>
         <span class="result-count">
-          {{ (filteredGroupedArticles | keyvalue).length }} productos disponibles
+          {{ filteredGroupedEntries.length }} productos disponibles
         </span>
       </div>
 
@@ -104,10 +110,10 @@
 
       <!-- Grid de productos -->
       <section class="products-grid"
-               *ngIf="filteredGroupedArticles && (filteredGroupedArticles | keyvalue).length > 0">
+               *ngIf="filteredGroupedEntries.length > 0">
 
         <article class="product-card"
-                 *ngFor="let group of (filteredGroupedArticles | keyvalue) | slice:0:displayedCount">
+                 *ngFor="let group of filteredGroupedEntries | slice:0:displayedCount; trackBy: trackByKey">
 
           <!-- Imagen con fallback robusto -->
           <div class="product-img-wrap">
@@ -155,7 +161,7 @@
       </section>
 
       <!-- Estado vacío -->
-      <div class="empty-state" *ngIf="!filteredGroupedArticles || (filteredGroupedArticles | keyvalue).length === 0">
+      <div class="empty-state" *ngIf="filteredGroupedEntries.length === 0">
         <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <h3>Sin productos con estos filtros</h3>
         <p>Prueba a ampliar el rango de precios o seleccionar otras categorías.</p>

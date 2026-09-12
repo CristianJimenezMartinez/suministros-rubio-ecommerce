@@ -72,14 +72,17 @@ export class CategoriaComponent implements OnInit {
         : this.familyService.getFamily();
 
       families$.pipe(
-        timeout(2500),
+        timeout(3000),
         catchError(() => of([] as Family[]))
       ).subscribe({
         next: families => {
           if (families && families.length > 0) {
-            this.families = families;
+            this.families = families.map(f => ({
+              ...f,
+              imageUrl: f.imageUrl || this.resolveFallbackImage(f.desfam)
+            }));
             this.initializeFilter();
-            this.loadAllImageUrls();
+            this.isLoading = false;
           }
         }
       });
@@ -208,8 +211,16 @@ export class CategoriaComponent implements OnInit {
   /** ---------- RESTO TAL CUAL ---------- */
 
   private initializeFilter(): void {
-    const types = this.families.map(f => f.desfam.trim().split(' ')[0]);
-    this.availableTypes = Array.from(new Set(types));
+    const counts: { [t: string]: number } = {};
+    this.families.forEach(f => {
+      const firstWord = (f.desfam || '').trim().split(' ')[0];
+      if (firstWord && firstWord.length > 2) {
+        counts[firstWord] = (counts[firstWord] || 0) + 1;
+      }
+    });
+    this.availableTypes = Object.keys(counts)
+      .sort((a, b) => counts[b] - counts[a])
+      .slice(0, 25);
     this.filteredFamilies = [...this.families];
     this.displayedCount = this.pageSize;
   }

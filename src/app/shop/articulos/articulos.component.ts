@@ -62,6 +62,28 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   groupedArticles: { [key: string]: Article[] } = {};
   // Agrupación que se mostrará (después de filtrar)
   filteredGroupedArticles: { [key: string]: Article[] } = {};
+  // Entradas precomputadas para el template (cero uso de pipe keyvalue en el DOM)
+  filteredGroupedEntries: { key: string; value: Article[] }[] = [];
+
+  // Búsqueda y control de familias en sidebar
+  searchFamilyText: string = '';
+  showAllFamilies: boolean = false;
+
+  get displayedAvailableFamilies(): { code: string; name: string; count: number }[] {
+    if (this.searchFamilyText) {
+      const q = this.searchFamilyText.toLowerCase().trim();
+      return this.availableFamilies.filter(f => f.name.toLowerCase().includes(q) || f.code.toLowerCase().includes(q));
+    }
+    return this.showAllFamilies ? this.availableFamilies : this.availableFamilies.slice(0, 30);
+  }
+
+  trackByKey(_index: number, item: { key: string; value: Article[] }): string {
+    return item.key;
+  }
+
+  trackByCode(_index: number, item: { code: string; name: string; count: number }): string {
+    return item.code;
+  }
 
   // Variante seleccionada por cada grupo
   selectedVariants: { [key: string]: Article | undefined } = {};
@@ -229,6 +251,8 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   private processApiArticles(data: Article[]): void {
     if (!data || data.length === 0) return;
 
+    const sortedMeasures = [...(this.measures || [])].sort((a, b) => b.length - a.length);
+
     data.forEach(article => {
       if (article.imgart) {
         let fixedPath = article.imgart.replace(/\\/g, '/');
@@ -246,7 +270,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
         .replace(/\n/g, ' ')
         .trim();
 
-      const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
+      const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, sortedMeasures);
       article.desart = truncatedName || article.desart;
       if (foundMeasure) {
         article.measure = foundMeasure;
@@ -375,6 +399,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
     }
 
     this.filteredGroupedArticles = sortedObj;
+    this.filteredGroupedEntries = entries.map(([key, value]) => ({ key, value }));
     this.displayedCount = this.pageSize;
     this.autoScrollCount = 0;
   }
@@ -504,11 +529,10 @@ export class ArticulosComponent implements OnInit, OnDestroy {
 
 function extractMeasureFromDesart(
   desart: string,
-  measures: string[]
+  sortedMeasures: string[]
 ): { truncatedName: string, foundMeasure: string } {
   if (!desart) return { truncatedName: '', foundMeasure: '' };
-  const sortedMeasures = [...(measures || [])].sort((a, b) => b.length - a.length);
-  for (const measure of sortedMeasures) {
+  for (const measure of (sortedMeasures || [])) {
     const trimmedMeasure = (measure || '').trim();
     if (trimmedMeasure && desart.includes(trimmedMeasure)) {
       const truncatedName = desart.replace(trimmedMeasure, '').trim();
