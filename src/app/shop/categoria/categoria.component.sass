@@ -1,231 +1,305 @@
-@use '../../../_variables' as * // Importa tus variables globales
+@use '../../../_variables' as *
 
 .categorias-container
-  // Contenedor general en columna o bloque (no importa demasiado mientras .main-layout maneje el panel)
-  padding: 2rem
+  min-height: calc(100vh - 68px)
+  background: #f8fafc
+  display: flex
+  flex-direction: column
 
 .main-layout
   display: flex
   flex-direction: row
+  flex: 1
+  min-height: calc(100vh - 68px)
 
-  // Panel de filtro a la izquierda (fijo)
-  .filter-panel
-    width: 270px
-    padding: 1rem
-    border: 1px solid #ccc
-    border-radius: 8px
-    background-color: #fff
-    position: fixed
-    top: 100px     // Ajusta según tu header
-    left: 0
-    bottom: 80px
-    overflow-y: auto
+// ─── SIDEBAR DE FILTROS ───────────────────────────────────────────
+.filter-panel
+  width: 280px
+  flex-shrink: 0
+  background: #ffffff
+  border-right: 1px solid #e2e8f0
+  padding: 1.25rem
+  position: sticky
+  top: 68px
+  height: calc(100vh - 68px)
+  overflow-y: auto
+  box-sizing: border-box
+  z-index: 10
+
+  .filter-header-bar
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding-bottom: 1rem
+    border-bottom: 1px solid #f1f5f9
+    margin-bottom: 1.25rem
 
     h3
-      margin-bottom: 1rem
+      font-size: 0.95rem
+      font-weight: 700
+      color: #0f172a
+      margin: 0
+      text-transform: uppercase
+      letter-spacing: 0.04em
+
+    .clear-filters
+      font-size: 0.78rem
+      font-weight: 600
+      color: var(--primary-color)
+      background: #eff6ff
+      border: 1px solid #bfdbfe
+      padding: 0.2rem 0.6rem
+      border-radius: 6px
       cursor: pointer
-      user-select: none
+      transition: all 0.2s ease
 
-    .filter-group
-      margin-bottom: 1rem
-      fieldset
-        border: none
-        padding: 0
-
-      legend
-        font-weight: bold
-        margin-bottom: 0.5rem
-
-      ul
-        list-style: none
-        padding: 0
-        margin: 0
-
-      li
-        margin-bottom: 0.5rem
-        display: flex
-        align-items: center
-
-        label
-          display: flex
-          align-items: center
-          cursor: pointer
-
-          input[type="checkbox"]
-            margin-right: 0.5rem
-
-  // Contenido principal a la derecha
-  .content
-    flex: 1
-    margin-left: 270px // Reserva espacio para el filtro fijo
-    text-align: center  // Alineamos el contenido horizontalmente al centro
-
-    .title-card
-      // Tarjeta que contendrá el título
-      display: inline-block        // Para que se centre dentro de text-align: center
-      background-color: $dropdown-bg
-      border: 1px solid $border-color
-      border-radius: 8px
-      padding: 1rem
-      margin-bottom: 2rem
-
-      h1
-        margin: 0.5rem 0
-        font-size: 2rem
-
-    h1, h2
-      margin-bottom: 2rem
-
-    .categories
-      display: grid
-      grid-template-columns: repeat(5, 1fr) // Para pantallas grandes
-      gap: 1rem
-      justify-content: center
-
-      @media (max-width: 992px) and (min-width: 769px)
-        grid-template-columns: repeat(3, 1fr)
-
-      @media (min-width: 993px)
-        grid-template-columns: repeat(4, 1fr)
-
-    .category-card
-      background-color: #ffffff
-      display: flex
-      flex-direction: column
-      justify-content: space-between
-      align-items: center
-      border: 1px solid $border-color
-      border-radius: 8px
-      padding: 0.5rem  // Padding reducido
-      text-align: center
-      min-height: 200px
-
-      @media (max-width: 768px)
-        min-height: 170px
-      @media (max-width: 576px)
-        min-height: auto
-
-      img
-        max-width: 100%
-        max-height: 120px
-        object-fit: cover
-        border-radius: 4px
-        margin-bottom: 0.5rem
-
-      h3
-        margin: 0.5rem 0
-        font-size: 0.9rem
-        text-align: center
-
-      button
-        background-color: $yellow-color
-        color: black
-        padding: 0.5rem 0.75rem
-        border: none
-        border-radius: 4px
-        cursor: pointer
-        margin-top: auto  // Empuja el botón al fondo
-        transition: background-color 0.3s
-
-        &:hover
-          background-color: $primary-hover-color-button
-
-    .price-container
-      display: flex
-      justify-content: flex-end
-
-    .pagination
-      display: flex
-      justify-content: center
-      align-items: center
-      margin-top: 2rem
-
-      button
-        background-color: $yellow-color
-        color: black
-        padding: 0.5rem 1rem
-        border: none
-        border-radius: 4px
-        cursor: pointer
-        margin: 0 0.5rem
-        transition: background-color 0.3s
-
-        &:disabled
-          background-color: #ffe082
-          cursor: not-allowed
-
-        &:hover:not(:disabled)
-          background-color: $primary-hover-color-button
-
-      span
-        font-size: 1rem
-        margin: 0 0.5rem
-
-    .load-more
-      text-align: center
-      margin-top: 1rem
-
-      button
-        background-color: $yellow-color
-        color: black
-        padding: 0.5rem 1rem
-        border: none
-        border-radius: 4px
-        cursor: pointer
-        transition: background-color 0.3s
-
-        &:hover
-          background-color: $primary-hover-color-button
-
-// Ajustes responsivos para móviles
-@media (max-width: 576px)
-  .main-layout
-    flex-direction: column
-    padding: 1rem
-
-  // El panel de filtro pasa de fijo a relativo y se coloca arriba (primer en la columna)
-  .filter-panel
-    position: relative !important
-    width: 100% !important
-    top: 0 !important
-    left: 0 !important
-    bottom: auto !important
-    margin-bottom: 1rem !important
-    overflow-y: visible !important
-    order: 1 !important
-
-  // El contenido se coloca después del filtro
-  .content
-    margin-left: 0 !important
-    order: 2 !important
+      &:hover
+        background: var(--primary-color)
+        color: #ffffff
 
   .filter-group
-    display: flex
-    flex-direction: row
-    overflow-x: auto
-    white-space: nowrap
-    scrollbar-color: $yellow-color #ffe082 !important
-    scrollbar-width: thin !important
-
-    &::-webkit-scrollbar
-      height: 8px !important
-
-    &::-webkit-scrollbar-track
-      background: #ffe082 !important
-
-    &::-webkit-scrollbar-thumb
-      background: $yellow-color !important
-      border-radius: 8px !important
-
-    ul
-      display: flex
-      flex-direction: row
+    fieldset
+      border: none
       padding: 0
       margin: 0
 
-    li
-      flex: 0 0 auto
-      margin-right: 1rem
+    legend
+      font-size: 0.8rem
+      font-weight: 700
+      color: #64748b
+      text-transform: uppercase
+      letter-spacing: 0.05em
+      margin-bottom: 0.75rem
 
-  .sidebar
-    display: none
+    .filter-types-grid
+      display: flex
+      flex-direction: column
+      gap: 0.35rem
+
+    .filter-type-item
+      display: flex
+      align-items: center
+      gap: 0.6rem
+      padding: 0.4rem 0.6rem
+      border-radius: 6px
+      cursor: pointer
+      font-size: 0.85rem
+      color: #334155
+      transition: background 0.15s ease
+
+      &:hover
+        background: #f1f5f9
+
+      &.checked
+        background: #eff6ff
+        color: var(--primary-color)
+        font-weight: 600
+
+      input[type="checkbox"]
+        accent-color: var(--primary-color)
+        width: 15px
+        height: 15px
+        cursor: pointer
+
+// ─── CONTENIDO PRINCIPAL ──────────────────────────────────────────
+.content
+  flex: 1
+  min-width: 0
+  padding: 1.75rem 2rem
+
+  .title-card
+    background: #ffffff
+    border: 1px solid #e2e8f0
+    border-radius: 10px
+    padding: 1rem 1.5rem
+    margin-bottom: 1.75rem
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04)
+
+    .title-meta
+      h1
+        font-size: 1.35rem
+        font-weight: 700
+        color: #0f172a
+        margin: 0 0 0.25rem 0
+
+      .subtitle
+        font-size: 0.85rem
+        color: #64748b
+        margin: 0
+
+  // Grid de categorías
+  .categories-grid
+    display: grid
+    grid-template-columns: repeat(4, 1fr)
+    gap: 1.25rem
+
+    @media (max-width: 1200px)
+      grid-template-columns: repeat(3, 1fr)
+
+    @media (max-width: 800px)
+      grid-template-columns: repeat(2, 1fr)
+
+    @media (max-width: 480px)
+      grid-template-columns: 1fr
+
+  .category-card
+    background: #ffffff
+    border: 1px solid #e2e8f0
+    border-radius: 12px
+    overflow: hidden
+    display: flex
+    flex-direction: column
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04)
+    transition: transform 0.2s ease, box-shadow 0.2s ease
+
+    &:hover
+      transform: translateY(-3px)
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08)
+
+    .category-card-img-wrap
+      width: 100%
+      height: 140px
+      background: #f8fafc
+      overflow: hidden
+      display: flex
+      align-items: center
+      justify-content: center
+      border-bottom: 1px solid #f1f5f9
+
+      img
+        width: 100%
+        height: 100%
+        object-fit: cover
+        transition: transform 0.3s ease
+
+      &:hover img
+        transform: scale(1.05)
+
+    .category-card-body
+      padding: 1rem
+      display: flex
+      flex-direction: column
+      flex: 1
+      justify-content: space-between
+      gap: 0.75rem
+
+      h3
+        font-size: 0.92rem
+        font-weight: 600
+        color: #0f172a
+        margin: 0
+        line-height: 1.3
+        display: -webkit-box
+        -webkit-line-clamp: 2
+        -webkit-box-orient: vertical
+        overflow: hidden
+
+      .btn-view-articles
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        gap: 0.4rem
+        background: var(--primary-color)
+        color: #ffffff
+        border: none
+        border-radius: 6px
+        padding: 0.5rem 0.85rem
+        font-size: 0.82rem
+        font-weight: 600
+        cursor: pointer
+        transition: all 0.2s ease
+        margin-top: auto
+
+        &:hover
+          background: var(--primary-hover-color-button)
+          transform: translateY(-1px)
+
+  // Estado vacío amigable
+  .empty-categories-state
+    background: #ffffff
+    border: 1px solid #e2e8f0
+    border-radius: 12px
+    padding: 3rem 2rem
+    text-align: center
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: 0.75rem
+
+    svg
+      color: #94a3b8
+
+    h3
+      font-size: 1.1rem
+      font-weight: 600
+      color: #1e293b
+      margin: 0
+
+    p
+      font-size: 0.88rem
+      color: #64748b
+      margin: 0
+
+    .btn-reset-categories
+      margin-top: 0.5rem
+      background: var(--primary-color)
+      color: #ffffff
+      border: none
+      border-radius: 6px
+      padding: 0.5rem 1.25rem
+      font-size: 0.85rem
+      font-weight: 600
+      cursor: pointer
+      transition: background 0.2s ease
+
+      &:hover
+        background: var(--primary-hover-color-button)
+
+  // Botón Ver Más
+  .load-more
+    display: flex
+    justify-content: center
+    margin-top: 2rem
+
+    .btn-load-more
+      display: inline-flex
+      align-items: center
+      gap: 0.5rem
+      background: #ffffff
+      border: 1px solid #cbd5e1
+      color: #334155
+      padding: 0.6rem 1.25rem
+      border-radius: 8px
+      font-size: 0.85rem
+      font-weight: 600
+      cursor: pointer
+      transition: all 0.2s ease
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05)
+
+      &:hover
+        background: #f8fafc
+        border-color: #94a3b8
+        color: #0f172a
+
+      .remaining-badge
+        background: #f1f5f9
+        color: #475569
+        padding: 0.15rem 0.5rem
+        border-radius: 10px
+        font-size: 0.75rem
+
+// ─── RESPONSIVE MÓVIL ─────────────────────────────────────────────
+@media (max-width: 900px)
+  .main-layout
+    flex-direction: column
+
+  .filter-panel
+    position: static
+    width: 100%
+    height: auto
+    border-right: none
+    border-bottom: 1px solid #e2e8f0
+    padding: 1rem
+
+  .content
+    padding: 1.25rem

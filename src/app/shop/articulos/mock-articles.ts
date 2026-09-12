@@ -1,17 +1,37 @@
-﻿import { Article } from './articulos.component';
+import { Article } from './articulos.component';
 
 export interface MockFamily {
   codfam: string;
   desfam: string;
+  imageUrl?: string;
+  sec?: string[];
 }
 
 export const MOCK_FAMILIES: MockFamily[] = [
-  { codfam: '01', desfam: 'Agua y Riego Agrícola' },
-  { codfam: '02', desfam: 'Energía Solar y Bombeo' },
-  { codfam: '03', desfam: 'Ferretería y Tuberías' },
-  { codfam: '04', desfam: 'Seguridad y Alarmas' },
-  { codfam: '05', desfam: 'Telecomunicaciones Rurales' },
-  { codfam: '06', desfam: 'Electricidad y Motores' }
+  // Categorías Principales
+  { codfam: '01', desfam: 'Agua y Riego Agrícola', imageUrl: 'assets/img/agua.png', sec: ['1', '2', '3', '5', '11', '21', '32'] },
+  { codfam: '02', desfam: 'Energía Solar y Bombeo', imageUrl: 'assets/img/energia.png', sec: ['REN'] },
+  { codfam: '03', desfam: 'Ferretería y Tuberías', imageUrl: 'assets/img/jardineria.png', sec: ['31', '10', '18', '9', '36'] },
+  { codfam: '04', desfam: 'Seguridad y Vigilancia Homologada', imageUrl: 'assets/img/seguridad.png', sec: ['SEG'] },
+  { codfam: '05', desfam: 'Telecomunicaciones Rurales y Redes', imageUrl: 'assets/img/seguridad.png', sec: ['SEG'] },
+  { codfam: '06', desfam: 'Electricidad y Motores Industriales', imageUrl: 'assets/img/motores.png', sec: ['30', 'ELC'] },
+
+  // Subfamilias detalladas por sección para navegación precisa
+  { codfam: '01', desfam: 'Tuberías y Riego por Goteo', imageUrl: 'assets/img/agua.png', sec: ['1', '2'] },
+  { codfam: '01', desfam: 'Bombas Sumergibles y Pozos', imageUrl: 'assets/img/agua.png', sec: ['3', '5'] },
+  { codfam: '01', desfam: 'Electroválvulas y Automatismos', imageUrl: 'assets/img/agua.png', sec: ['11', '21'] },
+  { codfam: '01', desfam: 'Aspersores y Difusores de Impacto', imageUrl: 'assets/img/agua.png', sec: ['32'] },
+  { codfam: '02', desfam: 'Paneles Solares Fotovoltaicos', imageUrl: 'assets/img/energia.png', sec: ['REN'] },
+  { codfam: '02', desfam: 'Inversores de Bombeo Solar Directo', imageUrl: 'assets/img/energia.png', sec: ['REN'] },
+  { codfam: '02', desfam: 'Estructuras y Soportes para Paneles', imageUrl: 'assets/img/energia.png', sec: ['REN'] },
+  { codfam: '06', desfam: 'Motobombas Diésel y Gasolina', imageUrl: 'assets/img/motores.png', sec: ['30'] },
+  { codfam: '06', desfam: 'Motores Eléctricos Sumergibles', imageUrl: 'assets/img/motores.png', sec: ['30'] },
+  { codfam: '03', desfam: 'Ferretería Industrial y Fijaciones', imageUrl: 'assets/img/jardineria.png', sec: ['31', '10'] },
+  { codfam: '03', desfam: 'Mangueras y Accesorios de Jardín', imageUrl: 'assets/img/jardineria.png', sec: ['18'] },
+  { codfam: '03', desfam: 'Climatización y Tuberías Multicapa', imageUrl: 'assets/img/climatizacion.png', sec: ['9', '36'] },
+  { codfam: '06', desfam: 'Cuadros Eléctricos y Automatización', imageUrl: 'assets/img/electronica.png', sec: ['ELC'] },
+  { codfam: '01', desfam: 'Outlet: Liquidación Riego y Tuberías', imageUrl: 'assets/img/outlet.png', sec: ['OFE'] },
+  { codfam: '02', desfam: 'Outlet: Paneles y Bombeo Solar', imageUrl: 'assets/img/outlet.png', sec: ['OFE'] }
 ];
 
 export const MOCK_ARTICLES: Article[] = [

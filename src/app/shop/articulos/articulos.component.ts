@@ -8,6 +8,8 @@ import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { RatesService } from '../../services/rates.service';
 import { MOCK_ARTICLES, MOCK_FAMILIES } from './mock-articles';
+import { combineLatest, of } from 'rxjs';
+import { timeout, catchError } from 'rxjs/operators';
 
 export interface Article {
   codart: string;
@@ -54,6 +56,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   articles: Article[] = [];
   measures: string[] = [];
   errorMessage: string = '';
+  infoNotice: string = '';
 
   // Agrupación original de artículos
   groupedArticles: { [key: string]: Article[] } = {};
@@ -61,7 +64,7 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   filteredGroupedArticles: { [key: string]: Article[] } = {};
 
   // Variante seleccionada por cada grupo
-  selectedVariants: { [key: string]: Article } = {};
+  selectedVariants: { [key: string]: Article | undefined } = {};
 
   // Familias y Categorías reales
   familyNamesMap: { [code: string]: string } = {};
@@ -112,8 +115,11 @@ export class ArticulosComponent implements OnInit, OnDestroy {
     this.groupArticlesAndSetup();
     this.isLoading = false;
 
-    // 2. Consulta en segundo plano de familias del backend si está disponible
-    this.familyService.getFamily().subscribe({
+    // 2. Consulta en segundo plano de familias del backend si está disponible (con timeout seguro)
+    this.familyService.getFamily().pipe(
+      timeout(3000),
+      catchError(() => of([] as Family[]))
+    ).subscribe({
       next: (fams) => {
         if (fams && fams.length > 0) {
           fams.forEach(f => {
@@ -123,73 +129,106 @@ export class ArticulosComponent implements OnInit, OnDestroy {
             this.extractFamilies();
           }
         }
-      },
-      error: () => {}
+      }
     });
 
-    // 3. Manejo de rutas y búsquedas
-    this.route.queryParams.subscribe(params => {
-      const query = params['query'];
+    // 3. Manejo reactivo de rutas y búsquedas (reacciona tanto a queryParams como a paramMap)
+    combineLatest([this.route.paramMap, this.route.queryParams]).subscribe(([paramMap, queryParams]) => {
+      const query = queryParams['query'];
+      const famParam = paramMap.get('fam');
+      this.infoNotice = '';
+
       if (query) {
         this.isSearchMode = true;
-        const q = query.toLowerCase();
+        const q = query.toLowerCase().trim();
         const matches = MOCK_ARTICLES.filter(a =>
-          a.desart.toLowerCase().includes(q) ||
-          a.codart.toLowerCase().includes(q) ||
+          (a.desart && a.desart.toLowerCase().includes(q)) ||
+          (a.codart && a.codart.toLowerCase().includes(q)) ||
           (a.measure && a.measure.toLowerCase().includes(q))
         );
         if (matches.length > 0) {
           this.articles = matches;
           this.groupArticlesAndSetup();
+        } else {
+          this.articles = [...MOCK_ARTICLES];
+          this.infoNotice = `No se encontraron resultados para "${query}". Mostrando el catálogo general:`;
+          this.groupArticlesAndSetup();
         }
-        this.apiService.searchArticles(query).subscribe({
+
+        this.apiService.searchArticles(query).pipe(
+          timeout(3500),
+          catchError(() => of([] as Article[]))
+        ).subscribe({
           next: (data: Article[]) => {
             if (data && data.length > 0) {
               this.processApiArticles(data);
+              this.infoNotice = '';
             }
-          },
-          error: () => {
+            this.isLoading = false;
+          }
+        });
+      } else if (famParam) {
+        this.isSearchMode = false;
+        const normalized = famParam.trim();
+        const padded = normalized.padStart(2, '0');
+
+        let famArticles = MOCK_ARTICLES.filter(a =>
+          a.famart === normalized ||
+          a.famart === padded ||
+          normalized.startsWith(a.famart) ||
+          a.famart.startsWith(normalized)
+        );
+
+        if (famArticles.length > 0) {
+          this.articles = famArticles;
+          this.groupArticlesAndSetup();
+        } else {
+          this.articles = [...MOCK_ARTICLES];
+          const famName = this.familyNamesMap[normalized] || this.familyNamesMap[padded];
+          this.infoNotice = famName
+            ? `Mostrando productos destacados para la sección ${famName}.`
+            : `Mostrando catálogo completo de productos disponibles.`;
+          this.groupArticlesAndSetup();
+        }
+
+        this.apiService.getArticlesByFamily(famParam).pipe(
+          timeout(3500),
+          catchError(() => of([] as Article[]))
+        ).subscribe({
+          next: (data: Article[]) => {
+            if (data && data.length > 0) {
+              this.processApiArticles(data);
+              this.infoNotice = '';
+            }
             this.isLoading = false;
           }
         });
       } else {
-        const famParam = this.route.snapshot.paramMap.get('fam');
-        if (famParam) {
-          const famArticles = MOCK_ARTICLES.filter(a => a.famart === famParam);
-          if (famArticles.length > 0) {
-            this.articles = famArticles;
-            this.groupArticlesAndSetup();
+        this.isSearchMode = false;
+        this.articles = [...MOCK_ARTICLES];
+        this.groupArticlesAndSetup();
+
+        this.apiService.getArticles().pipe(
+          timeout(3500),
+          catchError(() => of(null))
+        ).subscribe({
+          next: (result) => {
+            if (result && result.articles && result.articles.length > 0) {
+              this.measures = (result.measures || [])
+                .map((m: any) => m.desume)
+                .filter((s: string) => s && s.trim() !== '');
+              this.processApiArticles(result.articles);
+            }
+            this.isLoading = false;
           }
-          this.apiService.getArticlesByFamily(famParam).subscribe({
-            next: (data: Article[]) => {
-              if (data && data.length > 0) {
-                this.processApiArticles(data);
-              }
-            },
-            error: () => {
-              this.isLoading = false;
-            }
-          });
-        } else {
-          this.apiService.getArticles().subscribe({
-            next: (result) => {
-              if (result && result.articles && result.articles.length > 0) {
-                this.measures = (result.measures || [])
-                  .map((m: any) => m.desume)
-                  .filter((s: string) => s && s.trim() !== '');
-                this.processApiArticles(result.articles);
-              }
-            },
-            error: () => {
-              this.isLoading = false;
-            }
-          });
-        }
+        });
       }
     });
   }
 
   private processApiArticles(data: Article[]): void {
+    if (!data || data.length === 0) return;
+
     data.forEach(article => {
       if (article.imgart) {
         let fixedPath = article.imgart.replace(/\\/g, '/');
@@ -202,40 +241,44 @@ export class ArticulosComponent implements OnInit, OnDestroy {
       if (article.dewart) {
         article.desart = article.dewart;
       }
-      article.desart = article.desart
+      article.desart = (article.desart || article.codart || 'Artículo')
         .replace(/\\/g, '')
         .replace(/\n/g, ' ')
         .trim();
+
       const { truncatedName, foundMeasure } = extractMeasureFromDesart(article.desart, this.measures);
-      article.desart = truncatedName;
+      article.desart = truncatedName || article.desart;
       if (foundMeasure) {
         article.measure = foundMeasure;
       }
     });
     this.articles = data;
-    this.ratesService.getInternetRate().subscribe({
+
+    this.ratesService.getInternetRate().pipe(
+      timeout(3000),
+      catchError(() => of(null))
+    ).subscribe({
       next: (internetRate) => {
-        this.articles.forEach(article => {
-          const basePrice = parseFloat(article.pcoart);
-          const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
-          let vatPercentage = 21;
-          switch (article.tivart) {
-            case '0': vatPercentage = 21; break;
-            case '1': vatPercentage = 10; break;
-            case '2': vatPercentage = 4;  break;
-            case '4': vatPercentage = 0;  break;
-            default:  vatPercentage = 21;
-          }
-          const netPrice   = computedPrice;
-          const vatAmount  = netPrice * (vatPercentage / 100);
-          const grossPrice = netPrice + vatAmount;
-          article.pcoart     = grossPrice.toFixed(2);
-          article.netPrice   = netPrice.toFixed(2);
-          article.vatAmount  = vatAmount.toFixed(2);
-        });
-        this.groupArticlesAndSetup();
-      },
-      error: () => {
+        if (internetRate) {
+          this.articles.forEach(article => {
+            const basePrice = parseFloat(article.pcoart) || 0;
+            const computedPrice = this.ratesService.calculateRealPrice(basePrice, internetRate);
+            let vatPercentage = 21;
+            switch (article.tivart) {
+              case '0': vatPercentage = 21; break;
+              case '1': vatPercentage = 10; break;
+              case '2': vatPercentage = 4;  break;
+              case '4': vatPercentage = 0;  break;
+              default:  vatPercentage = 21;
+            }
+            const netPrice   = computedPrice;
+            const vatAmount  = netPrice * (vatPercentage / 100);
+            const grossPrice = netPrice + vatAmount;
+            article.pcoart     = grossPrice.toFixed(2);
+            article.netPrice   = netPrice.toFixed(2);
+            article.vatAmount  = vatAmount.toFixed(2);
+          });
+        }
         this.groupArticlesAndSetup();
       }
     });
@@ -401,8 +444,8 @@ export class ArticulosComponent implements OnInit, OnDestroy {
 
   private groupArticles(articles: Article[]): { [key: string]: Article[] } {
     const groups: { [key: string]: Article[] } = {};
-    articles.forEach(article => {
-      const key = article.desart.trim();
+    (articles || []).forEach(article => {
+      const key = (article.desart || article.dewart || article.codart || 'Artículo').trim();
       if (!groups[key]) {
         groups[key] = [];
       }
@@ -412,10 +455,10 @@ export class ArticulosComponent implements OnInit, OnDestroy {
   }
 
   private extractArticleTypes(articles: Article[]): string[] {
-    const types = articles.map(article => {
-      const text = article.desart.trim();
+    const types = (articles || []).map(article => {
+      const text = (article.desart || '').trim();
       return text.split(' ')[0];
-    });
+    }).filter(t => !!t);
     return Array.from(new Set(types));
   }
 
@@ -439,16 +482,21 @@ export class ArticulosComponent implements OnInit, OnDestroy {
     }
   }
 
-  addToCart(article: Article): void {
+  addToCart(article?: Article): void {
+    if (!article) return;
+    const pco = parseFloat(article.pcoart) || 0;
+    const net = parseFloat(article.netPrice || '') || parseFloat((pco / 1.21).toFixed(2));
+    const vat = parseFloat(article.vatAmount || '') || parseFloat((pco - net).toFixed(2));
+
     const cartItem = {
-      id:        article.codart,
-      name:      article.dewart || article.desart,
-      price:     parseFloat(article.pcoart),       // bruto (precio final con IVA)
-      netPrice:  parseFloat(article.netPrice!),   // neto (precio sin IVA)
-      vatAmount: parseFloat(article.vatAmount!),  // importe de IVA por unidad
-      vatType:   parseInt(article.tivart || '0', 10), // 0,1,2,4 según tivart
+      id:        article.codart || 'ART',
+      name:      article.dewart || article.desart || 'Artículo',
+      price:     pco,
+      netPrice:  net,
+      vatAmount: vat,
+      vatType:   parseInt(article.tivart || '0', 10),
       quantity:  1,
-      img:       article.imgart
+      img:       article.imgart || 'assets/img/agua.png'
     };
     this.cartService.addItem(cartItem);
   }
@@ -458,9 +506,10 @@ function extractMeasureFromDesart(
   desart: string,
   measures: string[]
 ): { truncatedName: string, foundMeasure: string } {
-  const sortedMeasures = [...measures].sort((a, b) => b.length - a.length);
+  if (!desart) return { truncatedName: '', foundMeasure: '' };
+  const sortedMeasures = [...(measures || [])].sort((a, b) => b.length - a.length);
   for (const measure of sortedMeasures) {
-    const trimmedMeasure = measure.trim();
+    const trimmedMeasure = (measure || '').trim();
     if (trimmedMeasure && desart.includes(trimmedMeasure)) {
       const truncatedName = desart.replace(trimmedMeasure, '').trim();
       return { truncatedName, foundMeasure: trimmedMeasure };

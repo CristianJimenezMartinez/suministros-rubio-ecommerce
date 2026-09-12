@@ -1,81 +1,96 @@
 <div class="categorias-container">
   <div class="main-layout">
 
-    <!-- Panel de filtros -->
-    <div class="filter-panel">
-      <h3 class="toggle-filter" (click)="toggleFilter()">
-        Filtros
-        <span *ngIf="isFilterOpen">&#9650;</span>
-        <span *ngIf="!isFilterOpen">&#9660;</span>
-      </h3>
-      <div class="filter-group" *ngIf="isFilterOpen">
+    <!-- Panel de filtros (pegado al navbar) -->
+    <aside class="filter-panel" [class.open]="isFilterOpen">
+      <div class="filter-header-bar" (click)="toggleFilter()">
+        <div class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          <h3>Filtrar Familias</h3>
+        </div>
+        <button class="clear-filters" *ngIf="selectedFilterTypes.length > 0" (click)="resetCategoriesFilter(); $event.stopPropagation()">
+          Limpiar
+        </button>
+      </div>
+
+      <div class="filter-group" *ngIf="isFilterOpen && availableTypes.length > 0">
         <fieldset>
-          <legend>Filtrar por letra:</legend>
-          <ul>
-            <li *ngFor="let type of availableTypes">
-              <label>
-                <input
-                  type="checkbox"
-                  [value]="type"
-                  (change)="onCheckboxChange($event)"
-                  id="{{ type }}"
-                />
-                <span>{{ type }}</span>
-              </label>
-            </li>
-          </ul>
+          <legend>Filtrar por inicial / tipo:</legend>
+          <div class="filter-types-grid">
+            <label class="filter-type-item" *ngFor="let type of availableTypes" [class.checked]="selectedFilterTypes.includes(type)">
+              <input
+                type="checkbox"
+                [value]="type"
+                [checked]="selectedFilterTypes.includes(type)"
+                (change)="onCheckboxChange($event)"
+                id="{{ type }}"
+              />
+              <span>{{ type }}</span>
+            </label>
+          </div>
         </fieldset>
       </div>
-    </div>
+    </aside>
 
     <!-- Contenido principal -->
-    <div class="content">
+    <main class="content">
 
-      <!-- Título dinámico -->
+      <!-- Título de cabecera de la sección -->
       <div class="title-card" *ngIf="!isLoading">
-  <!-- Hay categorías: título principal -->
-  <h1 *ngIf="filteredFamilies && filteredFamilies.length">
-    Explora nuestras categorías
-  </h1>
+        <div class="title-meta">
+          <h1>Explora nuestras categorías</h1>
+          <p class="subtitle" *ngIf="filteredFamilies && filteredFamilies.length > 0">
+            {{ filteredFamilies.length }} categorías profesionales disponibles
+          </p>
+        </div>
+      </div>
 
-  <!-- No hay categorías: mensaje genérico -->
-  <h1 *ngIf="!filteredFamilies || filteredFamilies.length === 0">
-    Algo no ocurrió como se esperaba
-  </h1>
-
-  <!-- Detalle de error (opcional) -->
-  <p *ngIf="errorMessage" class="error-detail">
-    {{ errorMessage }}
-  </p>
-</div>
       <!-- Spinner de carga -->
       <app-loading *ngIf="isLoading"></app-loading>
 
-      <!-- Lista de categorías -->
-      <section class="categories" *ngIf="!isLoading && filteredFamilies?.length">
-  <div
-    class="category-card"
-    *ngFor="let fam of filteredFamilies | slice: 0 : displayedCount; trackBy: trackFam"
-  >
-    <h3>{{ fam.desfam }}</h3>
+      <!-- Grid de categorías -->
+      <section class="categories-grid" *ngIf="!isLoading && filteredFamilies && filteredFamilies.length > 0">
+        <article
+          class="category-card"
+          *ngFor="let fam of filteredFamilies | slice: 0 : displayedCount; trackBy: trackFam"
+        >
+          <div class="category-card-img-wrap">
+            <img
+              [src]="fam.imageUrl || 'assets/img/agua.png'"
+              [alt]="'Imagen de ' + fam.desfam"
+              (error)="onImgError($event)"
+              loading="lazy"
+            />
+          </div>
 
-    <img
-      [src]="fam.imageUrl || 'assets/img/placeholder.png'"
-      [alt]="'Imagen de ' + fam.desfam"
-      loading="lazy"
-    />
+          <div class="category-card-body">
+            <h3 [title]="fam.desfam">{{ fam.desfam }}</h3>
+            <button class="btn-view-articles" (click)="goToArticles(fam.codfam)">
+              <span>Ver Artículos</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </article>
+      </section>
 
-    <button (click)="goToArticles(fam.codfam)">Ver Artículos</button>
-  </div>
-</section>
+      <!-- Estado vacío amigable (sin mensajes rotos) -->
+      <div class="empty-categories-state" *ngIf="!isLoading && (!filteredFamilies || filteredFamilies.length === 0)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <h3>No se encontraron categorías para este filtro</h3>
+        <p>Prueba a restablecer los filtros para ver todas las categorías de producto.</p>
+        <button class="btn-reset-categories" (click)="resetCategoriesFilter()">Ver todas las categorías</button>
+      </div>
 
       <!-- Botón “Ver más” -->
       <div
         class="load-more"
-        *ngIf="!isLoading && filteredFamilies.length > displayedCount"
+        *ngIf="!isLoading && filteredFamilies && filteredFamilies.length > displayedCount"
       >
-        <button (click)="loadMore()">Ver más</button>
+        <button class="btn-load-more" (click)="loadMore()">
+          <span>Ver más categorías</span>
+          <span class="remaining-badge">+{{ filteredFamilies.length - displayedCount }}</span>
+        </button>
       </div>
-    </div>
+    </main>
   </div>
 </div>

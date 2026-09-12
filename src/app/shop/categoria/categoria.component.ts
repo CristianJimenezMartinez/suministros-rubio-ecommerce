@@ -4,6 +4,9 @@ import { FamilyService, Family }             from '../../services/family.service
 import { CommonModule }                       from '@angular/common';
 import { DataService, Article }               from '../../services/data.service';
 import { LoadingComponent }                   from '../../shared/loading/loading.component';
+import { MOCK_FAMILIES }                      from '../articulos/mock-articles';
+import { of }                                 from 'rxjs';
+import { timeout, catchError }                from 'rxjs/operators';
 
 @Component({
   selector: 'app-categoria',
@@ -20,7 +23,7 @@ export class CategoriaComponent implements OnInit {
   pageSize = 20;
   displayedCount = 20;
   
-  isLoading = true;
+  isLoading = false;
   isFilterOpen = true;
   availableTypes: string[] = [];
   selectedFilterTypes: string[] = [];
@@ -39,21 +42,47 @@ export class CategoriaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const secParam = this.route.snapshot.paramMap.get('sec');
-    const families$ = secParam
-      ? this.familyService.getFamiliesBySections(secParam)
-      : this.familyService.getFamily();
+    this.route.paramMap.subscribe(paramMap => {
+      const secParam = paramMap.get('sec');
+      this.errorMessage = '';
 
-    families$.subscribe({
-      next: families => {
-        this.families = families;
-        this.initializeFilter();
-        this.loadAllImageUrls();
-      },
-      error: _ => {
-        this.errorMessage = 'Error al cargar las familias';
-        this.isLoading = false;
+      // 1. CARGA INMEDIATA DE RESPALDO (Resiliencia total: la vista jamás se rompe ni espera)
+      let fallbackFamilies: Family[] = [];
+      if (secParam) {
+        const secs = secParam.split(',').map(s => s.trim());
+        fallbackFamilies = MOCK_FAMILIES.filter(f => f.sec && f.sec.some(s => secs.includes(s)));
+        if (fallbackFamilies.length === 0) {
+          fallbackFamilies = [...MOCK_FAMILIES];
+        }
+      } else {
+        fallbackFamilies = [...MOCK_FAMILIES];
       }
+
+      this.families = fallbackFamilies.map(f => ({
+        codfam: f.codfam,
+        desfam: f.desfam,
+        imageUrl: f.imageUrl || this.resolveFallbackImage(f.desfam)
+      }));
+      this.initializeFilter();
+      this.isLoading = false;
+
+      // 2. Consulta en segundo plano de la API con timeout defensivo
+      const families$ = secParam
+        ? this.familyService.getFamiliesBySections(secParam)
+        : this.familyService.getFamily();
+
+      families$.pipe(
+        timeout(2500),
+        catchError(() => of([] as Family[]))
+      ).subscribe({
+        next: families => {
+          if (families && families.length > 0) {
+            this.families = families;
+            this.initializeFilter();
+            this.loadAllImageUrls();
+          }
+        }
+      });
     });
   }
 
@@ -219,6 +248,43 @@ export class CategoriaComponent implements OnInit {
   goToArticles(id: string): void {
     this.router.navigate(['/articulos', id]);
   }
+
+  resolveFallbackImage(desfam: string): string {
+    const text = (desfam || '').toLowerCase();
+    if (text.includes('agua') || text.includes('riego') || text.includes('bomba') || text.includes('valv') || text.includes('aspersor') || text.includes('pozo')) {
+      return 'assets/img/agua.png';
+    }
+    if (text.includes('solar') || text.includes('energia') || text.includes('panel') || text.includes('inversor')) {
+      return 'assets/img/energia.png';
+    }
+    if (text.includes('motor') || text.includes('electr') || text.includes('cuadro')) {
+      return 'assets/img/motores.png';
+    }
+    if (text.includes('seguridad') || text.includes('alarma') || text.includes('camara') || text.includes('telecom') || text.includes('red')) {
+      return 'assets/img/seguridad.png';
+    }
+    if (text.includes('clima') || text.includes('calder')) {
+      return 'assets/img/climatizacion.png';
+    }
+    if (text.includes('outlet') || text.includes('oferta') || text.includes('liquidacion')) {
+      return 'assets/img/outlet.png';
+    }
+    return 'assets/img/jardineria.png';
+  }
+
+  onImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = 'assets/img/agua.png';
+    }
+  }
+
+  resetCategoriesFilter(): void {
+    this.selectedFilterTypes = [];
+    this.filteredFamilies = [...this.families];
+    this.displayedCount = this.pageSize;
+  }
+
   trackFam = (_: number, f: Family) => (f as any).codfam ?? f.desfam;
 }
 
