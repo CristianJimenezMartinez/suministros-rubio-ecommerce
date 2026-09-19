@@ -2,20 +2,21 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import type { PaymentIntent } from '@stripe/stripe-js';
 import { environment } from '../../enviroments/environment';
 
 export interface ShippingData {
-  fullName:  string;
-  address:   string;
-  city:      string;
-  postalCode:string;
-  country:   string;
-  phone:     string;
-  email:     string;
+  fullName:   string;
+  address:    string;
+  city:       string;
+  postalCode: string;
+  country:    string;
+  phone:      string;
+  email:      string;
+  province?:  string;
 }
 
-export type PaymentMethodType = 'stripe' | 'paypal' | 'redsys';
+export type PaymentMethodType = 'paypal' | 'stripe' | 'redsys';
+
 export interface ProcessOrderPayload {
   order: any;
   paymentMethodId: string;
@@ -23,32 +24,43 @@ export interface ProcessOrderPayload {
   shippingMethod: string;
   shippingCost: number;
   paymentMethodType: PaymentMethodType;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  paymentReference?: string;
+  lines?: any[];
+  subtotal?: number;
+  taxTotal?: number;
+  total?: number;
+  raw?: any;
 }
 
 export interface ProcessOrderResponse {
-  requiresAction?: boolean;
-  clientSecret?: string;
-  rawResult?: any;
-  paymentIntent?: PaymentIntent;
+  success?: boolean;
   pedidoId?: number;
+  orderNumber?: string;
+  message?: string;
+  rawResult?: any;
 }
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
-  // antigua URL de Stripe/PayPal:
-  private stripePaypalUrl = `${environment.apiUrl}/payment/orders`;
-  // nueva URL genérica de pasarelaGlobal:
-  private globalUrl        = `${environment.apiUrl}/pasarelaGlobal/pay`;
+  private endpointUrl = environment.apiUrl.includes('?')
+    ? `${environment.apiUrl}&action=create_order`
+    : `${environment.apiUrl}?action=create_order`;
 
   constructor(private http: HttpClient) {}
 
-  /** Sigue usando este método para Stripe y PayPal */
+  /**
+   * Procesa la orden llamando a erp-bridge-endpoint.php con action=create_order
+   */
   processOrder(payload: ProcessOrderPayload): Observable<ProcessOrderResponse> {
-    return this.http.post<ProcessOrderResponse>(this.stripePaypalUrl, payload);
-  }
-
-  /** Nuevo: usa el endpoint genérico para Redsys (u otras pasarelas adicionales) */
-  processGlobal(payload: ProcessOrderPayload): Observable<{ success: boolean; pedidoId: number; rawResult: any }> {
-    return this.http.post<{ success: boolean; pedidoId: number; rawResult: any }>(this.globalUrl, payload);
+    const formattedPayload = {
+      ...payload,
+      paymentMethod: payload.paymentMethod || payload.paymentMethodType || 'paypal',
+      paymentMethodType: payload.paymentMethodType || 'paypal',
+      paymentStatus: payload.paymentStatus || 'COMPLETED',
+      paymentReference: payload.paymentReference || payload.paymentMethodId
+    };
+    return this.http.post<ProcessOrderResponse>(this.endpointUrl, formattedPayload);
   }
 }

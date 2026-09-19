@@ -3,7 +3,7 @@ import { CartService } from '../../services/cart.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProcessOrderPayload } from '../../services/payment.service'; // importa la interfaz
+import { PaymentMethodType, ProcessOrderPayload } from '../../services/payment.service';
 
 import { PaymentComponent } from '../payment/payment.component';
 import { CheckoutComponent } from '../checkout/checkout.component';
@@ -11,6 +11,7 @@ import { PopupComponent } from '../../popup/popup.component';
 
 import { FeedbackService } from '../../services/feedback.service';
 import { PaymentService } from '../../services/payment.service';
+import { OrderService } from '../../services/order.service';
 import { LoadingService } from '../../services/loading.service';
 import { LoadingComponent } from '../../shared/loading/loading.component';
 import { Observable } from 'rxjs';
@@ -26,7 +27,6 @@ import { Observable } from 'rxjs';
     PaymentComponent,
     CheckoutComponent,
     PopupComponent,
-    PaymentComponent,
     LoadingComponent
   ]
 })
@@ -52,6 +52,7 @@ export class CartComponent implements OnInit {
     private router: Router,
     private feedbackService: FeedbackService,
     private paymentService: PaymentService,
+    private orderService: OrderService,
     private loading: LoadingService 
   ) {
     this.loading$ = this.loading.isLoading;
@@ -183,52 +184,54 @@ export class CartComponent implements OnInit {
   
 
   // 3) Cuando el pago se confirma (desde PaymentComponent)
- handlePaymentConfirmed(paymentData: {
+  handlePaymentConfirmed(paymentData: {
     paymentMethodId: string;
     raw?: any;
-    paymentMethodType: 'stripe' | 'paypal' | 'redsys';
+    paymentMethodType: PaymentMethodType;
+    orderResponse?: any;
   }): void {
-    /* console.log('Pago confirmado:', paymentData); */
-
-    const payload: ProcessOrderPayload = {
-      order:             this.orderToPay,
-      paymentMethodId:   paymentData.paymentMethodId,
-      shippingData:      this.checkoutData.shippingData,
-      shippingMethod:    this.checkoutData.shippingMethod,
-      shippingCost:      this.checkoutData.shippingCost,
-      paymentMethodType: paymentData.paymentMethodType
-    };
-
     const onSuccess = (resp: any) => {
-/*       console.log(`processOrder (${paymentData.paymentMethodType}) response:`, resp);
- */      if (resp.pedidoId != null) {
+      if (resp?.pedidoId != null) {
         this.feedbackService.joinRoom(resp.pedidoId.toString());
       }
       this.cartService.clearCart();
       this.currentStep = 'none';
-      // mensaje según método
-      this.popupMessage = paymentData.paymentMethodType === 'redsys'
-        ? '¡Tu compra con Redsys se ha realizado con éxito!'
-        : paymentData.paymentMethodType === 'stripe'
-          ? '¡Tu compra con tarjeta se ha realizado con éxito!'
-          : '¡Tu compra con PayPal se ha realizado con éxito!';
-      this.loading.hide()
+      this.popupMessage = '¡Tu compra con PayPal se ha realizado con éxito!';
+      this.loading.hide();
       this.showPopup = true;
-      // NO escondemos el spinner aquí: lo dejamos hasta que el usuario cierre popup
     };
 
     const onError = (err: any) => {
-      /* console.error(`Error en ${paymentData.paymentMethodType}:`, err); */
-      this.popupMessage = `Error al procesar la orden: ${err.error?.message || err.message}`;
+      this.loading.hide();
+      this.popupMessage = `Error al procesar la orden: ${err?.error?.message || err?.message || 'Error al registrar pedido'}`;
       this.showPopup = true;
-      // idem, spinner sigue hasta cerrar popup
     };
 
-    if (paymentData.paymentMethodType === 'redsys') {
-      this.paymentService.processGlobal(payload).subscribe({ next: onSuccess, error: onError });
-    } else {
-      this.paymentService.processOrder(payload).subscribe({ next: onSuccess, error: onError });
+    // Si PaymentComponent ya completó la creación de orden contra el endpoint:
+    if (paymentData.orderResponse) {
+      onSuccess(paymentData.orderResponse);
+      return;
     }
+
+    // Fallback: registrar mediante orderService.createOrder
+    const payload = {
+      order:             this.orderToPay,
+      lines:             this.orderToPay?.lineas || this.orderToPay?.lines || [],
+      subtotal:          this.subtotal,
+      taxTotal:          this.orderToPay?.cabecera?.iiva1pcl ?? 0,
+      total:             this.total,
+      shippingData:      this.checkoutData?.shippingData,
+      shippingMethod:    this.checkoutData?.shippingMethod,
+      shippingCost:      this.checkoutData?.shippingCost,
+      paymentMethod:     'paypal',
+      paymentMethodType: 'paypal',
+      paymentStatus:     'COMPLETED',
+      paymentMethodId:   paymentData.paymentMethodId,
+      paymentReference:  paymentData.paymentMethodId,
+      raw:               paymentData.raw
+    };
+
+    this.orderService.createOrder(payload).subscribe({ next: onSuccess, error: onError });
   }
 
   /**
