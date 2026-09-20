@@ -37,10 +37,11 @@ export class HomeComponent {
   constructor(private router: Router) {}
 
   goToCategory(section: Section): void {
-    // Convertimos el array de familias en una cadena separada por comas
-    const secParam = section.sec.join(',');
-    // Navegamos a /categoria/1,3,5 (por ejemplo)
-    this.router.navigate(['/categorias', secParam]);
+    if (section.sec && section.sec.length > 0) {
+      this.router.navigate(['/articulos', section.sec[0]]);
+    } else {
+      this.router.navigate(['/articulos']);
+    }
   }
 
   scrollToCategories(): void {

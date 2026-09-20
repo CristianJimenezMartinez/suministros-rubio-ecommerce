@@ -9,23 +9,33 @@ export const routes: Routes = [
   { path: 'home', component: HomeComponent, title: 'Suministros Rubio - Tienda Online de Riego, Solar y Electricidad' },
   { 
     path: 'categorias/:sec', 
-    loadComponent: () => import('./shop/categoria/categoria.component').then(m => m.CategoriaComponent),
-    title: 'Categorías - Suministros Rubio'
+    redirectTo: 'articulos',
+    pathMatch: 'full'
   },
   { 
     path: 'categorias', 
-    loadComponent: () => import('./shop/categoria/categoria.component').then(m => m.CategoriaComponent),
-    title: 'Categorías - Suministros Rubio'
+    redirectTo: 'articulos',
+    pathMatch: 'full'
+  },
+  { 
+    path: 'tienda', 
+    redirectTo: 'articulos',
+    pathMatch: 'full'
+  },
+  { 
+    path: 'productos', 
+    redirectTo: 'articulos',
+    pathMatch: 'full'
   },
   { 
     path: 'articulos/:fam', 
     loadComponent: () => import('./shop/articulos/articulos.component').then(m => m.ArticulosComponent),
-    title: 'Catálogo de Artículos - Suministros Rubio'
+    title: 'Tienda Online - Suministros Rubio'
   },
   { 
     path: 'articulos', 
     loadComponent: () => import('./shop/articulos/articulos.component').then(m => m.ArticulosComponent),
-    title: 'Catálogo de Artículos - Suministros Rubio'
+    title: 'Tienda Online - Suministros Rubio'
   },
   { 
     path: 'login', 

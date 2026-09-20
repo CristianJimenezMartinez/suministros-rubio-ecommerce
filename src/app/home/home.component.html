@@ -6,8 +6,8 @@
       <h1>Líderes en Riego, Energía Solar y Telecomunicaciones</h1>
       <p>Ofrecemos soluciones profesionales de riego solar, sistemas de bombeo de agua, instalaciones fotovoltaicas, seguridad inteligente y telecomunicaciones rurales en Albacete y Castilla-La Mancha.</p>
       <div class="hero-actions">
-        <a class="btn-primary-hero" (click)="scrollToCategories()">
-          Explorar Catálogo
+        <a class="btn-primary-hero" (click)="navigateTo('/articulos')">
+          Ver Tienda de Productos
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><polyline points="12 5 19 12 12 19"></polyline></svg>
         </a>
         <a class="btn-secondary-hero" (click)="navigateTo('/contacto')">Solicitar Presupuesto</a>
@@ -24,7 +24,7 @@
   <!-- Tarjetas de Secciones -->
   <section id="categories-grid" class="home-sections">
     <div class="section-header">
-      <h2>Nuestras Secciones de Catálogo</h2>
+      <h2>Nuestras Secciones de Productos</h2>
       <p>Equipamiento profesional de máxima calidad para agricultura, industria y el hogar.</p>
     </div>
 
@@ -36,7 +36,7 @@
         <div class="card-body">
           <h3>{{ section.name }}</h3>
           <button class="btn-category-action" (click)="goToCategory(section)">
-            Ver Familias
+            Ver Productos
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>

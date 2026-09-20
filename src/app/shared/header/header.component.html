@@ -19,8 +19,9 @@
       <!-- Menú horizontal para ordenadores de escritorio -->
       <nav class="desktop-nav d-flex align-items-center" *ngIf="!isMobile">
         <a class="nav-link-item" (click)="navigateTo('/')">Inicio</a>
-        <a class="nav-link-item" (click)="navigateTo('/categorias')">Categorías</a>
-        <a class="nav-link-item" (click)="navigateTo('/articulos')">Productos</a>
+        <a class="nav-link-item" (click)="navigateTo('/articulos')">Tienda</a>
+        <a class="nav-link-item" (click)="navigateTo('/sobre-nosotros')">Sobre Nosotros</a>
+        <a class="nav-link-item" (click)="navigateTo('/contacto')">Contacto</a>
       </nav>
     </div>
 
@@ -116,8 +117,7 @@
     </div>
     <nav class="sidenav-links d-flex flex-column px-4">
       <a (click)="navigateTo('/')">Inicio</a>
-      <a (click)="navigateTo('/categorias')">Categorías</a>
-      <a (click)="navigateTo('/articulos')">Productos</a>
+      <a (click)="navigateTo('/articulos')">Tienda</a>
       <hr class="sidenav-divider">
       <a (click)="navigateTo('/sobre-nosotros')">Sobre Nosotros</a>
       <a (click)="navigateTo('/contacto')">Contacto</a>
