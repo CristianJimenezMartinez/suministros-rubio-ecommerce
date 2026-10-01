@@ -55,8 +55,8 @@ export const routes: Routes = [
   },
   { 
     path: 'checkout', 
-    loadComponent: () => import('./shop/checkout/checkout.component').then(m => m.CheckoutComponent),
-    title: 'Finalizar Compra - Suministros Rubio'
+    redirectTo: 'articulos',
+    pathMatch: 'full'
   },
   { 
     path: 'contacto', 

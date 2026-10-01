@@ -7,6 +7,10 @@
       <input type="text" name="fullName" [(ngModel)]="shippingData.fullName" required>
     </div>
     <div class="form-group">
+      <label>NIF / CIF (opcional, para emisión de factura):</label>
+      <input type="text" name="nif" [(ngModel)]="shippingData.nif" placeholder="Ej: 12345678Z o B12345678">
+    </div>
+    <div class="form-group">
       <label>Dirección:</label>
       <input type="text" name="address" [(ngModel)]="shippingData.address" required>
     </div>
@@ -23,15 +27,14 @@
       <input type="text" name="postalCode" [(ngModel)]="shippingData.postalCode" required>
     </div>
     <div class="form-group">
-    <label>País:</label>
-    <!-- Cambiado a select con solo "España" -->
-    <select name="country"
-            [(ngModel)]="shippingData.country"
-            required>
-      <option value="">Selecciona un país</option>
-      <option value="España">España</option>
-    </select>
-  </div>
+      <label>País:</label>
+      <!-- Selección de país para España -->
+      <select name="country"
+              [(ngModel)]="shippingData.country">
+        <option value="">Selecciona un país</option>
+        <option value="España">España</option>
+      </select>
+    </div>
     <div class="form-group">
       <label>Teléfono:</label>
       <input type="tel" name="phone" [(ngModel)]="shippingData.phone" required>

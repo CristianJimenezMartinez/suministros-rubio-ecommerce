@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PaymentMethodType } from '../../services/payment.service';
+import { PaymentMethodType, ShippingData } from '../../services/payment.service';
 import { OrderService } from '../../services/order.service';
 import { environment } from '../../../enviroments/environment';
 import { LoadingComponent } from '../../shared/loading/loading.component';
@@ -25,7 +25,7 @@ import { LoadingService } from '../../services/loading.service';
 export class PaymentComponent implements OnInit {
   @Input() cartItems: any[] = [];
   @Input() order!: any;
-  @Input() shippingData!: any;
+  @Input() shippingData!: ShippingData;
   @Input() shippingMethod!: string;
   @Input() shippingCost!: number;
 

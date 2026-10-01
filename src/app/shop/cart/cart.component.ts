@@ -61,13 +61,23 @@ export class CartComponent implements OnInit {
   ngOnInit(): void {
     this.loadCart();
 
+    this.cartService.getItemsObservable().subscribe(items => {
+      this.items = items;
+      this.calculateTotal();
+    });
+
     // 1) Suscripción para recibir feedback del webhook
     this.feedbackService.onPaymentFeedback()
-      .subscribe(data => {
-        /* console.log('Received payment feedback:', data); */
-        if (data?.message) {
-          this.popupMessage = data.message;
-          this.showPopup = true;
+      .subscribe({
+        next: (data) => {
+          /* console.log('Received payment feedback:', data); */
+          if (data?.message) {
+            this.popupMessage = data.message;
+            this.showPopup = true;
+          }
+        },
+        error: () => {
+          // Desconexión silenciosa: en servidores Plesk/PHP tradicionales no hay daemon Socket.IO
         }
       });
   }
@@ -145,8 +155,9 @@ export class CartComponent implements OnInit {
         agepcl:   '',
         clipcl:   clientId.toString(),
   
-        cempcl:   checkoutData.shippingData.email,     // <--- nuevo
-        cpapcl:   checkoutData.shippingData.country,   // <--- nuevo
+        cempcl:   checkoutData.shippingData.email,
+        cpapcl:   checkoutData.shippingData.country,
+        nifpcl:   checkoutData.shippingData.nif || '',
   
         tivpcl:   items[0]?.vatType ?? '0',
         reqpcl:   '0',
@@ -192,7 +203,11 @@ export class CartComponent implements OnInit {
   }): void {
     const onSuccess = (resp: any) => {
       if (resp?.pedidoId != null) {
-        this.feedbackService.joinRoom(resp.pedidoId.toString());
+        try {
+          this.feedbackService.joinRoom(resp.pedidoId.toString());
+        } catch {
+          // Desconexión silenciosa: en servidores Plesk/PHP tradicionales no hay daemon Socket.IO
+        }
       }
       this.cartService.clearCart();
       this.currentStep = 'none';

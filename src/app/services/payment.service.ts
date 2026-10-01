@@ -13,6 +13,7 @@ export interface ShippingData {
   phone:      string;
   email:      string;
   province?:  string;
+  nif?:       string;
 }
 
 export type PaymentMethodType = 'paypal' | 'stripe' | 'redsys';

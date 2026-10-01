@@ -2,6 +2,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ShippingData } from '../../services/payment.service';
 
 @Component({
   selector: 'app-checkout',
@@ -15,15 +16,16 @@ export class CheckoutComponent implements OnInit {
   @Output() checkoutCompleted = new EventEmitter<any>();
   @Output() cancelCheckout = new EventEmitter<void>();
 
-  shippingData = {
+  shippingData: ShippingData = {
     fullName: '',
     address: '',
     city: '',
     province: '',
     postalCode: '',
-    country: '',
+    country: 'España',
     phone: '',
-    email: ''
+    email: '',
+    nif: ''
   };
   shippingMethod: string = 'standard';
   subtotal: number = 0;
@@ -65,15 +67,18 @@ export class CheckoutComponent implements OnInit {
   }
 
   submitCheckout(): void {
-    // Validación de país
-    if (this.shippingData.country !== 'España') {
+    // Validación flexible de país
+    const rawCountry = (this.shippingData.country || '').trim().toLowerCase();
+    const validCountries = ['españa', 'espana', 'es', 'spain', ''];
+    if (!validCountries.includes(rawCountry)) {
       this.errorMessage = 'Solo realizamos envíos dentro de España.';
       return;
     }
+    this.shippingData.country = 'España';
     this.errorMessage = '';
 
     const checkoutInfo = {
-      shippingData: this.shippingData,
+      shippingData: { ...this.shippingData },
       shippingMethod: this.shippingMethod,
       subtotal: this.subtotal,
       shippingCost: this.shippingCost,
