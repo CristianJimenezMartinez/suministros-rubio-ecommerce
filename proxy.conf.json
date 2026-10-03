@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://suministrosrubios.duckdns.org",
+    "target": "https://www.suministrosrubio.com",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
